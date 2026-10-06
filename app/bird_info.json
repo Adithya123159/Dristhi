@@ -1,0 +1,802 @@
+[
+    {
+        "species_id": "000.Indian_Peafowl",
+        "common_name": "Indian Peafowl",
+        "scientific_name": "Unknown",
+        "description": "The Indian peafowl (Pavo cristatus), also known as the common peafowl, or blue peafowl, is a species of peafowl native to the Indian subcontinent. While it originated in the Indian subcontinent, it has since been introduced to many other parts of the world.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "001.Indian_Roller",
+        "common_name": "Indian Roller",
+        "scientific_name": "Unknown",
+        "description": "The Indian roller (Coracias benghalensis) is a bird of the family Coraciidae. It is 30\u201334 cm (12\u201313 in) long with a wingspan of 65\u201374 cm (26\u201329 in) and weighs 166\u2013176 g (5.9\u20136.2 oz).",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "002.Great_Indian_Bustard",
+        "common_name": "Great Indian Bustard",
+        "scientific_name": "Unknown",
+        "description": "The great Indian bustard (Ardeotis nigriceps) or Indian bustard is a bustard occurring on the Indian subcontinent. It is a large bird with a horizontal body, long bare legs and is among the heaviest of the flying birds.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "003.House_Sparrow",
+        "common_name": "House Sparrow",
+        "scientific_name": "Unknown",
+        "description": "The house sparrow (Passer domesticus) is a bird of the sparrow family Passeridae, found in most parts of the world. It is a small bird that has a typical length of 16 cm (6.3 in) and a mass of 24\u201339.5 g (0.85\u20131.39 oz).",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "004.Asian_Koel",
+        "common_name": "Asian Koel",
+        "scientific_name": "Unknown",
+        "description": "The Asian Koel is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "005.Rose-ringed_Parakeet",
+        "common_name": "Rose-ringed Parakeet",
+        "scientific_name": "Unknown",
+        "description": "The Rose-ringed Parakeet is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "006.Red-vented_Bulbul",
+        "common_name": "Red-vented Bulbul",
+        "scientific_name": "Unknown",
+        "description": "The Red-vented Bulbul is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "007.Indian_Robin",
+        "common_name": "Indian Robin",
+        "scientific_name": "Unknown",
+        "description": "The Indian Robin is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "008.Jungle_Babbler",
+        "common_name": "Jungle Babbler",
+        "scientific_name": "Unknown",
+        "description": "The Jungle Babbler is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "009.Common_Myna",
+        "common_name": "Common Myna",
+        "scientific_name": "Unknown",
+        "description": "The Common Myna is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "010.Brahminy_Kite",
+        "common_name": "Brahminy Kite",
+        "scientific_name": "Unknown",
+        "description": "The Brahminy Kite is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "011.Black_Kite",
+        "common_name": "Black Kite",
+        "scientific_name": "Unknown",
+        "description": "The Black Kite is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "012.Shikra",
+        "common_name": "Shikra",
+        "scientific_name": "Unknown",
+        "description": "The Shikra is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "013.White-throated_Kingfisher",
+        "common_name": "White-throated Kingfisher",
+        "scientific_name": "Unknown",
+        "description": "The white-throated kingfisher (Halcyon smyrnensis) also known as the white-breasted kingfisher is a tree kingfisher, widely distributed in Asia from the Sinai east through the Indian subcontinent to China and Indonesia. This kingfisher is a resident over much of its range, although some populations may make short distance movements.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "014.Common_Kingfisher",
+        "common_name": "Common Kingfisher",
+        "scientific_name": "Unknown",
+        "description": "The Common Kingfisher is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "015.Pied_Kingfisher",
+        "common_name": "Pied Kingfisher",
+        "scientific_name": "Unknown",
+        "description": "The pied kingfisher (Ceryle rudis) is a species of water kingfisher widely distributed across Africa and Asia. Originally described by Carl Linnaeus in 1758, it has five recognised subspecies, and is the only member of the genus Ceryle.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "016.Green_Bee-eater",
+        "common_name": "Green Bee-eater",
+        "scientific_name": "Unknown",
+        "description": "The bee-eaters are a group of birds in the family Meropidae, containing three genera and thirty-one species. Most species are found in Africa and Asia, with a few in southern Europe, Australia, and New Guinea.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "017.Indian_Golden_Oriole",
+        "common_name": "Indian Golden Oriole",
+        "scientific_name": "Unknown",
+        "description": "The Indian golden oriole (Oriolus kundoo) is a species of oriole found in the Indian subcontinent and Central Asia. The species was formerly considered to be a subspecies of the Eurasian golden oriole, but is now considered a full species.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "018.Black_Drongo",
+        "common_name": "Black Drongo",
+        "scientific_name": "Unknown",
+        "description": "The  black drongo (Dicrurus macrocercus) is a small Asian passerine bird of the drongo family Dicruridae. It is a common resident breeder in much of tropical southern Asia from southwest Iran through Pakistan, India, Bangladesh and Sri Lanka east to southern China and Indonesia and accidental visitor of Japan.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "019.Ashy_Drongo",
+        "common_name": "Ashy Drongo",
+        "scientific_name": "Unknown",
+        "description": "The ashy drongo (Dicrurus leucophaeus) is a species of bird in the drongo family Dicruridae. It is found widely distributed across eastern and Southeast Asia, with several populations that vary in the shade of grey, migration patterns and in the size or presence of white patches around the eye.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "020.Greater_Coucal",
+        "common_name": "Greater Coucal",
+        "scientific_name": "Unknown",
+        "description": "The greater coucal or crow pheasant (Centropus sinensis), is a large non-parasitic member of the cuckoo order of birds, the Cuculiformes. A widespread resident in the Indian subcontinent and Southeast Asia, it is divided into several subspecies, some being treated as full species.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "021.Sarus_Crane",
+        "common_name": "Sarus Crane",
+        "scientific_name": "Unknown",
+        "description": "The sarus crane (Antigone antigone) is a large nonmigratory crane found in parts of the Indian subcontinent, Southeast Asia, and northern Australia. The tallest of the flying birds, standing at a height of up to 1.8 m (5 ft 11 in), they are a conspicuous species of open wetlands in South Asia, seasonally flooded Dipterocarpus forests in Southeast Asia, and Eucalyptus-dominated woodlands and grasslands in Australia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "022.Painted_Stork",
+        "common_name": "Painted Stork",
+        "scientific_name": "Unknown",
+        "description": "The painted stork (Mycteria leucocephala) is a large wader  in the stork family. It is found in the wetlands of the plains of tropical Asia south of the Himalayas in the Indian subcontinent and extending into Southeast Asia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "023.Asian_Openbill",
+        "common_name": "Asian Openbill",
+        "scientific_name": "Unknown",
+        "description": "The Asian Openbill is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "024.Black-headed_Ibis",
+        "common_name": "Black-headed Ibis",
+        "scientific_name": "Unknown",
+        "description": "The black-headed ibis (Threskiornis melanocephalus), also known as the Oriental white ibis, Indian white ibis, and black-necked ibis, is a species of wading bird of the ibis family Threskiornithidae which breeds in the South and Southeast Asia from India to the west and as far east as Japan. It is the only native ibis species in its range that has an overall white plumage with a black neck and head.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "025.Red-wattled_Lapwing",
+        "common_name": "Red-wattled Lapwing",
+        "scientific_name": "Unknown",
+        "description": "The red-wattled lapwing (Vanellus indicus) is an Asian lapwing or large plover, a wader in the family Charadriidae. Like other lapwings they are ground birds that are incapable of perching.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "026.White-breasted_Waterhen",
+        "common_name": "White-breasted Waterhen",
+        "scientific_name": "Unknown",
+        "description": "The white-breasted waterhen (Amaurornis phoenicurus) is a waterbird of the rail and crake family, Rallidae, that is widely distributed across South and Southeast Asia. They are dark slaty birds with a clean white face, breast and belly.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "027.Common_Moorhen",
+        "common_name": "Common Moorhen",
+        "scientific_name": "Unknown",
+        "description": "The common moorhen (Gallinula chloropus), also known as the waterhen, is a bird species in the rail family (Rallidae). It is distributed across many parts of the Old World, across Africa, Europe, and Asia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "028.Purple_Sunbird",
+        "common_name": "Purple Sunbird",
+        "scientific_name": "Unknown",
+        "description": "The purple sunbird (Cinnyris asiaticus) is a small bird in the sunbird family. It occurs in parts of the Arabian peninsula and South and Southeast Asia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "029.Crimson_Sunbird",
+        "common_name": "Crimson Sunbird",
+        "scientific_name": "Unknown",
+        "description": "The crimson sunbird (Aethopyga siparaja) is a species of bird in the sunbird family which feed largely on nectar. They may also take insects, especially when feeding their young.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "030.Baya_Weaver",
+        "common_name": "Baya Weaver",
+        "scientific_name": "Unknown",
+        "description": "The baya weaver (Ploceus philippinus) is a weaverbird found across the Indian subcontinent and Southeast Asia. Flocks are found in grasslands, cultivated areas, scrub and secondary growth.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "031.Indian_Silverbill",
+        "common_name": "Indian Silverbill",
+        "scientific_name": "Unknown",
+        "description": "The Indian silverbill or white-throated munia (Euodice malabarica) is a small passerine bird found in the Indian subcontinent and adjoining regions that was formerly considered to include the closely related African silverbill (Euodice cantans). This estrildid finch is a common resident breeding bird in the drier regions of the Middle East and the Indian subcontinent.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "032.Scaly-breasted_Munia",
+        "common_name": "Scaly-breasted Munia",
+        "scientific_name": "Unknown",
+        "description": "The scaly-breasted munia or spotted munia (Lonchura punctulata), known in the pet trade as nutmeg mannikin or spice finch, is a sparrow-sized estrildid finch native to tropical Asia. A species of the genus Lonchura, it was formally described and named by Carl Linnaeus in 1758.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "033.Plum-headed_Parakeet",
+        "common_name": "Plum-headed Parakeet",
+        "scientific_name": "Unknown",
+        "description": "The plum-headed parakeet (Psittacula cyanocephala) is a species of parakeet in the family Psittacidae. It is endemic to the Indian subcontinent and was once thought to be conspecific with the blossom-headed parakeet (P. roseata) before being elevated to a full species.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "034.Alexandrine_Parakeet",
+        "common_name": "Alexandrine Parakeet",
+        "scientific_name": "Unknown",
+        "description": "The Alexandrine parakeet (Psittacula eupatria), also known as the Alexandrine parrot, is a medium-sized parrot in the genus Psittacula of the family Psittaculidae, native to South Asia and Southeast Asia. It is named after Alexander the Great, who transported numerous birds from Punjab to various European and Mediterranean countries and regions, where they were prized by the royalty, nobility and warlords.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "035.Spotted_Owlet",
+        "common_name": "Spotted Owlet",
+        "scientific_name": "Unknown",
+        "description": "The spotted owlet (Athene brama) is a small owl which breeds in tropical Asia from North Pakistan to Southeast Asia. A common resident of open habitats including farmland and human habitation, it has adapted to living in cities.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "036.Barn_Owl",
+        "common_name": "Barn Owl",
+        "scientific_name": "Unknown",
+        "description": "The Barn Owl is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "037.Indian_Eagle-Owl",
+        "common_name": "Indian Eagle-Owl",
+        "scientific_name": "Unknown",
+        "description": "The Indian eagle-owl (Bubo bengalensis), or the Bengal eagle-owl or rock eagle-owl, is a large horned owl species native to hilly and rocky scrub forests in the Indian subcontinent. It is splashed with brown and grey, and has a white throat patch with black small stripes.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "038.Brown_Fish_Owl",
+        "common_name": "Brown Fish Owl",
+        "scientific_name": "Unknown",
+        "description": "The brown fish owl (Ketupa zeylonensis) is a fish owl species in the family known as typical owls, Strigidae. It is native from Turkey to South and Southeast Asia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "039.Jungle_Owlet",
+        "common_name": "Jungle Owlet",
+        "scientific_name": "Unknown",
+        "description": "The jungle owlet (Glaucidium radiatum) or barred jungle owlet is native to the Indian Subcontinent. The species is often found singly, in pairs or small groups, and they are usually detected by their calls at dawn and dusk.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "040.Coppersmith_Barbet",
+        "common_name": "Coppersmith Barbet",
+        "scientific_name": "Unknown",
+        "description": "The coppersmith barbet (Psilopogon haemacephalus), also called crimson-breasted barbet and coppersmith, is an Asian barbet with crimson forehead and throat, known for its metronomic call that sounds similar to a coppersmith striking metal with a hammer. It is a resident bird in the Indian subcontinent and parts of Southeast Asia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "041.Brown-headed_Barbet",
+        "common_name": "Brown-headed Barbet",
+        "scientific_name": "Unknown",
+        "description": "The brown-headed barbet (Psilopogon zeylanicus) is an Asian barbet species native to the Indian subcontinent, where it inhabits tropical and subtropical moist broadleaf forests.\n\n\n== Taxonomy ==\nThe brown-headed barbet was formally described in 1788 by the German naturalist Johann Friedrich Gmelin in his revised and expanded edition of Carl Linnaeus's Systema Naturae.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "042.Lineated_Barbet",
+        "common_name": "Lineated Barbet",
+        "scientific_name": "Unknown",
+        "description": "The lineated barbet (Psilopogon lineatus) is an Asian barbet native to the Terai, the Brahmaputra basin to Southeast Asia. It is a frugivore and nests in holes of tree trunks.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "043.Indian_Grey_Hornbill",
+        "common_name": "Indian Grey Hornbill",
+        "scientific_name": "Unknown",
+        "description": "The Indian gray hornbill (Ocyceros birostris) is a common hornbill found on the Indian subcontinent. It is mostly arboreal and is commonly sighted in pairs.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "044.Malabar_Pied_Hornbill",
+        "common_name": "Malabar Pied Hornbill",
+        "scientific_name": "Unknown",
+        "description": "The Malabar pied hornbill (Anthracoceros coronatus), also known as the lesser pied hornbill, is a bird in the hornbill family, a family of tropical birds found in the Old World. The Malabar pied hornbill is a large hornbill, measuring 65 cm (26 in) in length.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "045.Great_Hornbill",
+        "common_name": "Great Hornbill",
+        "scientific_name": "Unknown",
+        "description": "The Great Hornbill is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "046.Rufous_Treepie",
+        "common_name": "Rufous Treepie",
+        "scientific_name": "Unknown",
+        "description": "The rufous treepie (Dendrocitta vagabunda) is a treepie, native to the Indian subcontinent and adjoining parts of Southeast Asia.  It is a member of the crow family, Corvidae.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "047.House_Crow",
+        "common_name": "House Crow",
+        "scientific_name": "Unknown",
+        "description": "The House Crow is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "048.Jungle_Crow",
+        "common_name": "Jungle Crow",
+        "scientific_name": "Unknown",
+        "description": "The Jungle Crow is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "049.Common_Tailorbird",
+        "common_name": "Common Tailorbird",
+        "scientific_name": "Unknown",
+        "description": "The common tailorbird (Orthotomus sutorius) is a songbird found across tropical and subtropical Asia. Popular for its nest made of leaves \"sewn\" together and immortalized by Rudyard Kipling as Darzee in his Jungle Book, it is a common resident in urban gardens.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "050.Ashy_Prinia",
+        "common_name": "Ashy Prinia",
+        "scientific_name": "Unknown",
+        "description": "The ashy prinia or ashy wren-warbler (Prinia socialis) is a small warbler in the family Cisticolidae. This prinia is a resident breeder in the Indian subcontinent, ranging across most of India, Nepal, Bangladesh, eastern Pakistan, Bhutan, Sri Lanka and western Myanmar.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "051.Plain_Prinia",
+        "common_name": "Plain Prinia",
+        "scientific_name": "Unknown",
+        "description": "The plain prinia (Prinia inornata), also known as the plain wren-warbler or white-browed wren-warbler, is a small cisticolid warbler found in Southeast Asia. It is a resident breeder from Pakistan and India to south China and southeast Asia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "052.Oriental_Magpie-Robin",
+        "common_name": "Oriental Magpie-Robin",
+        "scientific_name": "Unknown",
+        "description": "The Oriental magpie-robin (Copsychus saularis) is a small passerine bird that was formerly classed as a member of the thrush family Turdidae, but now considered an Old World flycatcher. The males are distinctive black and white birds with a long tail that is held upright as they forage on the ground or perch conspicuously.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "053.White-rumped_Shama",
+        "common_name": "White-rumped Shama",
+        "scientific_name": "Unknown",
+        "description": "The White-rumped Shama is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "054.Indian_Paradise_Flycatcher",
+        "common_name": "Indian Paradise Flycatcher",
+        "scientific_name": "Unknown",
+        "description": "The Indian Paradise Flycatcher is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "055.Tickell's_Blue_Flycatcher",
+        "common_name": "Tickell's Blue Flycatcher",
+        "scientific_name": "Unknown",
+        "description": "The Tickell's Blue Flycatcher is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "056.Verditer_Flycatcher",
+        "common_name": "Verditer Flycatcher",
+        "scientific_name": "Unknown",
+        "description": "The Verditer Flycatcher is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "057.Grey-headed_Canary-Flycatcher",
+        "common_name": "Grey-headed Canary-Flycatcher",
+        "scientific_name": "Unknown",
+        "description": "The Grey-headed Canary-Flycatcher is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "058.Red-whiskered_Bulbul",
+        "common_name": "Red-whiskered Bulbul",
+        "scientific_name": "Unknown",
+        "description": "The Red-whiskered Bulbul is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "059.White-browed_Bulbul",
+        "common_name": "White-browed Bulbul",
+        "scientific_name": "Unknown",
+        "description": "The White-browed Bulbul is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "060.Yellow-billed_Babbler",
+        "common_name": "Yellow-billed Babbler",
+        "scientific_name": "Unknown",
+        "description": "The Yellow-billed Babbler is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "061.Puff-throated_Babbler",
+        "common_name": "Puff-throated Babbler",
+        "scientific_name": "Unknown",
+        "description": "The Puff-throated Babbler is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "062.Indian_White-eye",
+        "common_name": "Indian White-eye",
+        "scientific_name": "Unknown",
+        "description": "The Indian White-eye is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "063.Cinereous_Tit",
+        "common_name": "Cinereous Tit",
+        "scientific_name": "Unknown",
+        "description": "The Cinereous Tit is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "064.Black-lored_Tit",
+        "common_name": "Black-lored Tit",
+        "scientific_name": "Unknown",
+        "description": "The Black-lored Tit is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "065.Purple-rumped_Sunbird",
+        "common_name": "Purple-rumped Sunbird",
+        "scientific_name": "Unknown",
+        "description": "The Purple-rumped Sunbird is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "066.Loten's_Sunbird",
+        "common_name": "Loten's Sunbird",
+        "scientific_name": "Unknown",
+        "description": "The Loten's Sunbird is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "067.Thick-billed_Flowerpecker",
+        "common_name": "Thick-billed Flowerpecker",
+        "scientific_name": "Unknown",
+        "description": "The Thick-billed Flowerpecker is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "068.Pale-billed_Flowerpecker",
+        "common_name": "Pale-billed Flowerpecker",
+        "scientific_name": "Unknown",
+        "description": "The Pale-billed Flowerpecker is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "069.Crested_Serpent_Eagle",
+        "common_name": "Crested Serpent Eagle",
+        "scientific_name": "Unknown",
+        "description": "The Crested Serpent Eagle is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "070.Changeable_Hawk-Eagle",
+        "common_name": "Changeable Hawk-Eagle",
+        "scientific_name": "Unknown",
+        "description": "The Changeable Hawk-Eagle is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "071.Steppe_Eagle",
+        "common_name": "Steppe Eagle",
+        "scientific_name": "Unknown",
+        "description": "The steppe eagle (Aquila nipalensis) is a large bird of prey. Like all eagles, it belongs to the family Accipitridae.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "072.Indian_Vulture",
+        "common_name": "Indian Vulture",
+        "scientific_name": "Unknown",
+        "description": "The Indian Vulture is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "073.Egyptian_Vulture",
+        "common_name": "Egyptian Vulture",
+        "scientific_name": "Unknown",
+        "description": "The Egyptian Vulture is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "074.Red-headed_Vulture",
+        "common_name": "Red-headed Vulture",
+        "scientific_name": "Unknown",
+        "description": "The Red-headed Vulture is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "075.Osprey",
+        "common_name": "Osprey",
+        "scientific_name": "Unknown",
+        "description": "The Osprey is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "076.Peregrine_Falcon",
+        "common_name": "Peregrine Falcon",
+        "scientific_name": "Unknown",
+        "description": "The Peregrine Falcon is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "077.Common_Kestrel",
+        "common_name": "Common Kestrel",
+        "scientific_name": "Unknown",
+        "description": "The Common Kestrel is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "078.Indian_Courser",
+        "common_name": "Indian Courser",
+        "scientific_name": "Unknown",
+        "description": "The Indian Courser is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "079.Yellow-wattled_Lapwing",
+        "common_name": "Yellow-wattled Lapwing",
+        "scientific_name": "Unknown",
+        "description": "The Yellow-wattled Lapwing is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "080.Pheasant-tailed_Jacana",
+        "common_name": "Pheasant-tailed Jacana",
+        "scientific_name": "Unknown",
+        "description": "The Pheasant-tailed Jacana is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "081.Bronze-winged_Jacana",
+        "common_name": "Bronze-winged Jacana",
+        "scientific_name": "Unknown",
+        "description": "The Bronze-winged Jacana is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "082.Black-winged_Stilt",
+        "common_name": "Black-winged Stilt",
+        "scientific_name": "Unknown",
+        "description": "The Black-winged Stilt is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "083.Great_Thick-knee",
+        "common_name": "Great Thick-knee",
+        "scientific_name": "Unknown",
+        "description": "The Great Thick-knee is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "084.Indian_Skimmer",
+        "common_name": "Indian Skimmer",
+        "scientific_name": "Unknown",
+        "description": "The Indian Skimmer is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "085.River_Tern",
+        "common_name": "River Tern",
+        "scientific_name": "Unknown",
+        "description": "The River Tern is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "086.Whiskered_Tern",
+        "common_name": "Whiskered Tern",
+        "scientific_name": "Unknown",
+        "description": "The Whiskered Tern is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "087.Little_Egret",
+        "common_name": "Little Egret",
+        "scientific_name": "Unknown",
+        "description": "The Little Egret is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "088.Great_Egret",
+        "common_name": "Great Egret",
+        "scientific_name": "Unknown",
+        "description": "The Great Egret is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "089.Intermediate_Egret",
+        "common_name": "Intermediate Egret",
+        "scientific_name": "Unknown",
+        "description": "The Intermediate Egret is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "090.Cattle_Egret",
+        "common_name": "Cattle Egret",
+        "scientific_name": "Unknown",
+        "description": "The Cattle Egret is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "091.Indian_Pond_Heron",
+        "common_name": "Indian Pond Heron",
+        "scientific_name": "Unknown",
+        "description": "The Indian Pond Heron is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "092.Grey_Heron",
+        "common_name": "Grey Heron",
+        "scientific_name": "Unknown",
+        "description": "The Grey Heron is a bird species found in the Indian subcontinent.",
+        "habitat": "Indian subcontinent",
+        "diet": "Varies"
+    },
+    {
+        "species_id": "093.Purple_Heron",
+        "common_name": "Purple Heron",
+        "scientific_name": "Unknown",
+        "description": "The purple heron (Ardea purpurea) is a wide-ranging heron species. It breeds in Africa, central and southern Europe, and southern and eastern Palearctic.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "094.Black-crowned_Night_Heron",
+        "common_name": "Black-crowned Night Heron",
+        "scientific_name": "Unknown",
+        "description": "The black-crowned night heron (Nycticorax nycticorax) or black-capped night heron, commonly shortened to just night heron in Eurasia, is a medium-sized heron found throughout a large part of the world, including parts of Africa, Asia, Europe, and North and South America. In Australasia it is replaced by the closely related Nankeen night heron (N. caledonicus), with which it has hybridised in the area of contact.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "095.Little_Cormorant",
+        "common_name": "Little Cormorant",
+        "scientific_name": "Unknown",
+        "description": "The little cormorant (Microcarbo niger) is a member of the cormorant family of seabirds. Slightly smaller than the Indian cormorant it lacks a peaked head and has a shorter beak.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "096.Indian_Cormorant",
+        "common_name": "Indian Cormorant",
+        "scientific_name": "Unknown",
+        "description": "The Indian cormorant or Indian shag (Phalacrocorax fuscicollis) is a member of the cormorant family. It is found mainly along the inland waters of the Indian subcontinent but extends west to Sind and east to Thailand and Cambodia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "097.Great_Cormorant",
+        "common_name": "Great Cormorant",
+        "scientific_name": "Unknown",
+        "description": "The great cormorant (Phalacrocorax carbo), also known as just cormorant in Britain, as black shag or kawau in New Zealand, formerly also known as the great black cormorant across the Northern Hemisphere, the black cormorant in Australia, and the large cormorant in India, is a widespread member of the cormorant family of seabirds. It breeds in much of the Old World, Australasia, and the Atlantic coast of North America.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "098.Oriental_Darter",
+        "common_name": "Oriental Darter",
+        "scientific_name": "Unknown",
+        "description": "The Oriental darter (Anhinga melanogaster) is a water bird of tropical South Asia and Southeast Asia. It has a long and slender neck with a straight, pointed bill and, like the cormorant, it hunts for fish while its body is submerged in water.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    },
+    {
+        "species_id": "099.Spot-billed_Pelican",
+        "common_name": "Spot-billed Pelican",
+        "scientific_name": "Unknown",
+        "description": "The spot-billed pelican (Pelecanus philippensis) or gray pelican is a member of the pelican family. It breeds in southern Asia from southern Iran across India east to Indonesia.",
+        "habitat": "Found across India.",
+        "diet": "Varies by species."
+    }
+]
