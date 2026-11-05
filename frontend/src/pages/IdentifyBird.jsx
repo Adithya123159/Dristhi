@@ -10,7 +10,9 @@ import {
   Key,
   CheckCircle2,
   ShieldCheck,
-  Feather
+  Feather,
+  Camera,
+  Image as ImageIcon
 } from 'lucide-react';
 import { api } from '../services/api';
 import ConfidenceMeter from '../components/ConfidenceMeter';
@@ -29,6 +31,7 @@ export default function IdentifyBird() {
   const [apiKey, setApiKey] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('avian_gemini_api_key') || '';
@@ -207,31 +210,62 @@ export default function IdentifyBird() {
             </div>
 
             {!imagePreview ? (
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onClick={() => fileInputRef.current?.click()}
-                className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
-                  isDragging
-                    ? 'border-emerald-500 bg-emerald-50/50'
-                    : 'border-slate-200 hover:border-emerald-400 hover:bg-slate-50'
-                }`}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg"
-                  className="hidden"
-                  onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
-                />
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-                  <UploadCloud className="w-6 h-6" />
+              <div className="space-y-3">
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${
+                    isDragging
+                      ? 'border-emerald-500 bg-emerald-50/50'
+                      : 'border-slate-200 hover:border-emerald-400 hover:bg-slate-50'
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    className="hidden"
+                    onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
+                  />
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
+                  />
+
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2.5">
+                    <UploadCloud className="w-6 h-6" />
+                  </div>
+                  <p className="font-semibold text-xs text-slate-800 text-center">
+                    Tap to upload photo, or drag and drop
+                  </p>
+                  <span className="text-[11px] text-slate-400 mt-0.5">JPG, JPEG, PNG, or WebP</span>
                 </div>
-                <p className="font-medium text-xs text-slate-700">
-                  Drop photo here, or <span className="text-emerald-600 underline">browse</span>
-                </p>
-                <span className="text-[11px] text-slate-400 mt-1">JPG, JPEG, or PNG</span>
+
+                {/* Mobile Camera Quick Buttons */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/70 border border-emerald-200 text-emerald-800 text-xs font-semibold transition-colors active:scale-98"
+                  >
+                    <Camera className="w-4 h-4 text-emerald-600" />
+                    <span>Take Photo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition-colors active:scale-98"
+                  >
+                    <ImageIcon className="w-4 h-4 text-slate-500" />
+                    <span>Photo Gallery</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
@@ -304,18 +338,18 @@ export default function IdentifyBird() {
           {/* Quick test samples */}
           {samples.length > 0 && !imagePreview && (
             <div className="bg-white rounded-2xl p-4 border border-slate-200 space-y-2">
-              <span className="text-xs font-semibold text-slate-700 block">Sample Bird Images</span>
-              <div className="grid grid-cols-2 gap-2">
+              <span className="text-xs font-semibold text-slate-700 block">Sample Bird Images (Tap to Test)</span>
+              <div className="flex sm:grid sm:grid-cols-2 gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {samples.slice(0, 4).map((s) => (
                   <button
                     key={s.species_id}
                     onClick={() => handleSampleClick(s)}
-                    className="p-2 rounded-xl border border-slate-200 hover:border-emerald-300 text-left flex items-center gap-2 text-xs text-slate-700"
+                    className="flex-shrink-0 min-w-[140px] sm:min-w-0 p-2 rounded-xl border border-slate-200 hover:border-emerald-300 text-left flex items-center gap-2 text-xs text-slate-700 active:bg-slate-50 transition-colors"
                   >
                     <img 
                       src={`${api.getBaseUrl()}${s.image_path}`} 
                       alt={s.common_name} 
-                      className="w-7 h-7 rounded-lg object-cover bg-slate-100"
+                      className="w-7 h-7 rounded-lg object-cover bg-slate-100 flex-shrink-0"
                     />
                     <span className="truncate">{s.common_name}</span>
                   </button>

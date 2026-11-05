@@ -326,12 +326,12 @@ export default function LandingPage({
               </div>
 
               {/* Bird Switcher Tabs */}
-              <div className="flex flex-wrap gap-1.5 bg-emerald-50/70 p-1.5 rounded-2xl border border-emerald-200/80">
+              <div className="flex sm:flex-wrap gap-1.5 bg-emerald-50/70 p-1.5 rounded-2xl border border-emerald-200/80 overflow-x-auto scrollbar-none pb-1.5 sm:pb-1.5">
                 {FEATURED_SPECIMENS.map((bird) => (
                   <button
                     key={bird.id}
                     onClick={() => setSelectedSpecimen(bird)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       selectedSpecimen.id === bird.id
                         ? 'bg-emerald-600 text-white shadow-xs'
                         : 'text-emerald-900 hover:bg-emerald-100/80'

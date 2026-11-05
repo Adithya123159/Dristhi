@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
+import MobileBottomNav from './components/MobileBottomNav';
 import SpeciesModal from './components/SpeciesModal';
 
 import LandingPage from './pages/LandingPage';
@@ -18,6 +19,7 @@ import { api } from './services/api';
 export default function App() {
   const [currentTab, setCurrentTab] = useState('landing');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isServerOnline, setIsServerOnline] = useState(false);
   const [selectedSpeciesModal, setSelectedSpeciesModal] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -65,7 +67,7 @@ export default function App() {
     setCurrentTab('landing');
   };
 
-  // Full-page views (no dashboard sidebar shell)
+  // Full-page views
   if (currentTab === 'landing') {
     return (
       <>
@@ -142,8 +144,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar Navigation */}
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Responsive Sidebar & Mobile Drawer */}
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
@@ -152,12 +154,14 @@ export default function App() {
         isServerOnline={isServerOnline}
         currentUser={currentUser}
         onLogout={handleLogout}
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        setIsMobileDrawerOpen={setIsMobileDrawerOpen}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Mobile-Friendly Margin */}
       <div 
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'ml-20' : 'ml-64'
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ml-0 ${
+          isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
         }`}
       >
         <Navbar
@@ -168,12 +172,21 @@ export default function App() {
           isServerOnline={isServerOnline}
           currentUser={currentUser}
           onLogout={handleLogout}
+          isMobileDrawerOpen={isMobileDrawerOpen}
+          setIsMobileDrawerOpen={setIsMobileDrawerOpen}
         />
 
-        <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 overflow-y-auto">
           {renderPage()}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
+      />
 
       {/* Interactive Species Detail Modal */}
       <SpeciesModal
