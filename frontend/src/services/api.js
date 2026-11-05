@@ -23,6 +23,7 @@ export const api = {
     }
   },
 
+  // ─── IMAGE IDENTIFICATION ───
   async identifyBird(file, apiKey = '') {
     const key = apiKey || (typeof window !== 'undefined' ? localStorage.getItem('avian_gemini_api_key') || '' : '');
     const formData = new FormData();
@@ -36,7 +37,7 @@ export const api = {
       headers['X-API-Key'] = key;
     }
 
-    const res = await fetch(`${getBaseUrl()}/api/identify-bird`, {
+    const res = await fetch(`${getBaseUrl()}/api/identify/image`, {
       method: 'POST',
       body: formData,
       headers: headers
@@ -63,6 +64,32 @@ export const api = {
     return this.identifyBird(file, apiKey);
   },
 
+  // ─── AUDIO IDENTIFICATION ───
+  async identifyAudio(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${getBaseUrl()}/api/identify/audio`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      const rawMsg = typeof errorData.detail === 'string'
+        ? errorData.detail
+        : (errorData.detail?.error || errorData.error || `Server error ${res.status}`);
+      const error = new Error(rawMsg);
+      error.isNotBirdSound = rawMsg.toLowerCase().includes('no bird sound') ||
+        rawMsg.toLowerCase().includes('invalid audio') ||
+        rawMsg.toLowerCase().includes('silent');
+      throw error;
+    }
+
+    return await res.json();
+  },
+
+  // ─── SPECIES & BIRDS ENCYCLOPEDIA ───
   async getSpecies(params = {}) {
     const query = new URLSearchParams();
     if (params.search) query.append('search', params.search);
@@ -72,19 +99,26 @@ export const api = {
     if (params.limit) query.append('limit', params.limit);
     if (params.offset) query.append('offset', params.offset);
 
-    const res = await fetch(`${getBaseUrl()}/api/species?${query.toString()}`);
+    const res = await fetch(`${getBaseUrl()}/api/birds?${query.toString()}`);
     if (!res.ok) throw new Error('Failed to fetch species list');
     return await res.json();
   },
 
   async getSpeciesDetails(speciesId) {
-    const res = await fetch(`${getBaseUrl()}/api/species/${encodeURIComponent(speciesId)}`);
+    const res = await fetch(`${getBaseUrl()}/api/birds/${encodeURIComponent(speciesId)}`);
     if (!res.ok) throw new Error('Species details not found');
     return await res.json();
   },
 
-  async getHistory(limit = 50, offset = 0) {
-    const res = await fetch(`${getBaseUrl()}/api/history?limit=${limit}&offset=${offset}`);
+  // ─── IDENTIFICATION HISTORY ───
+  async getHistory(params = {}) {
+    const query = new URLSearchParams();
+    if (params.input_type && params.input_type !== 'all') query.append('input_type', params.input_type);
+    if (params.detection_status && params.detection_status !== 'all') query.append('detection_status', params.detection_status);
+    if (params.limit) query.append('limit', params.limit);
+    if (params.offset) query.append('offset', params.offset);
+
+    const res = await fetch(`${getBaseUrl()}/api/history?${query.toString()}`);
     if (!res.ok) throw new Error('Failed to fetch history');
     return await res.json();
   },
@@ -101,122 +135,77 @@ export const api = {
     return await res.json();
   },
 
-  async getStats() {
-    try {
-      const res = await fetch(`${getBaseUrl()}/api/stats`);
-      if (!res.ok) throw new Error('Failed to fetch stats');
-      return await res.json();
-    } catch {
-      return {
-        total_classifications: 0,
-        avg_confidence: 0,
-        most_identified: 'None',
-        supported_species_count: 100,
-        taxonomic_families: 28,
-        threatened_species: 12,
-        model_name: 'MobileNetV2'
-      };
-    }
+  // ─── ADMIN METRICS & THRESHOLDS ───
+  async getAdminMetrics() {
+    const res = await fetch(`${getBaseUrl()}/api/admin/metrics`);
+    if (!res.ok) throw new Error('Failed to fetch admin metrics');
+    return await res.json();
+  },
+
+  async getAdminThresholds() {
+    const res = await fetch(`${getBaseUrl()}/api/admin/thresholds`);
+    if (!res.ok) throw new Error('Failed to fetch thresholds');
+    return await res.json();
+  },
+
+  async updateAdminThresholds(payload) {
+    const res = await fetch(`${getBaseUrl()}/api/admin/thresholds`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Failed to update thresholds');
+    return await res.json();
   },
 
   async getSampleImages() {
     try {
       const res = await fetch(`${getBaseUrl()}/api/sample-images`);
-      if (!res.ok) throw new Error('Failed to fetch samples');
+      if (!res.ok) return { samples: [] };
       return await res.json();
     } catch {
       return { samples: [] };
     }
   },
 
+  // ─── AUTHENTICATION ───
   async register(name, email, password) {
-    try {
-      const res = await fetch(`${getBaseUrl()}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.detail || 'Registration failed');
-      }
-      this.setStoredUser(data.user, data.token);
-      return data;
-    } catch (err) {
-      // Fallback local registration if backend unreachable
-      if (err.message.includes('Failed to fetch')) {
-        const localUser = {
-          id: Date.now(),
-          name,
-          email,
-          created_at: new Date().toISOString()
-        };
-        this.setStoredUser(localUser, `local_tok_${Date.now()}`);
-        return { success: true, user: localUser, isOffline: true };
-      }
-      throw err;
-    }
+    const res = await fetch(`${getBaseUrl()}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Registration failed');
+    if (data.token) localStorage.setItem('avian_auth_token', data.token);
+    if (data.user) localStorage.setItem('avian_user_profile', JSON.stringify(data.user));
+    return data;
   },
 
   async login(email, password) {
-    try {
-      const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.detail || 'Invalid email or password');
-      }
-      this.setStoredUser(data.user, data.token);
-      return data;
-    } catch (err) {
-      if (err.message.includes('Failed to fetch')) {
-        // Check local registered user if any
-        const stored = this.getStoredUser();
-        if (stored && stored.email === email.toLowerCase().trim()) {
-          return { success: true, user: stored, isOffline: true };
-        }
-        // Guest/offline mock login
-        const fallbackUser = {
-          id: 1,
-          name: email.split('@')[0] || 'Avian Naturalist',
-          email: email.toLowerCase().trim()
-        };
-        this.setStoredUser(fallbackUser, `local_tok_${Date.now()}`);
-        return { success: true, user: fallbackUser, isOffline: true };
-      }
-      throw err;
-    }
-  },
-
-  getStoredUser() {
-    if (typeof window === 'undefined') return null;
-    try {
-      const raw = localStorage.getItem('avian_auth_user');
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  },
-
-  setStoredUser(user, token) {
-    if (typeof window === 'undefined') return;
-    try {
-      if (user) {
-        localStorage.setItem('avian_auth_user', JSON.stringify(user));
-        if (token) localStorage.setItem('avian_auth_token', token);
-      } else {
-        localStorage.removeItem('avian_auth_user');
-        localStorage.removeItem('avian_auth_token');
-      }
-    } catch (e) {
-      console.warn('Storage error:', e);
-    }
+    const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed');
+    if (data.token) localStorage.setItem('avian_auth_token', data.token);
+    if (data.user) localStorage.setItem('avian_user_profile', JSON.stringify(data.user));
+    return data;
   },
 
   logout() {
-    this.setStoredUser(null, null);
+    localStorage.removeItem('avian_auth_token');
+    localStorage.removeItem('avian_user_profile');
+  },
+
+  getStoredUser() {
+    try {
+      const u = localStorage.getItem('avian_user_profile');
+      return u ? JSON.parse(u) : null;
+    } catch {
+      return null;
+    }
   }
 };
