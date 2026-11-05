@@ -48,10 +48,10 @@ export const api = {
         ? errorData.detail
         : (errorData.detail?.error || errorData.error || `Server error ${res.status}`);
       const error = new Error(rawMsg);
-      error.isNotBird = errorData.is_bird === false || 
-                        rawMsg.toLowerCase().includes('no bird') || 
-                        rawMsg.toLowerCase().includes('invalid image') ||
-                        rawMsg.toLowerCase().includes('not a bird');
+      error.isNotBird = errorData.is_bird === false ||
+        rawMsg.toLowerCase().includes('no bird') ||
+        rawMsg.toLowerCase().includes('invalid image') ||
+        rawMsg.toLowerCase().includes('not a bird');
       error.detectedObject = errorData.detected_object || errorData.detected;
       throw error;
     }
