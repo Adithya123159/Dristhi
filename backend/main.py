@@ -5,28 +5,39 @@ import json
 import shutil
 import base64
 import hashlib
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form, Header
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form, Header, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, FileResponse
 import requests
 
-# Add project root to sys.path so src modules can be imported
+# Add project root to sys.path so modules can be imported
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-import src.config
+# Ensure Keras, Matplotlib and Ultralytics stay within workspace
+os.environ.setdefault("KERAS_HOME", os.path.join(PROJECT_ROOT, '.keras'))
+os.environ.setdefault("YOLO_CONFIG_DIR", os.path.join(PROJECT_ROOT, '.yolo'))
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(PROJECT_ROOT, '.matplotlib'))
+
 from src.predict import BirdClassifier
 from src.config import BIRD_INFO_FILE, RAW_DATA_DIR
 from backend.database import (
-    init_db, save_prediction, get_history, 
-    delete_history_item, clear_all_history, get_stats,
-    create_user, get_user_by_email, get_user_by_id
+    init_db, create_user, get_user_by_email, get_user_by_id
+)
+from backend.validation_service import ImageValidationService
+from backend.audio_service import AudioValidationService, AudioClassificationService
+from backend.gradcam_service import GradCAMService
+from backend.mongo_db import (
+    init_mongo, record_identification, get_identifications,
+    delete_identification_record, clear_all_identifications,
+    get_system_thresholds, update_system_thresholds, get_aggregate_stats,
+    is_mongo_connected
 )
 
 # Upload directory
@@ -49,67 +60,13 @@ def load_env_file():
 
 load_env_file()
 
+# Core Services
 classifier_instance: Optional[BirdClassifier] = None
-imagenet_validator = None
+image_validator: Optional[ImageValidationService] = None
+audio_validator: Optional[AudioValidationService] = None
+audio_classifier: Optional[AudioClassificationService] = None
+gradcam_service: Optional[GradCAMService] = None
 bird_database: List[dict] = []
-
-def get_imagenet_validator():
-    """Lazily load MobileNetV2 ImageNet-1k object model for local bird vs non-bird validation."""
-    global imagenet_validator
-    if imagenet_validator is None:
-        try:
-            import tensorflow as tf
-            imagenet_validator = tf.keras.applications.MobileNetV2(weights='imagenet')
-            print("Local ImageNet object validator loaded.")
-        except Exception as e:
-            print(f"Warning: Could not load local ImageNet validator: {e}")
-            imagenet_validator = None
-    return imagenet_validator
-
-BIRD_KEYWORDS = {
-    'bird', 'cock', 'hen', 'vulture', 'peacock', 'owl', 'hawk', 'eagle', 
-    'duck', 'goose', 'swan', 'falcon', 'parrot', 'macaw', 'lorikeet', 
-    'toucan', 'hornbill', 'bulbul', 'robin', 'jay', 'magpie', 'sparrow', 
-    'finch', 'gull', 'pelican', 'flamingo', 'heron', 'stork', 'crane', 
-    'penguin', 'albatross', 'ostrich', 'hummingbird', 'drake', 'quail', 
-    'partridge', 'bustard', 'sandpiper', 'chickadee', 'water_ouzel', 
-    'kite', 'bunting', 'goldfinch', 'kingfisher', 'weaver', 'myna',
-    'cuckoo', 'pigeon', 'dove', 'barbet', 'sunbird', 'drongo', 'lapwing'
-}
-
-def validate_bird_locally(image_path: str):
-    """
-    Offline validation: Uses MobileNetV2 ImageNet-1k to verify whether the image
-    actually contains a bird, or another real-world object (car, person, dog, furniture, etc.).
-    """
-    validator = get_imagenet_validator()
-    if validator is None:
-        return True, "bird", 0.5
-
-    try:
-        from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
-        from PIL import Image
-        import numpy as np
-
-        img = Image.open(image_path).convert('RGB').resize((224, 224))
-        x = preprocess_input(np.expand_dims(np.array(img, dtype=np.float32), 0))
-        preds = validator.predict(x, verbose=0)
-        decoded = decode_predictions(preds, top=5)[0]
-
-        top_label = decoded[0][1].replace('_', ' ')
-        top_conf = float(decoded[0][2])
-
-        # Check if any top prediction matches a bird synset/keyword
-        bird_prob = sum(float(prob) for _, name, prob in decoded if any(k in name.lower() for k in BIRD_KEYWORDS))
-        is_top_bird = any(k in top_label.lower() for k in BIRD_KEYWORDS)
-
-        is_bird = is_top_bird or (bird_prob >= 0.15)
-        detected_object = "bird" if is_bird else top_label
-
-        return is_bird, detected_object, top_conf
-    except Exception as e:
-        print("Local bird validation check error:", e)
-        return True, "unknown", 0.5
 
 def load_species_database():
     global bird_database
@@ -119,7 +76,7 @@ def load_species_database():
     else:
         bird_database = []
 
-def find_bird_details(species_id: str):
+def find_bird_details(species_id: str) -> Optional[dict]:
     for bird in bird_database:
         if bird.get('species_id') == species_id:
             return bird
@@ -132,114 +89,53 @@ def find_bird_details(species_id: str):
             return bird
     return None
 
-def validate_and_identify_with_gemini(image_path: str, api_key: str):
-    """Uses Google Gemini Vision API to validate whether image is a bird and extract details."""
-    try:
-        with open(image_path, "rb") as f:
-            img_bytes = f.read()
-        b64_img = base64.b64encode(img_bytes).decode("utf-8")
-        
-        ext = os.path.splitext(image_path)[1].lower()
-        mime_type = "image/jpeg"
-        if ext == ".png":
-            mime_type = "image/png"
-        elif ext == ".webp":
-            mime_type = "image/webp"
-
-        models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash"]
-        res = None
-        for model_name in models_to_try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-            headers = {"Content-Type": "application/json"}
-            prompt = (
-                "You are an expert avian biologist and visual classifier.\n"
-                "Analyze this image carefully:\n"
-                "1. Does this image clearly show a bird? (Return is_bird: true ONLY if a live or taxidermy bird is visible). "
-                "If the image contains a human, dog, cat, car, vehicle, phone, building, random object, furniture, food, landscape without birds, or anything else that is NOT a bird, you MUST set is_bird to false.\n"
-                "2. If is_bird is false, provide a short 1-3 word description of what is actually in the image in 'detected_object' (e.g. 'sports car', 'person portrait', 'cat', 'furniture').\n"
-                "3. If is_bird is true, identify the species accurately. Provide common name, scientific name, confidence score (0.0 to 1.0), family, habitat, diet, physical characteristics, geographical distribution, conservation status, and a 2-sentence description.\n\n"
-                "Output valid JSON ONLY with this exact schema:\n"
-                "{\n"
-                '  "is_bird": boolean,\n'
-                '  "detected_object": string or null,\n'
-                '  "common_name": string or null,\n'
-                '  "scientific_name": string or null,\n'
-                '  "confidence": float,\n'
-                '  "family": string or null,\n'
-                '  "habitat": string or null,\n'
-                '  "diet": string or null,\n'
-                '  "physical_characteristics": string or null,\n'
-                '  "geographical_distribution": string or null,\n'
-                '  "conservation_status": string or null,\n'
-                '  "description": string or null\n'
-                "}"
-            )
-            payload = {
-                "contents": [{
-                    "parts": [
-                        {"text": prompt},
-                        {"inline_data": {"mime_type": mime_type, "data": b64_img}}
-                    ]
-                }],
-                "generationConfig": {
-                    "response_mime_type": "application/json"
-                }
-            }
-            res = requests.post(url, headers=headers, json=payload, timeout=20)
-            if res.status_code == 200:
-                break
-            elif res.status_code in (400, 401, 403):
-                # Check for invalid key specifically
-                err_data = res.json() if res.headers.get("content-type", "").startswith("application/json") else {}
-                msg = err_data.get("error", {}).get("message", res.text)
-                if "API_KEY_INVALID" in msg or "API key not valid" in msg or res.status_code in (401, 403):
-                    return {"error": f"Invalid Gemini API Key: {msg}"}
-                return {"error": f"Gemini API Error: {msg}"}
-
-        if res and res.status_code == 200:
-            data = res.json()
-            raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
-            # Remove any markdown code fences if present
-            if raw_text.startswith("```json"):
-                raw_text = raw_text[7:]
-            if raw_text.startswith("```"):
-                raw_text = raw_text[3:]
-            if raw_text.endswith("```"):
-                raw_text = raw_text[:-3]
-            raw_text = raw_text.strip()
-            return json.loads(raw_text)
-        else:
-            print("Gemini API error after trying models:", res.status_code if res else "No response", res.text if res else "")
-            return None
-    except Exception as e:
-        print("Gemini validation call error:", e)
-        return {"error": f"Validation failed: {str(e)}"}
+def determine_confidence_level(score: float, thresholds: dict) -> str:
+    high = thresholds.get("high_confidence", 0.75)
+    medium = thresholds.get("medium_confidence", 0.40)
+    if score >= high:
+        return "high"
+    elif score >= medium:
+        return "medium"
+    return "low"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global classifier_instance
-    print("Initializing SQLite Database...")
+    global classifier_instance, image_validator, audio_validator, audio_classifier, gradcam_service
+    print("Initializing Databases (MongoDB + SQLite)...")
     init_db()
+    init_mongo()
+    
     print("Loading Species Database...")
     load_species_database()
-    print("Preloading Deep Learning Model (MobileNetV2)...")
+
+    print("Initializing Image Validation & YOLO Service...")
+    image_validator = ImageValidationService()
+
+    print("Initializing Audio Validation & Classification Services...")
+    audio_validator = AudioValidationService()
+    audio_classifier = AudioClassificationService(species_database=bird_database)
+
+    print("Preloading MobileNetV2 Vision Classifier...")
     try:
         classifier_instance = BirdClassifier()
-        print("Model preloaded and ready for inference!")
+        if classifier_instance and classifier_instance.model:
+            gradcam_service = GradCAMService(classifier_instance.model)
+        print("Vision Classifier & Grad-CAM initialized!")
     except Exception as e:
-        print(f"Warning: Could not preload model on startup: {e}")
+        print(f"Vision model preload warning: {e}")
         classifier_instance = None
+
     yield
-    print("Shutting down backend...")
+    print("Shutting down Drishti backend...")
 
 app = FastAPI(
-    title="AvianAI API",
-    description="Bird Species Classification and Information System API powered by Deep Learning",
-    version="2.1.0",
+    title="Drishti Avian Intelligence API",
+    description="Multimodal AI Bird Species Identification Platform (Vision + Bioacoustics)",
+    version="3.0.0",
     lifespan=lifespan
 )
 
-# Allow CORS for React frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -248,224 +144,360 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve uploaded files for history previews
+# Static file serving
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
-
-# Serve sample images if available
 if os.path.exists(RAW_DATA_DIR):
     app.mount("/samples", StaticFiles(directory=RAW_DATA_DIR), name="samples")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. HEALTH CHECK & SYSTEM TELEMETRY
+# ─────────────────────────────────────────────────────────────────────────────
+
 @app.get("/api/health")
 def health_check():
+    thresholds = get_system_thresholds()
     return {
         "status": "healthy",
-        "model_loaded": classifier_instance is not None,
-        "model_architecture": "MobileNetV2 (Transfer Learning)",
-        "supported_species_count": len(bird_database),
+        "vision_model_loaded": classifier_instance is not None,
+        "yolo_detector_loaded": image_validator is not None,
+        "audio_pipeline_ready": audio_validator is not None and audio_classifier is not None,
+        "mongodb_connected": is_mongo_connected(),
+        "species_count": len(bird_database),
+        "thresholds": thresholds,
         "tensorflow_version": "2.21.0"
     }
 
-async def process_bird_identification(
-    file: UploadFile,
-    api_key: Optional[str] = None,
-    x_api_key: Optional[str] = None
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. IMAGE-BASED BIRD IDENTIFICATION PIPELINE
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/identify/image")
+@app.post("/api/identify-bird")
+@app.post("/api/predict")
+async def identify_bird_image(
+    file: UploadFile = File(...),
+    api_key: Optional[str] = Form(None),
+    x_api_key: Optional[str] = Header(None)
 ):
-    global classifier_instance
-    effective_api_key = api_key or x_api_key or os.environ.get("GEMINI_API_KEY", "")
+    """
+    Complete 6-Step Image Bird Identification Pipeline:
+    1. Upload & validate file properties (format, size, blur)
+    2. Run YOLOv8 bird detection
+    3. Strictly reject non-bird images (humans, vehicles, dogs, buildings)
+    4. Crop detected bird bounding box
+    5. MobileNetV2 fine-grained species classification (top-5)
+    6. Generate Grad-CAM explainability heatmap overlay
+    7. Record session in MongoDB
+    """
+    global classifier_instance, image_validator, gradcam_service
+    thresholds = get_system_thresholds()
 
-    # Validate file extension
+    # Step 1: Save upload
     ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in ['.jpg', '.jpeg', '.png', '.webp']:
-        raise HTTPException(
-            status_code=400, 
-            detail="Unsupported image format. Please upload JPG, JPEG, PNG, or WebP."
-        )
-
-    # Save uploaded file
     file_id = f"{uuid.uuid4().hex}{ext}"
     saved_path = os.path.join(UPLOADS_DIR, file_id)
     with open(saved_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    image_url = f"/uploads/{file_id}"
+    media_url = f"/uploads/{file_id}"
 
-    # 1. AI API Key Validation (If Gemini API key is provided)
-    if effective_api_key and effective_api_key.strip():
-        gemini_result = validate_and_identify_with_gemini(saved_path, effective_api_key.strip())
-        if gemini_result:
-            if "error" in gemini_result:
-                raise HTTPException(
-                    status_code=400,
-                    detail=gemini_result["error"]
-                )
-            if not gemini_result.get("is_bird"):
-                detected = gemini_result.get("detected_object") or "non-bird object"
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid Image: No bird detected in this image (detected: {detected}). Please upload an image of a bird."
-                )
+    # Step 2: Validate file properties
+    valid, reason, meta = image_validator.validate_file_properties(saved_path)
+    if not valid:
+        # Record corrupted or invalid upload
+        record_identification(
+            input_type="image",
+            uploaded_filename=file.filename or file_id,
+            media_url=media_url,
+            detection_status="rejected_invalid_file",
+            predicted_species="None",
+            scientific_name="None",
+            confidence_score=0.0,
+            top_predictions=[],
+            rejection_reason=reason
+        )
+        raise HTTPException(status_code=400, detail=reason)
 
-            # Image is verified to be a bird!
-            common_name = gemini_result.get("common_name") or "Unknown Bird"
-            scientific_name = gemini_result.get("scientific_name") or "Aves"
-            confidence = float(gemini_result.get("confidence") or 0.95)
-
-            # Match with local database if species exists
-            local_details = None
-            for b in bird_database:
-                if b.get("common_name", "").lower() == common_name.lower():
-                    local_details = b
-                    break
-
-            species_id = local_details.get("species_id") if local_details else f"custom.{common_name.replace(' ', '_')}"
-
-            top_predictions = [
-                {
-                    "species_id": species_id,
-                    "confidence": round(confidence, 4),
-                    "common_name": common_name,
-                    "scientific_name": scientific_name
-                }
-            ]
-
-            # Save to SQLite history
-            record_id = save_prediction(
-                filename=file_id,
-                image_url=image_url,
-                species_id=species_id,
-                common_name=common_name,
-                scientific_name=scientific_name,
-                confidence=round(confidence, 4),
-                top_predictions=top_predictions
-            )
-
-            return {
-                "success": True,
-                "status": "valid",
-                "is_bird": True,
-                "id": record_id,
-                "validated_by": "Gemini AI Vision",
-                "prediction": {
-                    "species_id": species_id,
-                    "common_name": common_name,
-                    "scientific_name": scientific_name,
-                    "confidence": round(confidence, 4),
-                    "family": gemini_result.get("family") or (local_details.get("family") if local_details else "Aves"),
-                    "conservation_status": gemini_result.get("conservation_status") or (local_details.get("conservation_status") if local_details else "Least Concern (LC)"),
-                    "habitat": gemini_result.get("habitat") or (local_details.get("habitat") if local_details else "Natural habitat"),
-                    "diet": gemini_result.get("diet") or (local_details.get("diet") if local_details else "Omnivorous / Varies"),
-                    "physical_characteristics": gemini_result.get("physical_characteristics") or (local_details.get("physical_characteristics") if local_details else ""),
-                    "geographical_distribution": gemini_result.get("geographical_distribution") or (local_details.get("geographical_distribution") if local_details else "Found across India"),
-                    "description": gemini_result.get("description") or (local_details.get("description") if local_details else ""),
-                    "image_url": local_details.get("image_url", "") if local_details else image_url
-                },
-                "top_predictions": top_predictions,
-                "uploaded_image_url": image_url
-            }
-
-    # 2. Local/Offline Validation: Check if image contains a bird or non-bird object
-    is_bird, detected_object, obj_conf = validate_bird_locally(saved_path)
-    if not is_bird:
+    # Step 3: YOLO Bird Detection
+    detection = image_validator.detect_birds(saved_path, conf_threshold=0.25)
+    
+    if not detection.get("is_bird"):
+        rejection_msg = detection.get("rejection_message", "Invalid Image: No bird detected. Please upload an image containing a bird.")
+        # Log to MongoDB
+        record_identification(
+            input_type="image",
+            uploaded_filename=file.filename or file_id,
+            media_url=media_url,
+            detection_status="rejected_no_bird",
+            predicted_species="None",
+            scientific_name="None",
+            confidence_score=0.0,
+            top_predictions=[],
+            annotated_url=f"/uploads/{os.path.basename(detection.get('annotated_image_path', ''))}" if detection.get('annotated_image_path') else "",
+            rejection_reason=rejection_msg,
+            telemetry={"detected_objects": detection.get("detected_objects", [])}
+        )
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid Image: No bird detected in this image (detected: {detected_object}). Please upload an image of a bird."
+            detail=rejection_msg
         )
 
-    # 3. Local MobileNetV2 Inference
+    # Step 4: Classification on cropped bird region
+    cropped_path = detection.get("cropped_image_path", saved_path)
+    annotated_path = detection.get("annotated_image_path", saved_path)
+    annotated_url = f"/uploads/{os.path.basename(annotated_path)}"
+    cropped_url = f"/uploads/{os.path.basename(cropped_path)}"
+
     if classifier_instance is None:
         try:
             classifier_instance = BirdClassifier()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Model failed to initialize: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Vision model initialization failed: {e}")
 
     try:
-        results = classifier_instance.predict(saved_path, top_k=3)
+        results = classifier_instance.predict(cropped_path, top_k=5)
         if not results:
-            raise HTTPException(status_code=500, detail="Prediction returned empty results.")
+            raise HTTPException(status_code=500, detail="Inference returned empty results.")
 
         top_match = results[0]
         species_id = top_match["species_id"]
         confidence = float(top_match["confidence"])
 
-        details = find_bird_details(species_id) or {}
-        common_name = details.get("common_name", species_id)
-        scientific_name = details.get("scientific_name", "Unknown")
+        # Step 5: Generate Grad-CAM Explainability Heatmap
+        gradcam_filename = f"{os.path.splitext(file_id)[0]}_gradcam.jpg"
+        gradcam_path = os.path.join(UPLOADS_DIR, gradcam_filename)
+        gradcam_url = None
 
+        if gradcam_service:
+            try:
+                gradcam_service.save_gradcam_overlay(cropped_path, gradcam_path)
+                gradcam_url = f"/uploads/{gradcam_filename}"
+            except Exception as e:
+                print("Grad-CAM generation notice:", e)
+
+        # Enriched top-5 predictions
         enriched_top = []
         for r in results:
-            r_details = find_bird_details(r["species_id"])
+            d = find_bird_details(r["species_id"])
             enriched_top.append({
                 "species_id": r["species_id"],
                 "confidence": round(float(r["confidence"]), 4),
-                "common_name": r_details.get("common_name", r["species_id"]) if r_details else r["species_id"],
-                "scientific_name": r_details.get("scientific_name", "Unknown") if r_details else "Unknown"
+                "common_name": d.get("common_name", r["species_id"]) if d else r["species_id"],
+                "scientific_name": d.get("scientific_name", "Unknown") if d else "Unknown",
+                "family": d.get("family", "") if d else "",
+                "conservation_status": d.get("conservation_status", "Least Concern (LC)") if d else "Least Concern (LC)"
             })
 
-        # Persist to database history
-        record_id = save_prediction(
-            filename=file_id,
-            image_url=image_url,
-            species_id=species_id,
-            common_name=common_name,
+        top_details = find_bird_details(species_id) or {}
+        common_name = top_details.get("common_name", species_id)
+        scientific_name = top_details.get("scientific_name", "Aves")
+
+        confidence_tier = determine_confidence_level(confidence, thresholds)
+        detection_status = "success" if confidence_tier != "low" else "uncertain"
+
+        # Step 6: Store in MongoDB
+        ident_id = record_identification(
+            input_type="image",
+            uploaded_filename=file.filename or file_id,
+            media_url=media_url,
+            detection_status=detection_status,
+            predicted_species=common_name,
             scientific_name=scientific_name,
-            confidence=round(confidence, 4),
-            top_predictions=enriched_top
+            confidence_score=confidence,
+            top_predictions=enriched_top,
+            annotated_url=annotated_url,
+            telemetry={
+                "bird_boxes": detection.get("boxes", []),
+                "image_meta": meta,
+                "confidence_tier": confidence_tier
+            }
         )
 
         return {
             "success": True,
-            "status": "valid",
+            "status": detection_status,
+            "identification_id": ident_id,
+            "input_type": "image",
             "is_bird": True,
-            "id": record_id,
-            "validated_by": "MobileNetV2 Neural Classifier",
+            "bird_count": detection.get("bird_count", 1),
+            "confidence_tier": confidence_tier,
             "prediction": {
                 "species_id": species_id,
                 "common_name": common_name,
                 "scientific_name": scientific_name,
                 "confidence": round(confidence, 4),
-                "family": details.get("family", "Aves"),
-                "conservation_status": details.get("conservation_status", "Least Concern (LC)"),
-                "habitat": details.get("habitat", "Tropical and temperate forests, grasslands"),
-                "diet": details.get("diet", "Insects, seeds, fruits, small invertebrates"),
-                "physical_characteristics": details.get("physical_characteristics", ""),
-                "geographical_distribution": details.get("geographical_distribution", "Widespread across the Indian Subcontinent"),
-                "description": details.get("description", "A documented avian species in the Indian bird encyclopedia."),
-                "image_url": details.get("image_url", "") or image_url
+                "family": top_details.get("family", "Aves"),
+                "order": top_details.get("order", "Passeriformes"),
+                "conservation_status": top_details.get("conservation_status", "Least Concern (LC)"),
+                "habitat": top_details.get("habitat", "Grasslands, scrublands, tropical deciduous forests"),
+                "diet": top_details.get("diet", "Insects, seeds, small invertebrates"),
+                "geographical_distribution": top_details.get("geographical_distribution", "Widespread across India"),
+                "physical_characteristics": top_details.get("physical_characteristics", ""),
+                "description": top_details.get("description", "Documented avian species in Drishti Encyclopedia."),
+                "image_url": top_details.get("image_url", "") or annotated_url
             },
             "top_predictions": enriched_top,
-            "uploaded_image_url": image_url
+            "uploaded_image_url": media_url,
+            "annotated_image_url": annotated_url,
+            "cropped_image_url": cropped_url,
+            "gradcam_url": gradcam_url,
+            "bounding_boxes": detection.get("boxes", []),
+            "image_quality": meta
         }
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Image classification error: {str(e)}")
 
-@app.post("/api/identify-bird")
-async def identify_bird_endpoint(
-    file: UploadFile = File(...),
-    api_key: Optional[str] = Form(None),
-    x_api_key: Optional[str] = Header(None)
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. AUDIO-BASED BIRD IDENTIFICATION PIPELINE
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/identify/audio")
+async def identify_bird_audio(
+    file: UploadFile = File(...)
 ):
     """
-    Bird-Only Identification API:
-    Strictly validates that the uploaded image is a bird.
-    If the image is any non-bird object (car, person, dog, phone, etc.),
-    it rejects the image with an HTTP 400 'Invalid Image' error.
+    Complete 6-Step Audio Bird Identification Pipeline:
+    1. Upload & validate audio format (WAV, MP3, FLAC)
+    2. Check audio readability, duration, and silence (RMS energy)
+    3. Bioacoustic bird sound detection: verify presence of avian vocalizations (1.5 - 8.5 kHz)
+       and reject human speech, dog barking, engine traffic rumble, or empty silence.
+    4. Librosa Mel Spectrogram generation & plot rendering
+    5. Acoustic CNN species classification with calibrated confidence (top-5)
+    6. Record session in MongoDB
     """
-    return await process_bird_identification(file, api_key, x_api_key)
+    global audio_validator, audio_classifier
+    thresholds = get_system_thresholds()
 
-@app.post("/api/predict")
-async def predict_bird_endpoint(
-    file: UploadFile = File(...),
-    api_key: Optional[str] = Form(None),
-    x_api_key: Optional[str] = Header(None)
-):
-    """Compatible bird prediction and validation endpoint."""
-    return await process_bird_identification(file, api_key, x_api_key)
+    # Step 1: Save audio file
+    ext = os.path.splitext(file.filename)[1].lower()
+    file_id = f"{uuid.uuid4().hex}{ext}"
+    saved_path = os.path.join(UPLOADS_DIR, file_id)
+    with open(saved_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
+    media_url = f"/uploads/{file_id}"
+
+    # Step 2: Validate audio file & silence check
+    valid, reason, meta = audio_validator.validate_file(saved_path)
+    if not valid:
+        record_identification(
+            input_type="audio",
+            uploaded_filename=file.filename or file_id,
+            media_url=media_url,
+            detection_status="rejected_invalid_audio",
+            predicted_species="None",
+            scientific_name="None",
+            confidence_score=0.0,
+            top_predictions=[],
+            rejection_reason=reason
+        )
+        raise HTTPException(status_code=400, detail=reason)
+
+    # Step 3: Bird Sound Detection (Bioacoustics)
+    detection = audio_validator.detect_bird_sound(saved_path)
+    if not detection.get("is_bird_sound"):
+        rejection_msg = detection.get("rejection_message", "Invalid Audio: No bird sound detected. Please upload an audio recording containing bird sounds.")
+        record_identification(
+            input_type="audio",
+            uploaded_filename=file.filename or file_id,
+            media_url=media_url,
+            detection_status="rejected_no_bird_sound",
+            predicted_species="None",
+            scientific_name="None",
+            confidence_score=0.0,
+            top_predictions=[],
+            rejection_reason=rejection_msg,
+            telemetry=detection.get("telemetry", {})
+        )
+        raise HTTPException(status_code=400, detail=rejection_msg)
+
+    # Step 4: Mel Spectrogram Generation
+    spectrogram_filename = f"{os.path.splitext(file_id)[0]}_spectrogram.png"
+    spectrogram_path = os.path.join(UPLOADS_DIR, spectrogram_filename)
+    try:
+        spec_info = audio_classifier.generate_mel_spectrogram(saved_path, spectrogram_path)
+        spectrogram_url = f"/uploads/{spectrogram_filename}"
+    except Exception as e:
+        print("Spectrogram generation error:", e)
+        spectrogram_url = None
+
+    # Step 5: Bioacoustic Species Classification (Top-5)
+    try:
+        top_predictions = audio_classifier.classify_audio_spectrogram(saved_path, top_k=5)
+        if not top_predictions:
+            raise HTTPException(status_code=500, detail="Audio classification returned empty results.")
+
+        top_match = top_predictions[0]
+        confidence = float(top_match["confidence"])
+        common_name = top_match["common_name"]
+        scientific_name = top_match["scientific_name"]
+        species_id = top_match["species_id"]
+
+        top_details = find_bird_details(species_id) or {}
+        confidence_tier = determine_confidence_level(confidence, thresholds)
+        detection_status = "success" if confidence_tier != "low" else "uncertain"
+
+        # Step 6: Persist in MongoDB
+        ident_id = record_identification(
+            input_type="audio",
+            uploaded_filename=file.filename or file_id,
+            media_url=media_url,
+            detection_status=detection_status,
+            predicted_species=common_name,
+            scientific_name=scientific_name,
+            confidence_score=confidence,
+            top_predictions=top_predictions,
+            spectrogram_url=spectrogram_url,
+            telemetry={
+                "acoustic": detection.get("telemetry", {}),
+                "audio_meta": meta,
+                "confidence_tier": confidence_tier
+            }
+        )
+
+        return {
+            "success": True,
+            "status": detection_status,
+            "identification_id": ident_id,
+            "input_type": "audio",
+            "is_bird_sound": True,
+            "confidence_tier": confidence_tier,
+            "prediction": {
+                "species_id": species_id,
+                "common_name": common_name,
+                "scientific_name": scientific_name,
+                "confidence": round(confidence, 4),
+                "family": top_details.get("family", top_match.get("family", "Aves")),
+                "order": top_details.get("order", "Passeriformes"),
+                "conservation_status": top_details.get("conservation_status", "Least Concern (LC)"),
+                "habitat": top_details.get("habitat", "Forests, scrublands, open woodlands"),
+                "diet": top_details.get("diet", "Insects, seeds, berries"),
+                "geographical_distribution": top_details.get("geographical_distribution", "Native to India"),
+                "physical_characteristics": top_details.get("physical_characteristics", ""),
+                "description": top_details.get("description", "Documented avian species in Drishti Encyclopedia."),
+                "image_url": top_details.get("image_url", "")
+            },
+            "top_predictions": top_predictions,
+            "audio_url": media_url,
+            "spectrogram_url": spectrogram_url,
+            "acoustic_telemetry": detection.get("telemetry", {}),
+            "audio_metadata": meta
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Audio classification error: {str(e)}")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. SPECIES ENCYCLOPEDIA & CATALOG ENDPOINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.get("/api/birds")
 @app.get("/api/species")
-def get_species(
-    search: Optional[str] = Query(None, description="Search by common or scientific name"),
+def get_species_catalog(
+    search: Optional[str] = Query(None, description="Search by common, scientific or family name"),
     family: Optional[str] = Query(None, description="Filter by taxonomic family"),
     status: Optional[str] = Query(None, description="Filter by conservation status"),
     letter: Optional[str] = Query(None, description="Filter by starting letter"),
@@ -494,44 +526,102 @@ def get_species(
         "total": total,
         "limit": limit,
         "offset": offset,
-        "species": paged
+        "species": paged,
+        "birds": paged  # Alias for requirement compatibility
     }
 
+@app.get("/api/birds/{species_id}")
 @app.get("/api/species/{species_id}")
-def get_single_species(species_id: str):
+def get_species_detail(species_id: str):
     details = find_bird_details(species_id)
     if not details:
         raise HTTPException(status_code=404, detail=f"Species '{species_id}' not found.")
     return details
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. MULTIMODAL IDENTIFICATION HISTORY ENDPOINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
 @app.get("/api/history")
-def get_classification_history(limit: int = 50, offset: int = 0):
-    records = get_history(limit=limit, offset=offset)
+def get_history(
+    input_type: Optional[str] = Query(None, description="Filter: all, image, or audio"),
+    detection_status: Optional[str] = Query(None, description="Filter: all, success, or rejected"),
+    limit: int = 50,
+    offset: int = 0
+):
+    records = get_identifications(
+        input_type=input_type,
+        detection_status=detection_status,
+        limit=limit,
+        offset=offset
+    )
     return {"history": records, "count": len(records)}
 
-@app.delete("/api/history/{history_id}")
-def delete_single_history(history_id: int):
-    success = delete_history_item(history_id)
+@app.get("/api/history/{id}")
+def get_single_history(id: str):
+    records = get_identifications(limit=100)
+    for r in records:
+        if r.get("identification_id") == id or str(r.get("id")) == id:
+            return r
+    raise HTTPException(status_code=404, detail="History record not found.")
+
+@app.delete("/api/history/{id}")
+def delete_history_record(id: str):
+    success = delete_identification_record(id)
     if not success:
         raise HTTPException(status_code=404, detail="History record not found.")
-    return {"success": True, "message": f"Record {history_id} deleted."}
+    return {"success": True, "message": f"Record {id} removed."}
 
 @app.delete("/api/history")
-def clear_history():
-    clear_all_history()
-    return {"success": True, "message": "All classification history cleared."}
+def clear_history_records():
+    clear_all_identifications()
+    return {"success": True, "message": "All identification records cleared."}
 
-@app.get("/api/stats")
-def get_system_stats():
-    stats = get_stats()
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. ADMIN DASHBOARD & SYSTEM METRICS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.get("/api/admin/metrics")
+def get_admin_metrics():
+    stats = get_aggregate_stats()
     families = set(b.get('family', '') for b in bird_database if b.get('family'))
-    endangered = sum(1 for b in bird_database if any(k in b.get('conservation_status', '') for k in ['Endangered', 'Vulnerable', 'Threatened']))
-    stats.update({
+    endangered = sum(1 for b in bird_database if any(k in b.get('conservation_status', '') for k in ['Endangered', 'Vulnerable', 'Threatened', 'Critically Endangered']))
+    
+    thresholds = get_system_thresholds()
+
+    return {
+        **stats,
+        "supported_species_count": len(bird_database),
         "taxonomic_families": len(families),
         "threatened_species": endangered,
-        "model_name": "MobileNetV2"
-    })
-    return stats
+        "vision_model": "YOLOv8n (Detection) + MobileNetV2 (Classification)",
+        "audio_model": "Librosa Bioacoustics + Mel Spectrogram CNN",
+        "thresholds": thresholds
+    }
+
+class ThresholdUpdate(BaseModel):
+    high_confidence: float
+    medium_confidence: float
+    blur_threshold: Optional[float] = 15.0
+
+@app.get("/api/admin/thresholds")
+def get_thresholds():
+    return get_system_thresholds()
+
+@app.put("/api/admin/thresholds")
+def update_thresholds(data: ThresholdUpdate):
+    if not (0.1 <= data.medium_confidence < data.high_confidence <= 1.0):
+        raise HTTPException(status_code=400, detail="Invalid thresholds: medium must be less than high and within 0.1-1.0.")
+    updated = update_system_thresholds(
+        high=data.high_confidence,
+        medium=data.medium_confidence,
+        blur=data.blur_threshold or 15.0
+    )
+    return {"success": True, "thresholds": updated}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. SAMPLES & AUTHENTICATION ENDPOINTS
+# ─────────────────────────────────────────────────────────────────────────────
 
 @app.get("/api/sample-images")
 def get_sample_images():
@@ -561,7 +651,7 @@ class UserLogin(BaseModel):
     password: str
 
 def hash_password(password: str) -> str:
-    salt = "avian_secure_salt_2026"
+    salt = "drishti_secure_salt_2026"
     return hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
 
 @app.post("/api/auth/register")
@@ -610,7 +700,10 @@ def login_user(data: UserLogin):
         "token": f"user_tok_{user['id']}_{hash_password(user['email'])[:16]}"
     }
 
-# Mount and serve built React frontend assets if present
+# ─────────────────────────────────────────────────────────────────────────────
+# 8. SERVE BUILT REACT FRONTEND SPA
+# ─────────────────────────────────────────────────────────────────────────────
+
 FRONTEND_DIST = os.path.join(PROJECT_ROOT, 'frontend', 'dist')
 if os.path.exists(FRONTEND_DIST):
     assets_dir = os.path.join(FRONTEND_DIST, 'assets')
