@@ -1,5 +1,5 @@
-import tensorflow as tf
 from src.config import IMAGE_SIZE
+import tensorflow as tf
 
 def preprocess_image(image_path, target_size=IMAGE_SIZE):
     """Loads and preprocesses a single image for MobileNetV2 inference."""

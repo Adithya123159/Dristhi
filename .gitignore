@@ -1,11 +1,31 @@
-data/
-__pycache__/
-*.pyc
+# Virtual Environments
+.venv/
 venv/
 env/
+ENV/
+
+# Python Cache & Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints/
 .env
-.ipynb_checkpoints/
+
+# Keras & Models
+.keras/
 models/*.pth
 models/*.pt
 models/*.h5
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.vite/
+
+# Data & Uploads
+data/
+uploads/
+*.db
+*.sqlite3
 temp_test.jpg
