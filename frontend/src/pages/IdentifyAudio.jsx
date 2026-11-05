@@ -63,7 +63,6 @@ export default function IdentifyAudio({ setSelectedSpeciesModal }) {
     setApiKey(val);
     localStorage.setItem('avian_gemini_api_key', val.trim());
   };
-  const fileInputRef = useRef(null);
 
   // Handle audio playback updates
   const handleTimeUpdate = () => {
