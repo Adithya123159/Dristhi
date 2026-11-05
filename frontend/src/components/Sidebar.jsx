@@ -66,7 +66,7 @@ export default function Sidebar({
           <div 
             className="flex items-center gap-3 overflow-hidden cursor-pointer" 
             onClick={() => handleSelectTab('landing')}
-            title="AvianAI Home"
+            title="Drishti Home"
           >
             <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center flex-shrink-0 text-white shadow-sm">
               <Bird className="w-5 h-5" />
@@ -74,7 +74,7 @@ export default function Sidebar({
             {(!isCollapsed || isMobileDrawerOpen) && (
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-base text-white tracking-tight">
-                  AvianAI
+                  Drishti
                 </span>
                 <span className="text-[11px] text-slate-400 truncate">100 Species</span>
               </div>

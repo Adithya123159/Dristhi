@@ -132,7 +132,7 @@ export default function AuthPage({
             <Bird className="w-6 h-6 text-white" />
           </div>
           <h2 className="text-2xl font-black tracking-tight text-emerald-950">
-            {mode === 'login' ? 'Sign in to AvianAI' : 'Create an Account'}
+            {mode === 'login' ? 'Sign in to Drishti' : 'Create a Drishti Account'}
           </h2>
           <p className="text-xs text-emerald-800/80 font-medium mt-1 max-w-xs mx-auto">
             {mode === 'login' 
