@@ -184,3 +184,4 @@ class ImageValidationService:
             "cropped_image_path": cropped_path,
             "detected_objects": ["bird"] + other_objects
         }
+

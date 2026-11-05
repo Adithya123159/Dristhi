@@ -104,3 +104,4 @@ class GradCAMService:
 
         cv2.imwrite(output_path, combined)
         return output_path
+

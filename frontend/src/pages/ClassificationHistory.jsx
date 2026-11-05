@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  History, 
-  Trash2, 
-  Calendar, 
-  ArrowRight, 
-  Download, 
-  Volume2, 
+import {
+  History,
+  Trash2,
+  Calendar,
+  ArrowRight,
+  Download,
+  Volume2,
   Image as ImageIcon,
-  CheckCircle2, 
+  CheckCircle2,
   AlertTriangle,
   Play,
   Pause,
@@ -145,18 +145,16 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
       <div className="flex flex-wrap items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl w-fit border border-slate-200/60">
         <button
           onClick={() => setFilterType('all')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            filterType === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterType === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
         >
           All Identifications
         </button>
 
         <button
           onClick={() => setFilterType('image')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            filterType === 'image' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${filterType === 'image' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
         >
           <ImageIcon className="w-3.5 h-3.5" />
           <span>Vision (Images)</span>
@@ -164,9 +162,8 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
 
         <button
           onClick={() => setFilterType('audio')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            filterType === 'audio' ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${filterType === 'audio' ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
         >
           <Volume2 className="w-3.5 h-3.5" />
           <span>Bioacoustics (Audio)</span>
@@ -174,9 +171,8 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
 
         <button
           onClick={() => setFilterType('rejected')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            filterType === 'rejected' ? 'bg-white text-rose-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${filterType === 'rejected' ? 'bg-white text-rose-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
         >
           <AlertTriangle className="w-3.5 h-3.5" />
           <span>Rejections</span>
@@ -218,11 +214,10 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
                   {/* Top Header Badge */}
                   <div className="flex items-center justify-between mb-3.5">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                        isAudio
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${isAudio
                           ? 'bg-teal-50 text-teal-700 border border-teal-200'
                           : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      }`}
+                        }`}
                     >
                       {isAudio ? <Volume2 className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
                       <span>{isAudio ? 'Audio Bioacoustics' : 'Image Vision'}</span>
@@ -306,9 +301,9 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
                     <span>
                       {item.timestamp
                         ? new Date(item.timestamp).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric'
-                          })
+                          month: 'short',
+                          day: 'numeric'
+                        })
                         : 'Recent'}
                     </span>
                   </div>

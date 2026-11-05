@@ -278,3 +278,4 @@ def get_aggregate_stats() -> Dict[str, Any]:
         "average_confidence_pct": avg_conf or 94.2,
         "mongo_connected": is_mongo_connected()
     }
+

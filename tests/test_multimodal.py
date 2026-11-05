@@ -157,3 +157,4 @@ assert any(h.get("identification_id") == rec_id for h in history), "Error: Recor
 print(">>> PASS: Multimodal history persistence verified.")
 
 print("\n=== ALL SYSTEM TESTS PASSED SUCCESSFULLY! ===")
+
