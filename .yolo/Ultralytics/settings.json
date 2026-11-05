@@ -1,0 +1,19 @@
+{
+  "settings_version": "0.0.8",
+  "datasets_dir": "D:\\datasets",
+  "weights_dir": "D:\\Dristhi\\weights",
+  "runs_dir": "D:\\Dristhi\\runs",
+  "uuid": "ac18a08d58fb28304a069199fe061c4419132dd561a08cb3bf6a1c1164945d80",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "mlflow": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}
