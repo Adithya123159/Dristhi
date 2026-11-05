@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ScanLine,
+  Volume2,
   Bird,
   History,
   ArrowRight,

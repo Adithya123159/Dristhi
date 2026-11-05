@@ -142,6 +142,10 @@ export const api = {
     return await res.json();
   },
 
+  async getStats() {
+    return this.getAdminMetrics();
+  },
+
   async getAdminThresholds() {
     const res = await fetch(`${getBaseUrl()}/api/admin/thresholds`);
     if (!res.ok) throw new Error('Failed to fetch thresholds');

@@ -8,9 +8,11 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardHome from './pages/DashboardHome';
 import IdentifyBird from './pages/IdentifyBird';
+import IdentifyAudio from './pages/IdentifyAudio';
 import SupportedSpecies from './pages/SupportedSpecies';
 import BirdEncyclopedia from './pages/BirdEncyclopedia';
 import ClassificationHistory from './pages/ClassificationHistory';
+import AdminDashboard from './pages/AdminDashboard';
 import AboutProject from './pages/AboutProject';
 import Settings from './pages/Settings';
 
@@ -111,6 +113,12 @@ export default function App() {
             setSelectedSpeciesModal={setSelectedSpeciesModal} 
           />
         );
+      case 'identify-audio':
+        return (
+          <IdentifyAudio 
+            setSelectedSpeciesModal={setSelectedSpeciesModal} 
+          />
+        );
       case 'species':
         return (
           <SupportedSpecies 
@@ -129,6 +137,8 @@ export default function App() {
             setSelectedSpeciesModal={setSelectedSpeciesModal} 
           />
         );
+      case 'admin':
+        return <AdminDashboard />;
       case 'about':
         return <AboutProject />;
       case 'settings':
