@@ -10,11 +10,9 @@ import {
   Zap, 
   BookOpen, 
   CheckCircle2, 
-  Compass, 
-  ExternalLink,
   ChevronRight,
-  Layers,
-  Activity
+  Activity,
+  Feather
 } from 'lucide-react';
 
 const FEATURED_SPECIMENS = [
@@ -24,12 +22,11 @@ const FEATURED_SPECIMENS = [
     scientificName: 'Pavo cristatus',
     family: 'Phasianidae',
     status: 'Least Concern (LC)',
-    statusColor: 'emerald',
+    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     confidence: 99.4,
-    diet: 'Omnivorous (seeds, insects, small reptiles)',
-    habitat: 'Deciduous forests, open scrublands & cultivated lands',
-    gradient: 'from-emerald-500/20 to-teal-500/20',
-    accentBorder: 'border-emerald-500/30'
+    diet: 'Omnivorous (seeds, grains, insects, small reptiles)',
+    habitat: 'Deciduous forests, open scrublands & village edges',
+    accentBg: 'bg-emerald-50/60'
   },
   {
     id: 'roller',
@@ -37,12 +34,11 @@ const FEATURED_SPECIMENS = [
     scientificName: 'Coracias benghalensis',
     family: 'Coraciidae',
     status: 'Least Concern (LC)',
-    statusColor: 'blue',
+    statusBadge: 'bg-sky-50 text-sky-700 border-sky-200',
     confidence: 98.8,
-    diet: 'Carnivorous (insects, beetles, arachnids)',
-    habitat: 'Open grasslands, agricultural fields & scrub forests',
-    gradient: 'from-cyan-500/20 to-blue-500/20',
-    accentBorder: 'border-cyan-500/30'
+    diet: 'Carnivorous (beetles, grasshoppers, small lizards)',
+    habitat: 'Open grasslands, agricultural fields & road perches',
+    accentBg: 'bg-sky-50/60'
   },
   {
     id: 'bustard',
@@ -50,12 +46,11 @@ const FEATURED_SPECIMENS = [
     scientificName: 'Ardeotis nigriceps',
     family: 'Otididae',
     status: 'Critically Endangered (CR)',
-    statusColor: 'rose',
+    statusBadge: 'bg-rose-50 text-rose-700 border-rose-200',
     confidence: 96.5,
-    diet: 'Omnivorous (grasshoppers, beetles, seeds)',
-    habitat: 'Semi-arid arid grasslands and thorny scrub of Thar',
-    gradient: 'from-rose-500/20 to-amber-500/20',
-    accentBorder: 'border-rose-500/30'
+    diet: 'Omnivorous (insects, grasshoppers, seeds, berries)',
+    habitat: 'Arid grasslands & semi-desert scrublands of Thar',
+    accentBg: 'bg-rose-50/60'
   },
   {
     id: 'parakeet',
@@ -63,12 +58,11 @@ const FEATURED_SPECIMENS = [
     scientificName: 'Psittacula krameri',
     family: 'Psittaculidae',
     status: 'Least Concern (LC)',
-    statusColor: 'emerald',
+    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     confidence: 99.1,
-    diet: 'Herbivorous (fruits, seeds, buds, flowers)',
-    habitat: 'Woodlands, urban gardens & agricultural farms',
-    gradient: 'from-lime-500/20 to-emerald-500/20',
-    accentBorder: 'border-lime-500/30'
+    diet: 'Herbivorous (fruits, nuts, buds, flowering seeds)',
+    habitat: 'Woodlands, cultivated farmlands & urban parks',
+    accentBg: 'bg-emerald-50/60'
   }
 ];
 
@@ -80,90 +74,88 @@ export default function LandingPage({
   const [selectedSpecimen, setSelectedSpecimen] = useState(FEATURED_SPECIMENS[0]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white relative overflow-x-hidden">
-      {/* Background organic light glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[550px] bg-gradient-to-b from-emerald-600/10 via-teal-600/5 to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute top-96 -right-40 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-[800px] -left-40 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-emerald-500 selection:text-white relative">
+      {/* Subtle top ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-80 bg-gradient-to-b from-emerald-100/40 via-teal-50/20 to-transparent pointer-events-none" />
 
-      {/* Modern Floating Header */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-slate-950/70 border-b border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      {/* Clean Light Header */}
+      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
           {/* Logo */}
           <div 
             onClick={() => onNavigateTab('landing')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group py-2"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-600/25 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm group-hover:bg-emerald-700 transition-colors">
               <Bird className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg tracking-tight text-white">AvianAI</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  v2.1
+                <span className="font-bold text-base text-slate-900 tracking-tight">AvianAI</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  100 Species
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Ecological Intelligence</p>
+              <p className="text-[11px] text-slate-500">Bird Classification System</p>
             </div>
           </div>
 
-          {/* Quick nav pills */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/60 border border-slate-800/80 p-1.5 rounded-2xl">
+          {/* Center Links */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl">
             <button
               onClick={() => onNavigateTab('identify')}
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-xl hover:bg-slate-800/60 transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 rounded-lg hover:bg-white transition-all flex items-center gap-1.5"
             >
-              <ScanLine className="w-3.5 h-3.5 text-emerald-400" />
-              <span>AI Classifier</span>
+              <ScanLine className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Classifier</span>
             </button>
             <button
               onClick={() => onNavigateTab('species')}
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-xl hover:bg-slate-800/60 transition-colors"
+              className="px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 rounded-lg hover:bg-white transition-all"
             >
-              100 Species
+              Species Catalog
             </button>
             <button
               onClick={() => onNavigateTab('encyclopedia')}
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-xl hover:bg-slate-800/60 transition-colors"
+              className="px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 rounded-lg hover:bg-white transition-all"
             >
               Encyclopedia
             </button>
             <button
               onClick={() => onNavigateTab('dashboard')}
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-xl hover:bg-slate-800/60 transition-colors"
+              className="px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 rounded-lg hover:bg-white transition-all"
             >
               Dashboard
             </button>
           </nav>
 
-          {/* Auth Action Buttons */}
-          <div className="flex items-center gap-3">
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-2">
             {currentUser ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div 
                   onClick={() => onNavigateTab('dashboard')}
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 cursor-pointer transition-colors"
                 >
                   <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">
                     {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                   </div>
-                  <span className="text-xs font-medium text-slate-200 truncate max-w-[120px]">
+                  <span className="text-xs font-medium text-slate-800 max-w-[100px] truncate">
                     {currentUser.name}
                   </span>
                 </div>
 
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs shadow-sm transition-colors flex items-center gap-1.5"
                 >
-                  <span>Go to App</span>
+                  <span>Open App</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
                 <button
                   onClick={onLogout}
-                  className="text-xs text-slate-400 hover:text-rose-400 p-2 transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
                   title="Logout"
                 >
                   <LogIn className="w-4 h-4 rotate-180" />
@@ -171,17 +163,19 @@ export default function LandingPage({
               </div>
             ) : (
               <div className="flex items-center gap-2">
+                {/* Login Button */}
                 <button
                   onClick={() => onNavigateTab('login')}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-1.5 border border-transparent hover:border-slate-800"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-all flex items-center gap-1.5"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-slate-400" />
+                  <LogIn className="w-3.5 h-3.5 text-slate-500" />
                   <span>Log In</span>
                 </button>
 
+                {/* Register Button */}
                 <button
                   onClick={() => onNavigateTab('register')}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs shadow-lg shadow-emerald-600/25 transition-all flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   <span>Register</span>
@@ -189,9 +183,9 @@ export default function LandingPage({
 
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="hidden sm:flex px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition-all items-center gap-1.5"
+                  className="hidden sm:flex px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  <span>Explore</span>
+                  Guest Access &rarr;
                 </button>
               </div>
             )}
@@ -200,91 +194,79 @@ export default function LandingPage({
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-20 sm:pt-20 sm:pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
-        {/* Subtle pill tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mb-6 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-          <span>MobileNetV2 Neural Vision &bull; 100 Indian Bird Species</span>
+      <section className="pt-12 pb-16 sm:pt-16 sm:pb-20 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+        {/* Soft Pill Tag */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium mb-6">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+          <span>MobileNetV2 AI Vision &bull; 100 Indian Bird Species</span>
         </div>
 
-        {/* Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl leading-[1.15]">
-          Identify Any Bird in Seconds with{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
-            Deep Neural Vision
+        {/* Hero Title */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl mx-auto leading-tight">
+          Smart Bird Identification,{' '}
+          <span className="text-emerald-700">
+            Simple &amp; Fast.
           </span>
         </h1>
 
-        {/* Subtitle */}
-        <p className="mt-6 text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed">
-          Upload an image to identify native Indian birds with sub-50ms latency. 
-          Get instant biological taxonomy, IUCN conservation status, diet, and ecological profiling.
+        {/* Hero Description */}
+        <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
+          Upload any bird photograph to instantly discover its species name, taxonomy, native habitat, diet, and conservation status.
         </p>
 
-        {/* Hero CTA Buttons */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+        {/* Hero CTA Button Row */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             onClick={() => onNavigateTab('identify')}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 group"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
           >
-            <ScanLine className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
-            <span>Identify a Bird Now</span>
+            <ScanLine className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <span>Identify a Bird</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
           {!currentUser && (
             <button
               onClick={() => onNavigateTab('register')}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
             >
-              <UserPlus className="w-4 h-4 text-emerald-400" />
-              <span>Create Free Account</span>
+              <UserPlus className="w-4 h-4 text-emerald-600" />
+              <span>Register Free</span>
             </button>
           )}
 
           <button
             onClick={() => onNavigateTab('species')}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900/40 hover:bg-slate-900 border border-slate-800/80 text-slate-300 hover:text-white font-medium text-sm transition-all flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto px-5 py-3 rounded-xl text-slate-600 hover:text-slate-900 font-medium text-sm transition-colors flex items-center justify-center gap-1"
           >
-            <span>Browse 100 Species</span>
-            <ChevronRight className="w-4 h-4 text-slate-500" />
+            <span>Explore 100 Species</span>
+            <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
         </div>
 
-        {/* Simple reassurance note */}
-        <div className="mt-4 flex items-center gap-4 text-xs text-slate-500">
-          <span>&bull; No credit card required</span>
-          <span>&bull; SQLite history saved</span>
-          <span>&bull; Dual-layer verification</span>
-        </div>
-
-        {/* Creative Interactive Showcase: "Live Specimen Radar" */}
-        <div className="mt-14 w-full max-w-4xl">
-          <div className="bg-slate-900/70 border border-slate-800/90 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden text-left">
-            {/* Header of showcase */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+        {/* Interactive Specimen Preview Card (Simple & Unique) */}
+        <div className="mt-12 w-full text-left">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-sm">
+            {/* Header of preview card */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-100 gap-3">
               <div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                    Live Specimen Radar
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white mt-1">
-                  Interactive Species Intelligence
-                </h3>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5" />
+                  Live Species Preview
+                </span>
+                <p className="text-xs text-slate-500 mt-0.5">Click any specimen to see classification details</p>
               </div>
 
-              {/* Selector pills */}
-              <div className="flex flex-wrap gap-1.5 bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800">
+              {/* Specimen Switcher Buttons */}
+              <div className="flex flex-wrap gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
                 {FEATURED_SPECIMENS.map((bird) => (
                   <button
                     key={bird.id}
                     onClick={() => setSelectedSpecimen(bird)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                       selectedSpecimen.id === bird.id
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                        ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     {bird.commonName}
@@ -293,64 +275,62 @@ export default function LandingPage({
               </div>
             </div>
 
-            {/* Specimen details display */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-              {/* Left: Biological Profile */}
-              <div className="md:col-span-2 space-y-4">
+            {/* Specimen Information Grid */}
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              {/* Left Details */}
+              <div className="md:col-span-2 space-y-3.5">
                 <div>
-                  <div className="flex items-center gap-3">
-                    <h4 className="text-2xl font-extrabold text-white">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
                       {selectedSpecimen.commonName}
-                    </h4>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    </h3>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${selectedSpecimen.statusBadge}`}>
                       {selectedSpecimen.status}
                     </span>
                   </div>
-                  <p className="text-sm italic text-slate-400 mt-0.5">
+                  <p className="text-xs italic text-slate-500 mt-1">
                     {selectedSpecimen.scientificName} &bull; Family {selectedSpecimen.family}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/70">
-                    <span className="text-slate-400 block mb-1 font-medium">Dietary Niche</span>
-                    <span className="text-slate-200 font-medium">{selectedSpecimen.diet}</span>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-slate-500 block mb-0.5 font-medium">Dietary Niche</span>
+                    <span className="text-slate-800 font-medium">{selectedSpecimen.diet}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/70">
-                    <span className="text-slate-400 block mb-1 font-medium">Native Habitat</span>
-                    <span className="text-slate-200 font-medium">{selectedSpecimen.habitat}</span>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-slate-500 block mb-0.5 font-medium">Native Habitat</span>
+                    <span className="text-slate-800 font-medium">{selectedSpecimen.habitat}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex items-center gap-3 pt-1">
                   <button
                     onClick={() => onNavigateTab('identify')}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-colors flex items-center gap-1.5 shadow-sm"
                   >
                     <ScanLine className="w-3.5 h-3.5" />
                     <span>Test Identification</span>
                   </button>
                   <button
                     onClick={() => onNavigateTab('species')}
-                    className="px-4 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 text-xs font-medium transition-colors"
+                    className="px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 text-xs font-medium transition-colors"
                   >
-                    View in Species Catalog
+                    View in Species Catalog &rarr;
                   </button>
                 </div>
               </div>
 
-              {/* Right: Simulated Confidence Score & Sensor */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center">
-                <div className="relative flex items-center justify-center mb-3">
-                  <div className="w-20 h-20 rounded-full border-4 border-slate-800 border-t-emerald-500 animate-pulse flex items-center justify-center">
-                    <span className="text-xl font-black text-white">{selectedSpecimen.confidence}%</span>
-                  </div>
+              {/* Right Mini Score Box */}
+              <div className="p-5 rounded-xl bg-emerald-50/50 border border-emerald-100 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full border-4 border-emerald-200 border-t-emerald-600 flex items-center justify-center mb-2">
+                  <span className="text-lg font-bold text-emerald-800">{selectedSpecimen.confidence}%</span>
                 </div>
-                <span className="text-xs font-semibold text-emerald-400">
-                  Model Confidence Tier: High
+                <span className="text-xs font-semibold text-emerald-800">
+                  Confidence Tier: High
                 </span>
-                <span className="text-[11px] text-slate-400 mt-1">
-                  Latency: 42ms on CPU
+                <span className="text-[11px] text-slate-500 mt-0.5">
+                  Sub-50ms CPU Latency
                 </span>
               </div>
             </div>
@@ -358,156 +338,126 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 3 Simple Unique Pillars */}
-      <section className="py-16 border-t border-slate-800/80 bg-slate-950 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Why AvianAI is Different
+      {/* 3 Simple Pillars (Simple & Clean) */}
+      <section className="py-14 bg-white border-y border-slate-200/80">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-md mx-auto mb-10">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+              Core Capabilities
             </h2>
-            <p className="text-sm text-slate-400 mt-2">
-              Engineered specifically for the ecological diversity of the Indian subcontinent.
+            <p className="text-xs text-slate-500 mt-1">
+              Purpose-built for biodiversity research and birdwatchers.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Feature 1 */}
-            <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all hover:bg-slate-900/80 group">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <Zap className="w-6 h-6" />
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+                <Zap className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
-                Sub-50ms MobileNetV2 Latency
+              <h3 className="text-sm font-bold text-slate-900 mb-1.5">
+                Sub-50ms Neural Speed
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Lightweight inverted residual architecture fine-tuned on native bird morphology for rapid, accurate edge classification.
+              <p className="text-xs text-slate-600 leading-relaxed">
+                MobileNetV2 deep convolutional network optimized for instant inference on photos.
               </p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all hover:bg-slate-900/80 group">
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <BookOpen className="w-6 h-6" />
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+              <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center mb-4">
+                <BookOpen className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
-                100 Indian Species &amp; IUCN Telemetry
+              <h3 className="text-sm font-bold text-slate-900 mb-1.5">
+                100 Indian Species
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Covers common backyard birds to critically endangered avifauna, enriched with taxonomic classification and habitats.
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Covers common backyard birds to endangered wildlife with diets, habitats, and IUCN tags.
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all hover:bg-slate-900/80 group">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-6 h-6" />
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
-                Dual Multimodal Validation
+              <h3 className="text-sm font-bold text-slate-900 mb-1.5">
+                Accurate Verification
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Offline ImageNet-1k object gatekeeper detects non-bird photos with zero hallucination, complemented by optional Gemini Vision.
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Smart gatekeeper validates genuine bird images and rejects cars, humans, or clutter.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Counter Strip */}
-      <section className="py-12 bg-slate-900/40 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-white">100</div>
-              <div className="text-xs text-slate-400 mt-1">Species Classified</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-emerald-400">&lt;50ms</div>
-              <div className="text-xs text-slate-400 mt-1">Inference Latency</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-teal-400">46</div>
-              <div className="text-xs text-slate-400 mt-1">Taxonomic Families</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-cyan-400">100%</div>
-              <div className="text-xs text-slate-400 mt-1">Free &amp; Open Access</div>
-            </div>
+      {/* Simple CTA Box */}
+      <section className="py-14 max-w-4xl mx-auto px-4 sm:px-6 w-full text-center">
+        <div className="p-8 sm:p-10 rounded-2xl bg-emerald-600 text-white shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-4">
+            <Bird className="w-5 h-5 text-white" />
           </div>
-        </div>
-      </section>
 
-      {/* Final Call to Action */}
-      <section className="py-20 relative z-10 text-center">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 relative overflow-hidden shadow-2xl">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-5">
-              <Bird className="w-6 h-6" />
-            </div>
+          <h2 className="text-xl sm:text-3xl font-bold tracking-tight">
+            Ready to identify your first bird?
+          </h2>
+          <p className="text-emerald-100 text-xs sm:text-sm mt-2 max-w-sm mx-auto">
+            Upload an image to start classifying or create an account to save your observation history.
+          </p>
 
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Ready to Explore the Skies?
-            </h2>
-            <p className="text-slate-400 text-sm mt-3 max-w-md mx-auto">
-              Start identifying Indian bird species instantly or create an account to save your ecological observation history.
-            </p>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={() => onNavigateTab('identify')}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white text-emerald-800 font-bold text-xs hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <ScanLine className="w-4 h-4" />
+              <span>Launch Classifier</span>
+            </button>
 
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                onClick={() => onNavigateTab('identify')}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2"
-              >
-                <ScanLine className="w-4 h-4" />
-                <span>Launch Classifier</span>
-              </button>
-
-              {!currentUser ? (
-                <>
-                  <button
-                    onClick={() => onNavigateTab('register')}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2"
-                  >
-                    <UserPlus className="w-4 h-4 text-emerald-400" />
-                    <span>Register New Account</span>
-                  </button>
-                  <button
-                    onClick={() => onNavigateTab('login')}
-                    className="w-full sm:w-auto px-5 py-3 rounded-xl text-slate-400 hover:text-white text-xs font-medium transition-colors"
-                  >
-                    Sign In &rarr;
-                  </button>
-                </>
-              ) : (
+            {!currentUser ? (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onNavigateTab('dashboard')}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors"
+                  onClick={() => onNavigateTab('register')}
+                  className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs border border-emerald-500/50 transition-colors"
                 >
-                  Go to Dashboard
+                  Create Account
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={() => onNavigateTab('login')}
+                  className="px-3 py-2.5 text-white/90 hover:text-white text-xs font-medium transition-colors"
+                >
+                  Sign In &rarr;
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => onNavigateTab('dashboard')}
+                className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Simple, Minimal Footer */}
-      <footer className="mt-auto py-8 border-t border-slate-900 bg-slate-950 text-slate-500 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Clean Minimal Footer */}
+      <footer className="mt-auto py-6 border-t border-slate-200 bg-white text-slate-500 text-xs">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Bird className="w-4 h-4 text-emerald-500" />
-            <span className="text-slate-400 font-semibold">AvianAI</span>
-            <span>&mdash; Indian Bird Species Intelligence System</span>
+            <Bird className="w-4 h-4 text-emerald-600" />
+            <span className="text-slate-800 font-semibold">AvianAI</span>
+            <span>&bull; Indian Bird Species Intelligence</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400">
-            <button onClick={() => onNavigateTab('about')} className="hover:text-white transition-colors">
+          <div className="flex items-center gap-4 text-slate-600">
+            <button onClick={() => onNavigateTab('about')} className="hover:text-slate-900 transition-colors">
               About
             </button>
-            <button onClick={() => onNavigateTab('species')} className="hover:text-white transition-colors">
+            <button onClick={() => onNavigateTab('species')} className="hover:text-slate-900 transition-colors">
               Species
             </button>
-            <button onClick={() => onNavigateTab('settings')} className="hover:text-white transition-colors">
-              Settings
+            <button onClick={() => onNavigateTab('dashboard')} className="hover:text-slate-900 transition-colors">
+              Dashboard
             </button>
           </div>
         </div>
@@ -515,4 +465,3 @@ export default function LandingPage({
     </div>
   );
 }
-

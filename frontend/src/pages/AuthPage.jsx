@@ -9,10 +9,8 @@ import {
   AlertCircle, 
   Eye, 
   EyeOff, 
-  Sparkles,
   ArrowLeft,
-  ShieldCheck,
-  Feather
+  ShieldCheck
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -81,24 +79,20 @@ export default function AuthPage({
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden selection:bg-emerald-500 selection:text-white">
-      {/* Ambient background glows */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-center items-center px-4 py-12 relative selection:bg-emerald-500 selection:text-white">
       {/* Top Bar Navigation */}
-      <div className="absolute top-6 left-6 right-6 max-w-5xl mx-auto flex items-center justify-between z-20">
+      <div className="absolute top-6 left-6 right-6 max-w-4xl mx-auto flex items-center justify-between z-20">
         <button
           onClick={onNavigateHome}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition-all text-sm font-medium backdrop-blur-md"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all text-xs font-medium shadow-xs"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Landing</span>
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Home</span>
         </button>
 
         <button
           onClick={onSkip}
-          className="text-xs text-slate-400 hover:text-emerald-400 transition-colors font-medium"
+          className="text-xs text-slate-500 hover:text-emerald-700 transition-colors font-medium"
         >
           Explore as Guest &rarr;
         </button>
@@ -107,32 +101,32 @@ export default function AuthPage({
       {/* Auth Card Container */}
       <div className="w-full max-w-md relative z-10">
         {/* Brand Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div 
             onClick={onNavigateHome}
-            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-lg shadow-emerald-500/20 mb-4 cursor-pointer hover:scale-105 transition-transform"
+            className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-600 shadow-sm mb-3 cursor-pointer hover:bg-emerald-700 transition-colors"
           >
-            <Bird className="w-7 h-7 text-white" />
+            <Bird className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            {mode === 'login' ? 'Welcome Back' : 'Create an Account'}
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+            {mode === 'login' ? 'Sign in to AvianAI' : 'Create an Account'}
           </h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-xs mx-auto">
+          <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
             {mode === 'login' 
-              ? 'Access your ecological history, neural predictions, and saved species.' 
-              : 'Join the AvianAI community to classify, track, and explore 100 bird species.'}
+              ? 'Enter your credentials to access your observation history.' 
+              : 'Join to classify and record Indian bird species.'}
           </p>
         </div>
 
         {/* Tab Toggle */}
-        <div className="bg-slate-900/90 border border-slate-800/80 p-1.5 rounded-2xl flex items-center mb-6 shadow-inner backdrop-blur-xl">
+        <div className="bg-slate-200/70 p-1 rounded-xl flex items-center mb-5">
           <button
             type="button"
             onClick={() => { setMode('login'); setError(''); setSuccessMsg(''); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
+            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               mode === 'login'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Sign In
@@ -140,99 +134,99 @@ export default function AuthPage({
           <button
             type="button"
             onClick={() => { setMode('register'); setError(''); setSuccessMsg(''); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
+            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               mode === 'register'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Create Account
+            Register
           </button>
         </div>
 
         {/* Auth Box */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-sm relative">
           {/* Notifications */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5">
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-start gap-2.5">
+            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {mode === 'register' && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Full Name
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Arun Sharma"
-                    className="w-full bg-slate-950/60 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 mb-1">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="naturalist@example.com"
-                  className="w-full bg-slate-950/60 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none"
+                  className="w-full bg-white border border-slate-200 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-slate-300">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium text-slate-700">
                   Password
                 </label>
                 {mode === 'login' && (
                   <button
                     type="button"
                     onClick={fillDemoAccount}
-                    className="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors"
+                    className="text-[11px] text-emerald-700 hover:text-emerald-800 font-medium"
                   >
                     Use Demo Account
                   </button>
                 )}
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/60 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none"
+                  className="w-full bg-white border border-slate-200 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl pl-9 pr-9 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -241,62 +235,62 @@ export default function AuthPage({
 
             {mode === 'register' && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-950/60 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all"
                   />
                 </div>
               </div>
             )}
 
-            {/* Submit CTA */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full mt-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Sign In to AvianAI' : 'Create My Free Account'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{mode === 'login' ? 'Sign In' : 'Create Free Account'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Social / Demo alternative */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
+          {/* Switch Prompt */}
+          <div className="mt-5 pt-4 border-t border-slate-100 text-center">
             {mode === 'login' ? (
-              <p className="text-xs text-slate-400">
-                Don't have an account yet?{' '}
+              <p className="text-xs text-slate-500">
+                Don't have an account?{' '}
                 <button
                   type="button"
                   onClick={() => { setMode('register'); setError(''); }}
-                  className="font-medium text-emerald-400 hover:text-emerald-300 hover:underline"
+                  className="font-semibold text-emerald-700 hover:text-emerald-800"
                 >
                   Register here
                 </button>
               </p>
             ) : (
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Already registered?{' '}
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setError(''); }}
-                  className="font-medium text-emerald-400 hover:text-emerald-300 hover:underline"
+                  className="font-semibold text-emerald-700 hover:text-emerald-800"
                 >
-                  Sign in instead
+                  Sign in
                 </button>
               </p>
             )}
@@ -304,12 +298,11 @@ export default function AuthPage({
         </div>
 
         {/* Security badge footer */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
-          <ShieldCheck className="w-4 h-4 text-emerald-500/70" />
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-slate-400 text-xs">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           <span>Local secure authentication with SQLite persistence</span>
         </div>
       </div>
     </div>
   );
 }
-
