@@ -1,28 +1,28 @@
 import React from 'react';
-import { 
+import {
   Home,
-  LayoutDashboard, 
-  ScanLine, 
-  Bird, 
-  BookOpen, 
-  History, 
-  Info, 
-  Settings, 
-  ChevronLeft, 
+  LayoutDashboard,
+  ScanLine,
+  Bird,
+  BookOpen,
+  History,
+  Info,
+  Settings,
+  ChevronLeft,
   ChevronRight,
   LogIn,
   LogOut,
   User
 } from 'lucide-react';
 
-export default function Sidebar({ 
-  currentTab, 
-  setCurrentTab, 
-  isCollapsed, 
-  setIsCollapsed, 
+export default function Sidebar({
+  currentTab,
+  setCurrentTab,
+  isCollapsed,
+  setIsCollapsed,
   isServerOnline,
   currentUser,
-  onLogout 
+  onLogout
 }) {
   const menuItems = [
     { id: 'landing', label: 'Landing Page', icon: Home },
@@ -36,15 +36,14 @@ export default function Sidebar({
   ];
 
   return (
-    <aside 
-      className={`fixed top-0 left-0 z-40 h-screen bg-slate-900 text-slate-200 transition-all duration-200 ease-in-out border-r border-slate-800 flex flex-col ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+    <aside
+      className={`fixed top-0 left-0 z-40 h-screen bg-slate-900 text-slate-200 transition-all duration-200 ease-in-out border-r border-slate-800 flex flex-col ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
     >
       {/* Brand Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 bg-slate-950/40">
-        <div 
-          className="flex items-center gap-3 overflow-hidden cursor-pointer" 
+        <div
+          className="flex items-center gap-3 overflow-hidden cursor-pointer"
           onClick={() => setCurrentTab('landing')}
           title="AvianAI Home"
         >
@@ -61,7 +60,7 @@ export default function Sidebar({
           )}
         </div>
 
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           title={isCollapsed ? "Expand" : "Collapse"}
@@ -80,11 +79,10 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => setCurrentTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-colors ${
-                isActive 
-                  ? 'bg-emerald-600 text-white font-semibold' 
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-colors ${isActive
+                  ? 'bg-emerald-600 text-white font-semibold'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-              }`}
+                }`}
               title={isCollapsed ? item.label : undefined}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -127,9 +125,8 @@ export default function Sidebar({
           <div className="flex flex-col gap-1.5">
             <button
               onClick={() => setCurrentTab('login')}
-              className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 transition-colors ${
-                isCollapsed ? 'justify-center' : ''
-              }`}
+              className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 transition-colors ${isCollapsed ? 'justify-center' : ''
+                }`}
               title="Sign In"
             >
               <LogIn className="w-3.5 h-3.5 flex-shrink-0" />
