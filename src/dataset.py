@@ -1,13 +1,13 @@
 import os
-import tensorflow as tf
 from src.config import RAW_DATA_DIR, BATCH_SIZE, IMAGE_SIZE, VALIDATION_SPLIT
+import tensorflow as tf
 
 def create_datasets():
     """Creates training and validation datasets from the raw image directory."""
     if not os.path.exists(RAW_DATA_DIR) or len(os.listdir(RAW_DATA_DIR)) == 0:
         raise ValueError(f"Raw data directory {RAW_DATA_DIR} is empty or missing. Please run setup_dataset.py first.")
 
-    train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    train_ds = tf.keras.utils.image_dataset_from_directory(
         RAW_DATA_DIR,
         validation_split=VALIDATION_SPLIT,
         subset="training",
@@ -16,7 +16,7 @@ def create_datasets():
         batch_size=BATCH_SIZE
     )
 
-    val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    val_ds = tf.keras.utils.image_dataset_from_directory(
         RAW_DATA_DIR,
         validation_split=VALIDATION_SPLIT,
         subset="validation",

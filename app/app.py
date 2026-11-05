@@ -7,8 +7,8 @@ import sys
 # Ensure src modules can be imported
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.predict import BirdClassifier
 from src.config import BIRD_INFO_FILE
+from src.predict import BirdClassifier
 
 # Configuration
 st.set_page_config(
@@ -43,8 +43,8 @@ def main():
     This Machine Learning application uses a Deep Learning model (MobileNetV2) to classify bird species from uploaded images. 
     It also provides detailed biological and conservation information about the identified bird.
     
-    **Note:** This model is currently trained on a curated subset of 100 Indian bird species. 
-    If you upload an image of an unsupported bird, the model will try to map it to the closest match among these 100 species.
+    **Note:** This model is currently trained on a curated subset of Indian bird species. 
+    If you upload an image of an unsupported bird, the model will try to map it to the closest match among the supported species.
     """)
 
     bird_db = load_bird_info()
@@ -61,7 +61,6 @@ def main():
         st.sidebar.write("Database unavailable.")
 
     classifier = load_classifier()
-    bird_db = load_bird_info()
 
     if classifier is None:
         st.error("⚠️ Trained model not found. Please train the model first by running `python src/train.py`.")
@@ -76,7 +75,7 @@ def main():
         
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
+            st.image(image, caption="Uploaded Image", use_container_width=True)
             
             if st.button("Classify Bird", type="primary", use_container_width=True):
                 with st.spinner("Classifying..."):
@@ -111,7 +110,7 @@ def main():
             st.header("🦅 Identification Result")
             
             if bird_details:
-                st.success(f"**Predicted Species:** {bird_details['common_name']} ({confidence:.2%} confidence)")
+                st.success(f"**Predicted Species:** {bird_details.get('common_name', species_id)} ({confidence:.2%} confidence)")
                 
                 if confidence < 0.5:
                     st.warning("Low confidence prediction. The model is uncertain about this classification.")
@@ -120,28 +119,36 @@ def main():
                     for r in results:
                         s_id = r['species_id']
                         det = get_bird_details(s_id, bird_db)
-                        name = det['common_name'] if det else s_id
+                        name = det.get('common_name', s_id) if det else s_id
                         st.write(f"- **{name}**: {r['confidence']:.2%}")
                 
                 st.divider()
-                st.header(f"About the {bird_details['common_name']}")
+                st.header(f"About the {bird_details.get('common_name', 'Bird')}")
+                
+                if bird_details.get('description'):
+                    st.write(bird_details['description'])
+                    st.write("")
                 
                 # Use tabs for clean organization
                 tab1, tab2, tab3 = st.tabs(["Biology", "Habitat & Diet", "Conservation"])
                 
                 with tab1:
-                    st.write(f"**Scientific Name:** *{bird_details['scientific_name']}*")
-                    st.write(f"**Family:** {bird_details['bird_family']}")
-                    st.write(f"**Physical Characteristics:** {bird_details['physical_characteristics']}")
+                    st.write(f"**Scientific Name:** *{bird_details.get('scientific_name', 'Unknown')}*")
+                    if 'bird_family' in bird_details:
+                        st.write(f"**Family:** {bird_details['bird_family']}")
+                    if 'physical_characteristics' in bird_details:
+                        st.write(f"**Physical Characteristics:** {bird_details['physical_characteristics']}")
                 
                 with tab2:
-                    st.write(f"**Habitat:** {bird_details['habitat']}")
-                    st.write(f"**Geographical Distribution:** {bird_details['geographical_distribution']}")
-                    st.write(f"**Diet:** {bird_details['diet']}")
-                    st.write(f"**Feeding Behavior:** {bird_details['feeding_behavior']}")
+                    st.write(f"**Habitat:** {bird_details.get('habitat', 'Found across the Indian subcontinent.')}")
+                    if 'geographical_distribution' in bird_details:
+                        st.write(f"**Geographical Distribution:** {bird_details['geographical_distribution']}")
+                    st.write(f"**Diet:** {bird_details.get('diet', 'Varied diet depending on local ecosystem.')}")
+                    if 'feeding_behavior' in bird_details:
+                        st.write(f"**Feeding Behavior:** {bird_details['feeding_behavior']}")
                 
                 with tab3:
-                    status = bird_details['conservation_status']
+                    status = bird_details.get('conservation_status', 'Least Concern (LC)')
                     if "Concern" in status:
                         st.info(f"**Status:** {status}")
                     elif "Threatened" in status or "Vulnerable" in status:
@@ -149,13 +156,17 @@ def main():
                     else:
                         st.error(f"**Status:** {status}")
                         
-                    st.write(f"**Assessed:** {bird_details['conservation_assessment_date']} ({bird_details['conservation_status_source']})")
+                    if 'conservation_assessment_date' in bird_details:
+                        source = bird_details.get('conservation_status_source', 'IUCN')
+                        st.write(f"**Assessed:** {bird_details['conservation_assessment_date']} ({source})")
                     
-                    st.write("**Major Threats:**")
-                    for threat in bird_details['threats']:
-                        st.write(f"- {threat}")
-                        
-                    st.write("**Sources:** " + ", ".join(bird_details['information_sources']))
+                    if 'threats' in bird_details and bird_details['threats']:
+                        st.write("**Major Threats:**")
+                        for threat in bird_details['threats']:
+                            st.write(f"- {threat}")
+                            
+                    if 'information_sources' in bird_details and bird_details['information_sources']:
+                        st.write("**Sources:** " + ", ".join(bird_details['information_sources']))
             else:
                 st.warning(f"Predicted species ID '{species_id}' ({confidence:.2%}) but no detailed information found in database.")
 

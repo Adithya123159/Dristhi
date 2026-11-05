@@ -1,9 +1,9 @@
 import os
 import json
-import numpy as np
-import tensorflow as tf
 from src.config import MODELS_DIR
 from src.preprocessing import preprocess_image
+import numpy as np
+import tensorflow as tf
 
 class BirdClassifier:
     def __init__(self):

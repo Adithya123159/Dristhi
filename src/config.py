@@ -2,6 +2,9 @@ import os
 
 # Base paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.environ.setdefault("KERAS_HOME", os.path.join(BASE_DIR, ".keras"))
+os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
+
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 RAW_DATA_DIR = os.path.join(DATA_DIR, 'raw')
 PROCESSED_DATA_DIR = os.path.join(DATA_DIR, 'processed')

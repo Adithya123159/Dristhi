@@ -1,9 +1,9 @@
 import os
 import json
-import tensorflow as tf
 from src.config import MODELS_DIR, EPOCHS, LEARNING_RATE, IMAGE_SIZE, IMAGE_CHANNELS
 from src.dataset import create_datasets
 from src.preprocessing import get_data_augmentation
+import tensorflow as tf
 
 def build_model(num_classes):
     """Builds the MobileNetV2 based classification model."""
