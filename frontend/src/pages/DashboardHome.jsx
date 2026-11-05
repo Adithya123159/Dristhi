@@ -52,13 +52,21 @@ export default function DashboardHome({ setCurrentTab, setSelectedSpeciesModal }
             Upload an image to identify bird species and view biological details.
           </p>
 
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={() => setCurrentTab('identify')}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-medium text-sm shadow-sm hover:bg-emerald-700 transition-colors"
             >
               <ScanLine className="w-4 h-4" />
-              <span>Identify Bird</span>
+              <span>Identify Image</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('identify-audio')}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm shadow-sm hover:bg-teal-700 transition-colors"
+            >
+              <Volume2 className="w-4 h-4" />
+              <span>Identify Audio</span>
             </button>
 
             <button
