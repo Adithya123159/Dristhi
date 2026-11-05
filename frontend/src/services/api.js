@@ -23,7 +23,7 @@ export const api = {
     }
   },
 
-  async predictBird(file, apiKey = '') {
+  async identifyBird(file, apiKey = '') {
     const key = apiKey || (typeof window !== 'undefined' ? localStorage.getItem('avian_gemini_api_key') || '' : '');
     const formData = new FormData();
     formData.append('file', file);
@@ -36,7 +36,7 @@ export const api = {
       headers['X-API-Key'] = key;
     }
 
-    const res = await fetch(`${getBaseUrl()}/api/predict`, {
+    const res = await fetch(`${getBaseUrl()}/api/identify-bird`, {
       method: 'POST',
       body: formData,
       headers: headers
@@ -44,13 +44,23 @@ export const api = {
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      const error = new Error(errorData.detail || `Server error ${res.status}`);
-      error.isNotBird = errorData.is_bird === false;
-      error.detectedObject = errorData.detected_object;
+      const rawMsg = typeof errorData.detail === 'string'
+        ? errorData.detail
+        : (errorData.detail?.error || errorData.error || `Server error ${res.status}`);
+      const error = new Error(rawMsg);
+      error.isNotBird = errorData.is_bird === false || 
+                        rawMsg.toLowerCase().includes('no bird') || 
+                        rawMsg.toLowerCase().includes('invalid image') ||
+                        rawMsg.toLowerCase().includes('not a bird');
+      error.detectedObject = errorData.detected_object || errorData.detected;
       throw error;
     }
 
     return await res.json();
+  },
+
+  async predictBird(file, apiKey = '') {
+    return this.identifyBird(file, apiKey);
   },
 
   async getSpecies(params = {}) {

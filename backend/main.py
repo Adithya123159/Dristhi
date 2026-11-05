@@ -30,8 +30,83 @@ from backend.database import (
 UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
+# Load optional .env file
+def load_env_file():
+    env_path = os.path.join(PROJECT_ROOT, '.env')
+    if os.path.exists(env_path):
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    k, v = line.split('=', 1)
+                    k = k.strip()
+                    v = v.strip().strip('"').strip("'")
+                    if k and not os.environ.get(k):
+                        os.environ[k] = v
+
+load_env_file()
+
 classifier_instance: Optional[BirdClassifier] = None
+imagenet_validator = None
 bird_database: List[dict] = []
+
+def get_imagenet_validator():
+    """Lazily load MobileNetV2 ImageNet-1k object model for local bird vs non-bird validation."""
+    global imagenet_validator
+    if imagenet_validator is None:
+        try:
+            import tensorflow as tf
+            imagenet_validator = tf.keras.applications.MobileNetV2(weights='imagenet')
+            print("Local ImageNet object validator loaded.")
+        except Exception as e:
+            print(f"Warning: Could not load local ImageNet validator: {e}")
+            imagenet_validator = None
+    return imagenet_validator
+
+BIRD_KEYWORDS = {
+    'bird', 'cock', 'hen', 'vulture', 'peacock', 'owl', 'hawk', 'eagle', 
+    'duck', 'goose', 'swan', 'falcon', 'parrot', 'macaw', 'lorikeet', 
+    'toucan', 'hornbill', 'bulbul', 'robin', 'jay', 'magpie', 'sparrow', 
+    'finch', 'gull', 'pelican', 'flamingo', 'heron', 'stork', 'crane', 
+    'penguin', 'albatross', 'ostrich', 'hummingbird', 'drake', 'quail', 
+    'partridge', 'bustard', 'sandpiper', 'chickadee', 'water_ouzel', 
+    'kite', 'bunting', 'goldfinch', 'kingfisher', 'weaver', 'myna',
+    'cuckoo', 'pigeon', 'dove', 'barbet', 'sunbird', 'drongo', 'lapwing'
+}
+
+def validate_bird_locally(image_path: str):
+    """
+    Offline validation: Uses MobileNetV2 ImageNet-1k to verify whether the image
+    actually contains a bird, or another real-world object (car, person, dog, furniture, etc.).
+    """
+    validator = get_imagenet_validator()
+    if validator is None:
+        return True, "bird", 0.5
+
+    try:
+        from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
+        from PIL import Image
+        import numpy as np
+
+        img = Image.open(image_path).convert('RGB').resize((224, 224))
+        x = preprocess_input(np.expand_dims(np.array(img, dtype=np.float32), 0))
+        preds = validator.predict(x, verbose=0)
+        decoded = decode_predictions(preds, top=5)[0]
+
+        top_label = decoded[0][1].replace('_', ' ')
+        top_conf = float(decoded[0][2])
+
+        # Check if any top prediction matches a bird synset/keyword
+        bird_prob = sum(float(prob) for _, name, prob in decoded if any(k in name.lower() for k in BIRD_KEYWORDS))
+        is_top_bird = any(k in top_label.lower() for k in BIRD_KEYWORDS)
+
+        is_bird = is_top_bird or (bird_prob >= 0.15)
+        detected_object = "bird" if is_bird else top_label
+
+        return is_bird, detected_object, top_conf
+    except Exception as e:
+        print("Local bird validation check error:", e)
+        return True, "unknown", 0.5
 
 def load_species_database():
     global bird_database
@@ -187,11 +262,10 @@ def health_check():
         "tensorflow_version": "2.21.0"
     }
 
-@app.post("/api/predict")
-async def predict_bird(
-    file: UploadFile = File(...),
-    api_key: Optional[str] = Form(None),
-    x_api_key: Optional[str] = Header(None)
+async def process_bird_identification(
+    file: UploadFile,
+    api_key: Optional[str] = None,
+    x_api_key: Optional[str] = None
 ):
     global classifier_instance
     effective_api_key = api_key or x_api_key or os.environ.get("GEMINI_API_KEY", "")
@@ -201,7 +275,7 @@ async def predict_bird(
     if ext not in ['.jpg', '.jpeg', '.png', '.webp']:
         raise HTTPException(
             status_code=400, 
-            detail="Unsupported format. Please upload JPG, JPEG, or PNG."
+            detail="Unsupported image format. Please upload JPG, JPEG, PNG, or WebP."
         )
 
     # Save uploaded file
@@ -212,7 +286,7 @@ async def predict_bird(
 
     image_url = f"/uploads/{file_id}"
 
-    # 1. AI API Key Validation (If provided)
+    # 1. AI API Key Validation (If Gemini API key is provided)
     if effective_api_key and effective_api_key.strip():
         gemini_result = validate_and_identify_with_gemini(saved_path, effective_api_key.strip())
         if gemini_result:
@@ -264,6 +338,8 @@ async def predict_bird(
 
             return {
                 "success": True,
+                "status": "valid",
+                "is_bird": True,
                 "id": record_id,
                 "validated_by": "Gemini AI Vision",
                 "prediction": {
@@ -284,7 +360,15 @@ async def predict_bird(
                 "uploaded_image_url": image_url
             }
 
-    # 2. Local MobileNetV2 Inference & Validation
+    # 2. Local/Offline Validation: Check if image contains a bird or non-bird object
+    is_bird, detected_object, obj_conf = validate_bird_locally(saved_path)
+    if not is_bird:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid Image: No bird detected in this image (detected: {detected_object}). Please upload an image of a bird."
+        )
+
+    # 3. Local MobileNetV2 Inference
     if classifier_instance is None:
         try:
             classifier_instance = BirdClassifier()
@@ -299,13 +383,6 @@ async def predict_bird(
         top_match = results[0]
         species_id = top_match["species_id"]
         confidence = float(top_match["confidence"])
-
-        # Local validation threshold: If max confidence is lower than 0.15, the image is non-bird or uncertain
-        if confidence < 0.15:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid Image: No bird recognized in this image. Please upload a clear photo of a bird."
-            )
 
         details = find_bird_details(species_id) or {}
         common_name = details.get("common_name", species_id)
@@ -334,6 +411,8 @@ async def predict_bird(
 
         return {
             "success": True,
+            "status": "valid",
+            "is_bird": True,
             "id": record_id,
             "validated_by": "MobileNetV2 Neural Classifier",
             "prediction": {
@@ -343,6 +422,43 @@ async def predict_bird(
                 "confidence": round(confidence, 4),
                 "family": details.get("family", "Aves"),
                 "conservation_status": details.get("conservation_status", "Least Concern (LC)"),
+                "habitat": details.get("habitat", "Tropical and temperate forests, grasslands"),
+                "diet": details.get("diet", "Insects, seeds, fruits, small invertebrates"),
+                "physical_characteristics": details.get("physical_characteristics", ""),
+                "geographical_distribution": details.get("geographical_distribution", "Widespread across the Indian Subcontinent"),
+                "description": details.get("description", "A documented avian species in the Indian bird encyclopedia."),
+                "image_url": details.get("image_url", "") or image_url
+            },
+            "top_predictions": enriched_top,
+            "uploaded_image_url": image_url
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+
+@app.post("/api/identify-bird")
+async def identify_bird_endpoint(
+    file: UploadFile = File(...),
+    api_key: Optional[str] = Form(None),
+    x_api_key: Optional[str] = Header(None)
+):
+    """
+    Bird-Only Identification API:
+    Strictly validates that the uploaded image is a bird.
+    If the image is any non-bird object (car, person, dog, phone, etc.),
+    it rejects the image with an HTTP 400 'Invalid Image' error.
+    """
+    return await process_bird_identification(file, api_key, x_api_key)
+
+@app.post("/api/predict")
+async def predict_bird_endpoint(
+    file: UploadFile = File(...),
+    api_key: Optional[str] = Form(None),
+    x_api_key: Optional[str] = Header(None)
+):
+    """Compatible bird prediction and validation endpoint."""
+    return await process_bird_identification(file, api_key, x_api_key)
                 "habitat": details.get("habitat", "Distributed across suitable habitats in India."),
                 "diet": details.get("diet", "Omnivorous / Varies with habitat."),
                 "physical_characteristics": details.get("physical_characteristics", "Distinctive plumage and morphological attributes."),
