@@ -459,22 +459,6 @@ async def predict_bird_endpoint(
 ):
     """Compatible bird prediction and validation endpoint."""
     return await process_bird_identification(file, api_key, x_api_key)
-                "habitat": details.get("habitat", "Distributed across suitable habitats in India."),
-                "diet": details.get("diet", "Omnivorous / Varies with habitat."),
-                "physical_characteristics": details.get("physical_characteristics", "Distinctive plumage and morphological attributes."),
-                "geographical_distribution": details.get("geographical_distribution", "Found across the Indian subcontinent."),
-                "description": details.get("description", ""),
-                "image_url": details.get("image_url", "")
-            },
-            "top_predictions": enriched_top,
-            "uploaded_image_url": image_url
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
 
 @app.get("/api/species")
 def get_species(
