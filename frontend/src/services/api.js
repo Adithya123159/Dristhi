@@ -65,13 +65,23 @@ export const api = {
   },
 
   // ─── AUDIO IDENTIFICATION ───
-  async identifyAudio(file) {
+  async identifyAudio(file, apiKey = '') {
+    const key = apiKey || (typeof window !== 'undefined' ? localStorage.getItem('avian_gemini_api_key') || '' : '');
     const formData = new FormData();
     formData.append('file', file);
+    if (key) {
+      formData.append('api_key', key);
+    }
+
+    const headers = {};
+    if (key) {
+      headers['X-API-Key'] = key;
+    }
 
     const res = await fetch(`${getBaseUrl()}/api/identify/audio`, {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: headers
     });
 
     if (!res.ok) {

@@ -15,7 +15,8 @@ import {
   RotateCcw, 
   Sliders,
   ExternalLink,
-  Layers
+  Layers,
+  Key
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -33,6 +34,8 @@ export default function IdentifyAudio({ setSelectedSpeciesModal }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [apiKey, setApiKey] = useState('');
+  const [showKeyBar, setShowKeyBar] = useState(false);
 
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -48,6 +51,18 @@ export default function IdentifyAudio({ setSelectedSpeciesModal }) {
   const [result, setResult] = useState(null);
 
   const audioRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('avian_gemini_api_key') || '';
+    setApiKey(saved);
+    if (saved) setShowKeyBar(true);
+  }, []);
+
+  const handleApiKeyChange = (val) => {
+    setApiKey(val);
+    localStorage.setItem('avian_gemini_api_key', val.trim());
+  };
   const fileInputRef = useRef(null);
 
   // Handle audio playback updates
@@ -162,7 +177,7 @@ export default function IdentifyAudio({ setSelectedSpeciesModal }) {
     const t4 = setTimeout(() => setCurrentStage(5), 2400);
 
     try {
-      const data = await api.identifyAudio(file);
+      const data = await api.identifyAudio(file, apiKey);
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
       setCurrentStage(5);
       setResult(data);
@@ -202,11 +217,60 @@ export default function IdentifyAudio({ setSelectedSpeciesModal }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Librosa 1.0 + Mel Spectrogram CNN
+          <button
+            type="button"
+            onClick={() => setShowKeyBar(!showKeyBar)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+              apiKey.trim()
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-xs'
+                : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <Key className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{apiKey.trim() ? 'Gemini API Key Active' : 'Configure Gemini API Key'}</span>
+          </button>
+
+          <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Librosa Bioacoustics
           </span>
         </div>
       </div>
+
+      {/* ─── OPTIONAL API KEY COLLAPSIBLE BAR ─── */}
+      {showKeyBar && (
+        <div className="p-4 rounded-2xl bg-white border border-emerald-200/90 shadow-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Google Gemini Bioacoustics API Key (Optional)</span>
+            </span>
+            <span className="text-[11px] text-slate-400">
+              {apiKey.trim() ? 'Cloud Bioacoustics Audio Understanding Enabled' : 'Offline Librosa Bioacoustics Mode Active'}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              placeholder="Enter Gemini API key (AIzaSy...)"
+              value={apiKey}
+              onChange={(e) => handleApiKeyChange(e.target.value)}
+              className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+            />
+            {apiKey && (
+              <button
+                type="button"
+                onClick={() => handleApiKeyChange('')}
+                className="px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-xl font-semibold border border-rose-200"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Keys are saved in your browser localStorage. When provided, Drishti uses Google Gemini Bioacoustic Audio Intelligence to understand song cadences, whistles, and calls. If blank, it runs 100% offline using local Librosa signal processing and Mel Spectrogram CNN models.
+          </p>
+        </div>
+      )}
 
       {/* ─── UPLOAD & RECORDING PANEL ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
