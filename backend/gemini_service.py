@@ -226,3 +226,4 @@ class GeminiMultimodalService:
             return True, parsed
         except Exception as e:
             return False, {"error": f"Failed to parse Gemini Audio response: {e}"}
+
