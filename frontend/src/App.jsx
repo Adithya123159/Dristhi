@@ -3,6 +3,8 @@ import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import SpeciesModal from './components/SpeciesModal';
 
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
 import DashboardHome from './pages/DashboardHome';
 import IdentifyBird from './pages/IdentifyBird';
 import SupportedSpecies from './pages/SupportedSpecies';
@@ -14,10 +16,19 @@ import Settings from './pages/Settings';
 import { api } from './services/api';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [currentTab, setCurrentTab] = useState('landing');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isServerOnline, setIsServerOnline] = useState(false);
   const [selectedSpeciesModal, setSelectedSpeciesModal] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Load active user session on startup
+  useEffect(() => {
+    const savedUser = api.getStoredUser();
+    if (savedUser) {
+      setCurrentUser(savedUser);
+    }
+  }, []);
 
   // Health check heartbeat
   useEffect(() => {
@@ -42,6 +53,46 @@ export default function App() {
       clearInterval(interval);
     };
   }, []);
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    setCurrentTab('dashboard');
+  };
+
+  const handleLogout = () => {
+    api.logout();
+    setCurrentUser(null);
+    setCurrentTab('landing');
+  };
+
+  // Full-page views (no dashboard sidebar shell)
+  if (currentTab === 'landing') {
+    return (
+      <>
+        <LandingPage 
+          onNavigateTab={setCurrentTab} 
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+        <SpeciesModal
+          species={selectedSpeciesModal}
+          isOpen={Boolean(selectedSpeciesModal)}
+          onClose={() => setSelectedSpeciesModal(null)}
+        />
+      </>
+    );
+  }
+
+  if (currentTab === 'login' || currentTab === 'register') {
+    return (
+      <AuthPage 
+        initialMode={currentTab}
+        onSuccess={handleAuthSuccess}
+        onNavigateHome={() => setCurrentTab('landing')}
+        onSkip={() => setCurrentTab('dashboard')}
+      />
+    );
+  }
 
   const renderPage = () => {
     switch (currentTab) {
@@ -99,6 +150,8 @@ export default function App() {
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         isServerOnline={isServerOnline}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -113,6 +166,8 @@ export default function App() {
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
           isServerOnline={isServerOnline}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
 
         <main className="flex-1 p-6 sm:p-8 overflow-y-auto">

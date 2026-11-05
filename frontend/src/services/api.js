@@ -127,5 +127,96 @@ export const api = {
     } catch {
       return { samples: [] };
     }
+  },
+
+  async register(name, email, password) {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Registration failed');
+      }
+      this.setStoredUser(data.user, data.token);
+      return data;
+    } catch (err) {
+      // Fallback local registration if backend unreachable
+      if (err.message.includes('Failed to fetch')) {
+        const localUser = {
+          id: Date.now(),
+          name,
+          email,
+          created_at: new Date().toISOString()
+        };
+        this.setStoredUser(localUser, `local_tok_${Date.now()}`);
+        return { success: true, user: localUser, isOffline: true };
+      }
+      throw err;
+    }
+  },
+
+  async login(email, password) {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Invalid email or password');
+      }
+      this.setStoredUser(data.user, data.token);
+      return data;
+    } catch (err) {
+      if (err.message.includes('Failed to fetch')) {
+        // Check local registered user if any
+        const stored = this.getStoredUser();
+        if (stored && stored.email === email.toLowerCase().trim()) {
+          return { success: true, user: stored, isOffline: true };
+        }
+        // Guest/offline mock login
+        const fallbackUser = {
+          id: 1,
+          name: email.split('@')[0] || 'Avian Naturalist',
+          email: email.toLowerCase().trim()
+        };
+        this.setStoredUser(fallbackUser, `local_tok_${Date.now()}`);
+        return { success: true, user: fallbackUser, isOffline: true };
+      }
+      throw err;
+    }
+  },
+
+  getStoredUser() {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('avian_auth_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  setStoredUser(user, token) {
+    if (typeof window === 'undefined') return;
+    try {
+      if (user) {
+        localStorage.setItem('avian_auth_user', JSON.stringify(user));
+        if (token) localStorage.setItem('avian_auth_token', token);
+      } else {
+        localStorage.removeItem('avian_auth_user');
+        localStorage.removeItem('avian_auth_token');
+      }
+    } catch (e) {
+      console.warn('Storage error:', e);
+    }
+  },
+
+  logout() {
+    this.setStoredUser(null, null);
   }
 };

@@ -4,8 +4,10 @@ import uuid
 import json
 import shutil
 import base64
+import hashlib
 from typing import Optional, List
 from contextlib import asynccontextmanager
+from pydantic import BaseModel
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form, Header
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +25,8 @@ from src.predict import BirdClassifier
 from src.config import BIRD_INFO_FILE, RAW_DATA_DIR
 from backend.database import (
     init_db, save_prediction, get_history, 
-    delete_history_item, clear_all_history, get_stats
+    delete_history_item, clear_all_history, get_stats,
+    create_user, get_user_by_email, get_user_by_id
 )
 
 # Upload directory
@@ -547,6 +550,65 @@ def get_sample_images():
                         "local_rel_path": f"data/raw/{folder}/{imgs[0]}"
                     })
     return {"samples": samples[:10]}
+
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+def hash_password(password: str) -> str:
+    salt = "avian_secure_salt_2026"
+    return hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+
+@app.post("/api/auth/register")
+def register_user(data: UserRegister):
+    if not data.name or len(data.name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Name must be at least 2 characters long.")
+    if not data.email or "@" not in data.email:
+        raise HTTPException(status_code=400, detail="A valid email address is required.")
+    if not data.password or len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+    
+    existing = get_user_by_email(data.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="An account with this email already exists.")
+    
+    pwd_hash = hash_password(data.password)
+    user = create_user(name=data.name.strip(), email=data.email, password_hash=pwd_hash)
+    if not user:
+        raise HTTPException(status_code=400, detail="Registration could not be completed.")
+    
+    return {
+        "success": True,
+        "message": "Registration successful!",
+        "user": user,
+        "token": f"user_tok_{user['id']}_{hash_password(user['email'])[:16]}"
+    }
+
+@app.post("/api/auth/login")
+def login_user(data: UserLogin):
+    user = get_user_by_email(data.email)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+    
+    if user["password_hash"] != hash_password(data.password):
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+    
+    return {
+        "success": True,
+        "message": "Login successful!",
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "created_at": user["created_at"]
+        },
+        "token": f"user_tok_{user['id']}_{hash_password(user['email'])[:16]}"
+    }
 
 # Mount and serve built React frontend assets if present
 FRONTEND_DIST = os.path.join(PROJECT_ROOT, 'frontend', 'dist')

@@ -28,6 +28,15 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -119,3 +128,50 @@ def get_stats():
         "most_identified": most_common[0] if most_common else "None yet",
         "supported_species_count": 100
     }
+
+def create_user(name: str, email: str, password_hash: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO users (name, email, password_hash, created_at)
+            VALUES (?, ?, ?, ?)
+        """, (name, email.lower().strip(), password_hash, datetime.now().isoformat()))
+        user_id = cursor.lastrowid
+        conn.commit()
+        return {"id": user_id, "name": name, "email": email.lower().strip()}
+    except sqlite3.IntegrityError:
+        return None
+    finally:
+        conn.close()
+
+def get_user_by_email(email: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email, password_hash, created_at FROM users WHERE email = ?", (email.lower().strip(),))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "email": row["email"],
+            "password_hash": row["password_hash"],
+            "created_at": row["created_at"]
+        }
+    return None
+
+def get_user_by_id(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email, created_at FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "email": row["email"],
+            "created_at": row["created_at"]
+        }
+    return None
