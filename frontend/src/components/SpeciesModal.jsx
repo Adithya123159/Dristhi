@@ -9,16 +9,16 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div 
+      <div
         className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Banner / Photo */}
         <div className="relative h-56 bg-slate-900 overflow-hidden">
           {species.image_url ? (
-            <img 
-              src={species.image_url} 
-              alt={species.common_name} 
+            <img
+              src={species.image_url}
+              alt={species.common_name}
               className="w-full h-full object-cover opacity-85"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -32,7 +32,7 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
 
           {/* Close button */}
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors backdrop-blur-md"
           >
