@@ -49,10 +49,15 @@ export default function Settings() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem('avian_api_url', apiUrl);
     localStorage.setItem('avian_gemini_api_key', apiKey.trim());
     localStorage.setItem('avian_confidence_threshold', threshold);
+    try {
+      await api.saveApiKey(apiKey.trim());
+    } catch (e) {
+      console.warn('Backend API key sync notice:', e);
+    }
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2000);
   };
