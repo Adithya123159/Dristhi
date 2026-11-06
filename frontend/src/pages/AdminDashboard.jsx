@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       {/* ─── HEADER ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
