@@ -221,5 +221,35 @@ export const api = {
     } catch {
       return null;
     }
+  },
+
+  async getApiKeyStatus() {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/settings/api-key`);
+      if (!res.ok) return { has_key: false, masked_key: '' };
+      return await res.json();
+    } catch {
+      return { has_key: false, masked_key: '' };
+    }
+  },
+
+  async saveApiKey(apiKey) {
+    if (typeof window !== 'undefined') {
+      if (apiKey) {
+        localStorage.setItem('avian_gemini_api_key', apiKey.trim());
+      } else {
+        localStorage.removeItem('avian_gemini_api_key');
+      }
+    }
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/settings/api-key`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: apiKey || '' })
+      });
+      return await res.json();
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   }
 };
