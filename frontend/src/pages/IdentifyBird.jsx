@@ -272,7 +272,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                 isDragging
                   ? 'border-emerald-500 bg-emerald-50/50'
                   : imagePreview
-                  ? 'border-emerald-200 bg-slate-950'
+                  ? 'border-emerald-200 bg-slate-100/80'
                   : 'border-slate-300 hover:border-emerald-400 bg-slate-50/60 cursor-pointer'
               }`}
             >
@@ -293,7 +293,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
               />
 
               {imagePreview ? (
-                <div className="relative w-full h-[280px] bg-slate-900 flex items-center justify-center">
+                <div className="relative w-full h-[280px] bg-slate-100 flex items-center justify-center">
                   <img
                     src={getActiveImageSrc()}
                     alt="Preview"
@@ -302,11 +302,11 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
 
                   {/* View Mode Overlay Tabs if prediction results are present */}
                   {predictionResult && (
-                    <div className="absolute bottom-2 left-2 right-2 bg-slate-900/85 backdrop-blur-md rounded-xl p-1.5 flex items-center justify-center gap-1 text-[11px] font-bold text-slate-300 border border-white/10">
+                    <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-md rounded-xl p-1.5 flex items-center justify-center gap-1 text-[11px] font-bold text-slate-700 border border-slate-200 shadow-sm">
                       <button
                         onClick={() => setViewMode('annotated')}
                         className={`px-2.5 py-1 rounded-lg transition-colors ${
-                          viewMode === 'annotated' ? 'bg-emerald-600 text-white' : 'hover:bg-white/10'
+                          viewMode === 'annotated' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
                         }`}
                       >
                         YOLO Bounding Box
@@ -316,7 +316,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                         <button
                           onClick={() => setViewMode('gradcam')}
                           className={`px-2.5 py-1 rounded-lg transition-colors ${
-                            viewMode === 'gradcam' ? 'bg-emerald-600 text-white' : 'hover:bg-white/10'
+                            viewMode === 'gradcam' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
                           }`}
                         >
                           Grad-CAM Heatmap
@@ -326,7 +326,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                       <button
                         onClick={() => setViewMode('original')}
                         className={`px-2.5 py-1 rounded-lg transition-colors ${
-                          viewMode === 'original' ? 'bg-emerald-600 text-white' : 'hover:bg-white/10'
+                          viewMode === 'original' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
                         }`}
                       >
                         Original
