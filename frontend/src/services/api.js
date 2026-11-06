@@ -9,6 +9,8 @@ const getBaseUrl = () => {
   return 'http://localhost:8000';
 };
 
+export const DEFAULT_GEMINI_API_KEY = '';
+
 export const api = {
   getBaseUrl,
 

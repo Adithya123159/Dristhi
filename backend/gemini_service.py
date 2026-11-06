@@ -13,7 +13,7 @@ class GeminiMultimodalService:
     Enforces strict bird vs non-bird validation.
     """
 
-    SUPPORTED_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+    SUPPORTED_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
 
     @staticmethod
     def _clean_json_response(raw_text: str) -> str:

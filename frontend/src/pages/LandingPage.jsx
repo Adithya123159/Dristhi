@@ -1,4 +1,5 @@
 import React from 'react';
+import birdBackground from '../assets/bird-background.jpg';
 import { 
   Bird, 
   ScanLine, 
@@ -23,42 +24,43 @@ export default function LandingPage({
   return (
     <div className="h-screen max-h-screen overflow-y-auto lg:overflow-hidden bg-slate-50 text-slate-800 flex flex-col justify-between font-sans selection:bg-emerald-600 selection:text-white relative">
       
-      {/* ─── ELEGANT BIRD BACKGROUND & SOFT AMBIENT GLOWS ─── */}
+      {/* ─── ELEGANT VISIBLE BIRD BACKGROUND & AMBIENT ATMOSPHERE ─── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Soft Radial Emerald & Sage Ambient Lights */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-emerald-100/60 via-teal-50/30 to-transparent blur-3xl" />
-        <div className="absolute bottom-16 -left-28 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-28 w-96 h-96 bg-teal-100/30 rounded-full blur-3xl" />
-
-        {/* Modern Dot Matrix Texture */}
-        <div 
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: `radial-gradient(#059669 1px, transparent 1px)`,
-            backgroundSize: '24px 24px'
-          }}
+        {/* Real High-Resolution Avian Hero Wallpaper */}
+        <img 
+          src={birdBackground}
+          alt="Avian Wildlife Background"
+          className="w-full h-full object-cover object-center opacity-45 mix-blend-multiply scale-102 transition-all duration-700"
         />
 
-        {/* Graceful Soaring Bird Silhouettes (Upper Left Sky) */}
+        {/* Soft Frosted Overlays to keep text crystal clear and vibrant */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/30 to-white/70" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-emerald-100/50 via-teal-50/20 to-transparent blur-3xl" />
+        <div className="absolute bottom-16 -left-28 w-96 h-96 bg-emerald-100/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-28 w-96 h-96 bg-teal-100/25 rounded-full blur-3xl" />
+
+        {/* Graceful Visible Soaring Birds (Upper Left Sky) */}
         <svg 
-          className="absolute top-10 left-10 sm:left-24 w-56 h-32 text-emerald-800/15" 
+          className="absolute top-8 left-10 sm:left-24 w-64 h-36 text-emerald-800/40 drop-shadow-xs" 
           viewBox="0 0 200 100" 
           fill="currentColor"
         >
           <path d="M 30 25 Q 50 5 80 20 Q 100 5 120 25 Q 90 20 80 32 Q 70 20 30 25 Z" />
           <path d="M 125 40 Q 140 28 160 38 Q 175 28 190 40 Q 170 36 160 48 Q 150 36 125 40 Z" />
           <path d="M 10 65 Q 22 55 35 63 Q 45 55 55 65 Q 40 62 35 70 Q 30 62 10 65 Z" />
+          <path d="M 160 15 Q 172 6 186 14 Q 196 6 205 15 Q 192 13 186 20 Q 180 13 160 15 Z" />
         </svg>
 
-        {/* Graceful Soaring Bird Silhouettes (Upper Right Sky) */}
+        {/* Graceful Visible Soaring Birds (Upper Right Sky) */}
         <svg 
-          className="absolute top-12 right-10 sm:right-28 w-64 h-36 text-emerald-800/15" 
+          className="absolute top-10 right-10 sm:right-28 w-72 h-40 text-emerald-800/40 drop-shadow-xs" 
           viewBox="0 0 220 110" 
           fill="currentColor"
         >
           <path d="M 150 15 Q 168 2 188 12 Q 200 2 215 15 Q 192 12 188 22 Q 180 12 150 15 Z" />
           <path d="M 90 35 Q 105 24 122 32 Q 132 24 145 35 Q 128 32 122 40 Q 115 32 90 35 Z" />
           <path d="M 40 65 Q 52 56 66 63 Q 75 56 86 65 Q 72 63 66 70 Q 60 63 40 65 Z" />
+          <path d="M 185 55 Q 196 46 208 52 Q 216 46 225 55 Q 214 53 208 58 Q 202 53 185 55 Z" />
         </svg>
       </div>
 

@@ -41,7 +41,6 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
   const [predictionResult, setPredictionResult] = useState(null);
   const [error, setError] = useState(null);
   const [isNotBird, setIsNotBird] = useState(false);
-  const [samples, setSamples] = useState([]);
   const [viewMode, setViewMode] = useState('annotated'); // 'annotated', 'gradcam', 'cropped', 'original'
   const [apiKey, setApiKey] = useState('');
   const [showKeyBar, setShowKeyBar] = useState(false);
@@ -61,21 +60,11 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
             setApiKey(status.masked_key || 'configured-on-server');
           }
         } catch (e) {
-          console.warn('API key check notice:', e);
+          console.warn('API key init notice:', e);
         }
       }
     }
     initKey();
-
-    async function loadSamples() {
-      try {
-        const data = await api.getSampleImages();
-        setSamples(data.samples || []);
-      } catch (e) {
-        console.warn('Could not load samples', e);
-      }
-    }
-    loadSamples();
   }, []);
 
   const handleSaveApiKey = async (val) => {
@@ -124,20 +113,6 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
     setError(null);
     setIsNotBird(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleSampleClick = async (sample) => {
-    try {
-      setError(null);
-      setIsNotBird(false);
-      setPredictionResult(null);
-      const res = await fetch(`${api.getBaseUrl()}${sample.image_path}`);
-      const blob = await res.blob();
-      const file = new File([blob], `${sample.species_id}.jpg`, { type: 'image/jpeg' });
-      handleFileSelect(file);
-    } catch (e) {
-      setError('Failed to load sample image.');
-    }
   };
 
   const handleClassify = async () => {
@@ -515,33 +490,6 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                   <strong>Enforced Rule:</strong> Non-bird objects (humans, vehicles, dogs, architecture) are rejected to ensure model integrity. Please upload a clear photo containing a bird.
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Quick Test Samples */}
-          {samples.length > 0 && (
-            <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
-              <span className="text-xs font-bold text-slate-700 block">Or Try Sample Indian Birds:</span>
-              <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-                {samples.map((s, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => handleSampleClick(s)}
-                    className="flex-shrink-0 w-20 cursor-pointer group text-center"
-                  >
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 group-hover:border-emerald-500 transition-colors bg-slate-100 mb-1.5">
-                      <img
-                        src={`${api.getBaseUrl()}${s.image_path}`}
-                        alt={s.common_name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                    <span className="text-[10px] font-semibold text-slate-700 block truncate">
-                      {s.common_name}
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
         </div>
