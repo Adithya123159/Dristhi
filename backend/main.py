@@ -807,6 +807,51 @@ def update_thresholds(data: ThresholdUpdate):
     )
     return {"success": True, "thresholds": updated}
 
+class ApiKeyPayload(BaseModel):
+    api_key: str
+
+@app.get("/api/settings/api-key")
+def get_api_key_status():
+    env_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    has_key = bool(env_key)
+    masked = f"{env_key[:6]}...{env_key[-4:]}" if has_key and len(env_key) > 10 else ("Configured" if has_key else "")
+    return {
+        "has_key": has_key,
+        "masked_key": masked
+    }
+
+@app.post("/api/settings/api-key")
+def set_api_key(data: ApiKeyPayload):
+    new_key = data.api_key.strip()
+    if new_key:
+        os.environ["GEMINI_API_KEY"] = new_key
+        # Persist to .env file
+        env_path = os.path.join(PROJECT_ROOT, '.env')
+        try:
+            lines = []
+            if os.path.exists(env_path):
+                with open(env_path, "r", encoding="utf-8") as f:
+                    lines = [l for l in f.readlines() if not l.startswith("GEMINI_API_KEY=")]
+            lines.append(f"GEMINI_API_KEY={new_key}\n")
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+        except Exception as e:
+            print(f"Notice: Could not write .env file: {e}")
+        return {"success": True, "message": "Google Gemini API Key activated successfully across all Vision and Bioacoustic pipelines."}
+    else:
+        if "GEMINI_API_KEY" in os.environ:
+            del os.environ["GEMINI_API_KEY"]
+        env_path = os.path.join(PROJECT_ROOT, '.env')
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    lines = [l for l in f.readlines() if not l.startswith("GEMINI_API_KEY=")]
+                with open(env_path, "w", encoding="utf-8") as f:
+                    f.writelines(lines)
+            except Exception:
+                pass
+        return {"success": True, "message": "Gemini API key cleared."}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 7. SAMPLES & AUTHENTICATION ENDPOINTS
 # ─────────────────────────────────────────────────────────────────────────────
