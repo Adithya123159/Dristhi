@@ -89,9 +89,6 @@ export default function LandingPage({
                   <span>100 Species</span>
                 </span>
               </div>
-              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-700/85 whitespace-nowrap">
-                Avian Ecological Intelligence
-              </p>
             </div>
           </div>
 

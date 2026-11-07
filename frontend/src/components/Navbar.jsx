@@ -85,9 +85,6 @@ export default function Navbar({
                 <span>100 Species</span>
               </span>
             </div>
-            <p className="hidden md:block text-[9px] font-bold uppercase tracking-wider text-emerald-700/80">
-              Avian Ecological Intelligence
-            </p>
           </div>
         </div>
 
