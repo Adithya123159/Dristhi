@@ -85,9 +85,9 @@ export default function DashboardHome({ setCurrentTab, setSelectedSpeciesModal }
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-medium block">Model</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 block">MobileNetV2</span>
-          <span className="text-xs text-slate-500 font-medium mt-0.5 block">Transfer Learning</span>
+          <span className="text-xs text-slate-500 font-medium block">AI Engine</span>
+          <span className="text-2xl font-bold text-slate-900 mt-1 block">Multimodal AI</span>
+          <span className="text-xs text-slate-500 font-medium mt-0.5 block">Vision & Audio</span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">

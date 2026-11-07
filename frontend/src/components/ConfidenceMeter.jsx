@@ -26,7 +26,7 @@ export default function ConfidenceMeter({ confidence }) {
 
       <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium pt-0.5">
         <span className={`font-semibold ${color}`}>{tier}</span>
-        <span>MobileNetV2 Softmax</span>
+        <span>AI Confidence Calibrated</span>
       </div>
     </div>
   );

@@ -48,7 +48,7 @@ export default function SupportedSpecies({ setSelectedSpeciesModal }) {
             100 Supported Indian Species
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Complete catalogue of species trained on our MobileNetV2 architecture with IUCN conservation ratings.
+            Complete catalogue of indigenous and migratory species with IUCN conservation ratings.
           </p>
         </div>
 

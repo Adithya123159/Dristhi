@@ -131,9 +131,9 @@ export default function StructuredBirdResult({
                 {isAudio ? <Volume2 className="w-3.5 h-3.5 text-teal-600" /> : <ScanLine className="w-3.5 h-3.5 text-emerald-600" />}
                 <span>{isAudio ? 'Bioacoustic Audio Identified' : 'Vision Classifier Identified'}</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
-                <span>{isAudio ? 'Acoustic CNN' : 'MobileNetV2 Deep Learning'}</span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{result.validated_by || (isAudio ? 'Drishti Bioacoustic AI' : 'Drishti Neural Vision AI')}</span>
               </span>
               <ConservationBadge status={conservationStatus} />
             </div>

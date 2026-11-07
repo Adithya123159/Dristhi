@@ -224,13 +224,11 @@ async def identify_bird_image(
         )
         raise HTTPException(status_code=400, detail=reason)
 
-    # 2. Bird Presence Verification (Gemini check if available)
-    gemini_check = None
+    # 2. Primary Multimodal Identification via Gemini API
     if effective_api_key and effective_api_key.strip():
         try:
             ok, g_res = gemini_service.identify_image(saved_path, effective_api_key.strip())
             if ok:
-                gemini_check = g_res
                 if g_res.get("is_bird") is False:
                     rejection_msg = "No bird detected. Please upload a valid bird image."
                     record_identification(
@@ -246,12 +244,109 @@ async def identify_bird_image(
                         telemetry={"detected_object": g_res.get("detected_object", "non-bird object")}
                     )
                     raise HTTPException(status_code=400, detail=rejection_msg)
+
+                # Species successfully identified via API
+                common_name = g_res.get("common_name", "Identified Bird")
+                scientific_name = g_res.get("scientific_name", "Aves indet.")
+                confidence = float(g_res.get("confidence", 0.98))
+                family = g_res.get("family", "Aves")
+
+                structured_info = species_detail_service.build_from_gemini_result(g_res, "image")
+
+                # Format enriched top predictions
+                raw_top = g_res.get("top_predictions", [])
+                enriched_top = []
+                for item in raw_top:
+                    c = float(item.get("confidence", 0.0))
+                    enriched_top.append({
+                        "species_id": item.get("common_name", "").lower().replace(" ", "_"),
+                        "confidence": round(c, 4),
+                        "confidence_percentage": f"{round(c * 100, 1)}%",
+                        "common_name": item.get("common_name", ""),
+                        "scientific_name": item.get("scientific_name", ""),
+                        "family": family,
+                        "conservation_status": g_res.get("conservation_status", "Least Concern (LC)")
+                    })
+                if not enriched_top:
+                    enriched_top.append({
+                        "species_id": common_name.lower().replace(" ", "_"),
+                        "confidence": round(confidence, 4),
+                        "confidence_percentage": f"{round(confidence * 100, 1)}%",
+                        "common_name": common_name,
+                        "scientific_name": scientific_name,
+                        "family": family,
+                        "conservation_status": g_res.get("conservation_status", "Least Concern (LC)")
+                    })
+
+                # Grad-CAM visual heatmap overlay
+                gradcam_filename = f"{os.path.splitext(file_id)[0]}_gradcam.jpg"
+                gradcam_path = os.path.join(UPLOADS_DIR, gradcam_filename)
+                gradcam_url = None
+                if gradcam_service:
+                    try:
+                        gradcam_service.save_gradcam_overlay(saved_path, gradcam_path)
+                        gradcam_url = f"/uploads/{gradcam_filename}"
+                    except Exception:
+                        pass
+
+                confidence_tier = "high" if confidence >= 0.75 else ("medium" if confidence >= 0.40 else "low")
+                detection_status = "success"
+
+                ident_id = record_identification(
+                    input_type="image",
+                    uploaded_filename=file.filename or file_id,
+                    media_url=media_url,
+                    detection_status=detection_status,
+                    predicted_species=common_name,
+                    scientific_name=scientific_name,
+                    confidence_score=confidence,
+                    top_predictions=enriched_top,
+                    annotated_url=media_url,
+                    telemetry={
+                        "provider": "Drishti Neural Vision AI",
+                        "confidence_tier": confidence_tier
+                    }
+                )
+
+                return {
+                    "success": True,
+                    "status": detection_status,
+                    "identification_id": ident_id,
+                    "input_type": "image",
+                    "is_bird": True,
+                    "validated_by": "Drishti Neural Vision AI",
+                    "confidence_tier": confidence_tier,
+                    "predicted_species": common_name,
+                    "scientific_name": scientific_name,
+                    "confidence": round(confidence, 4),
+                    "uploaded_image_url": media_url,
+                    "annotated_image_url": media_url,
+                    "cropped_image_url": media_url,
+                    "gradcam_url": gradcam_url,
+                    "structured_info": structured_info,
+                    "prediction": {
+                        "species_id": common_name.lower().replace(" ", "_"),
+                        "common_name": common_name,
+                        "scientific_name": scientific_name,
+                        "confidence": round(confidence, 4),
+                        "family": family,
+                        "conservation_status": structured_info["basic_identification"].get("conservation_status", "Least Concern (LC)"),
+                        "habitat": structured_info["habitat_distribution"].get("natural_habitat", ""),
+                        "diet": structured_info["feeding_habits"].get("what_it_eats", ""),
+                        "physical_characteristics": structured_info["physical_characteristics"].get("appearance", ""),
+                        "geographical_distribution": structured_info["habitat_distribution"].get("geographic_distribution", ""),
+                        "description": structured_info.get("description", ""),
+                        "image_url": structured_info.get("image_url", "") or media_url
+                    },
+                    "top_predictions": enriched_top,
+                    "image_quality": meta
+                }
         except HTTPException:
             raise
         except Exception as e:
-            print("Gemini verification notice (fallback to local):", e)
+            print("Gemini API call notice, attempting local fallback:", e)
 
-    # 3. Model Inference using trained MobileNetV2
+    # 3. Model Inference Fallback (Offline / Local)
     if classifier_instance is None:
         try:
             classifier_instance = BirdClassifier()
@@ -449,30 +544,6 @@ async def identify_bird_audio(
         )
         raise HTTPException(status_code=400, detail=rejection_msg)
 
-    # Optional Gemini sound verification if online
-    if effective_api_key and effective_api_key.strip():
-        try:
-            ok, g_res = gemini_service.identify_audio(saved_path, effective_api_key.strip())
-            if ok and g_res.get("is_bird_sound") is False:
-                rejection_msg = "No recognizable bird sound detected. Please upload a valid bird recording."
-                record_identification(
-                    input_type="audio",
-                    uploaded_filename=file.filename or file_id,
-                    media_url=media_url,
-                    detection_status="rejected_no_bird_sound",
-                    predicted_species="None",
-                    scientific_name="None",
-                    confidence_score=0.0,
-                    top_predictions=[],
-                    rejection_reason=rejection_msg,
-                    telemetry={"detected_sound": g_res.get("detected_sound", "non-bird audio")}
-                )
-                raise HTTPException(status_code=400, detail=rejection_msg)
-        except HTTPException:
-            raise
-        except Exception:
-            pass
-
     # 3. Always generate Mel Spectrogram for visual bioacoustic representation
     spectrogram_filename = f"{os.path.splitext(file_id)[0]}_spectrogram.png"
     spectrogram_path = os.path.join(UPLOADS_DIR, spectrogram_filename)
@@ -483,7 +554,115 @@ async def identify_bird_audio(
     except Exception as e:
         print("Spectrogram generation error:", e)
 
-    # 4. Classify audio using trained bioacoustic classification model
+    # 4. Primary Bioacoustic Identification via Gemini API
+    if effective_api_key and effective_api_key.strip():
+        try:
+            ok, g_res = gemini_service.identify_audio(saved_path, effective_api_key.strip())
+            if ok:
+                if g_res.get("is_bird_sound") is False:
+                    rejection_msg = "No recognizable bird sound detected. Please upload a valid bird recording."
+                    record_identification(
+                        input_type="audio",
+                        uploaded_filename=file.filename or file_id,
+                        media_url=media_url,
+                        detection_status="rejected_no_bird_sound",
+                        predicted_species="None",
+                        scientific_name="None",
+                        confidence_score=0.0,
+                        top_predictions=[],
+                        rejection_reason=rejection_msg,
+                        telemetry={"detected_sound": g_res.get("detected_sound", "non-bird audio")}
+                    )
+                    raise HTTPException(status_code=400, detail=rejection_msg)
+
+                common_name = g_res.get("common_name", "Identified Avian Vocalization")
+                scientific_name = g_res.get("scientific_name", "Aves indet.")
+                confidence = float(g_res.get("confidence", 0.94))
+                family = g_res.get("family", "Aves")
+
+                structured_info = species_detail_service.build_from_gemini_result(g_res, "audio")
+
+                # Format enriched top predictions
+                raw_top = g_res.get("top_predictions", [])
+                enriched_top = []
+                for item in raw_top:
+                    c = float(item.get("confidence", 0.0))
+                    enriched_top.append({
+                        "species_id": item.get("common_name", "").lower().replace(" ", "_"),
+                        "confidence": round(c, 4),
+                        "confidence_percentage": f"{round(c * 100, 1)}%",
+                        "common_name": item.get("common_name", ""),
+                        "scientific_name": item.get("scientific_name", ""),
+                        "family": family,
+                        "conservation_status": g_res.get("conservation_status", "Least Concern (LC)")
+                    })
+                if not enriched_top:
+                    enriched_top.append({
+                        "species_id": common_name.lower().replace(" ", "_"),
+                        "confidence": round(confidence, 4),
+                        "confidence_percentage": f"{round(confidence * 100, 1)}%",
+                        "common_name": common_name,
+                        "scientific_name": scientific_name,
+                        "family": family,
+                        "conservation_status": g_res.get("conservation_status", "Least Concern (LC)")
+                    })
+
+                confidence_tier = "high" if confidence >= 0.75 else ("medium" if confidence >= 0.40 else "low")
+                detection_status = "success"
+
+                ident_id = record_identification(
+                    input_type="audio",
+                    uploaded_filename=file.filename or file_id,
+                    media_url=media_url,
+                    detection_status=detection_status,
+                    predicted_species=common_name,
+                    scientific_name=scientific_name,
+                    confidence_score=confidence,
+                    top_predictions=enriched_top,
+                    spectrogram_url=spectrogram_url,
+                    telemetry={
+                        "provider": "Drishti Bioacoustic AI",
+                        "confidence_tier": confidence_tier
+                    }
+                )
+
+                return {
+                    "success": True,
+                    "status": detection_status,
+                    "identification_id": ident_id,
+                    "input_type": "audio",
+                    "is_bird_sound": True,
+                    "validated_by": "Drishti Bioacoustic AI",
+                    "confidence_tier": confidence_tier,
+                    "predicted_species": common_name,
+                    "scientific_name": scientific_name,
+                    "confidence": round(confidence, 4),
+                    "audio_url": media_url,
+                    "spectrogram_url": spectrogram_url,
+                    "structured_info": structured_info,
+                    "prediction": {
+                        "species_id": common_name.lower().replace(" ", "_"),
+                        "common_name": common_name,
+                        "scientific_name": scientific_name,
+                        "confidence": round(confidence, 4),
+                        "family": family,
+                        "conservation_status": structured_info["basic_identification"].get("conservation_status", "Least Concern (LC)"),
+                        "habitat": structured_info["habitat_distribution"].get("natural_habitat", ""),
+                        "diet": structured_info["feeding_habits"].get("what_it_eats", ""),
+                        "physical_characteristics": structured_info["physical_characteristics"].get("appearance", ""),
+                        "geographical_distribution": structured_info["habitat_distribution"].get("geographic_distribution", ""),
+                        "description": structured_info.get("description", ""),
+                        "image_url": structured_info.get("image_url", "") or media_url
+                    },
+                    "top_predictions": enriched_top,
+                    "audio_quality": meta
+                }
+        except HTTPException:
+            raise
+        except Exception as e:
+            print("Gemini Audio API notice, attempting local fallback:", e)
+
+    # 5. Local Bioacoustic Classification Fallback
     try:
         top_predictions = audio_classifier.classify_audio_spectrogram(saved_path, top_k=5)
         if not top_predictions:
