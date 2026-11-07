@@ -73,7 +73,8 @@ class GeminiMultimodalService:
             "Physical Characteristics Requirements:\n"
             "- Appearance: Detailed plumage structure, posture, and sexual dimorphism (clear differences between male and female).\n"
             "- Colour Features: Diagnostic feather markings, eye color, bill color, facial patterns, and crest details.\n"
-            "- Size Morphometrics: Verified adult body length, wingspan, and body mass with units (e.g., cm, g, kg). If reliable data is not documented, state 'Information unavailable'.\n\n"
+            "- Size Morphometrics: Verified adult body length, wingspan, and body mass with units (e.g., cm, g, kg). If reliable data is not documented, state 'Information unavailable'.\n"
+            "- Living Period (Lifespan & Longevity): Scientifically predicted average lifespan in the wild and maximum recorded longevity in years (e.g., 'Average lifespan: 8–12 years in the wild; Maximum recorded lifespan: up to 23 years in protected captivity').\n\n"
             "Habitat, Diet & Behaviour Requirements:\n"
             "- Habitat & Distribution: Actual natural habitat, resident/migratory distribution in the Indian Subcontinent and globally, and native environments.\n"
             "- Feeding Habits: Explicit primary diet category (e.g., 'Omnivorous', 'Frugivorous', 'Insectivorous', 'Carnivorous', 'Granivorous', 'Piscivorous'), actual preferred food items, feeding strategy, and hunting habits.\n"
@@ -98,7 +99,8 @@ class GeminiMultimodalService:
             '  "physical_characteristics": {\n'
             '    "appearance": "...",\n'
             '    "colour_features": "...",\n'
-            '    "size_characteristics": "..."\n'
+            '    "size_characteristics": "...",\n'
+            '    "lifespan_longevity": "Average lifespan: 8–12 years in the wild; Maximum recorded lifespan: up to 23 years in captivity."\n'
             '  },\n'
             '  "habitat_distribution": {\n'
             '    "natural_habitat": "...",\n'
@@ -225,7 +227,8 @@ class GeminiMultimodalService:
             "Physical Characteristics Requirements:\n"
             "- Appearance: Detailed plumage structure, sexual dimorphism (e.g. male glossy black vs female spotted brown for Asian Koel).\n"
             "- Colour Features: Diagnostic color patterns, eye color, bill color, and wing plumage.\n"
-            "- Size Morphometrics: Verified adult body length, wingspan, and weight measurements with units (e.g., cm, g, kg). If unavailable, use 'Information unavailable'.\n\n"
+            "- Size Morphometrics: Verified adult body length, wingspan, and weight measurements with units (e.g., cm, g, kg). If unavailable, use 'Information unavailable'.\n"
+            "- Living Period (Lifespan & Longevity): Scientifically predicted average lifespan in the wild and maximum recorded longevity in years (e.g., 'Average lifespan: 6–9 years in the wild; Maximum recorded lifespan: up to 14–16 years in captivity').\n\n"
             "Habitat, Diet & Behaviour Requirements:\n"
             "- Habitat & Distribution: Actual natural habitat, resident/migratory distribution in the Indian Subcontinent, and common native environments.\n"
             "- Feeding Habits: Explicit primary diet category (e.g., 'Frugivorous', 'Insectivorous', 'Omnivorous'), preferred food items, feeding strategy, and hunting habits.\n"
@@ -250,7 +253,8 @@ class GeminiMultimodalService:
             '  "physical_characteristics": {\n'
             '    "appearance": "...",\n'
             '    "colour_features": "...",\n'
-            '    "size_characteristics": "..."\n'
+            '    "size_characteristics": "...",\n'
+            '    "lifespan_longevity": "Average lifespan: 8–12 years in the wild; Maximum recorded lifespan: up to 23 years in captivity."\n'
             '  },\n'
             '  "habitat_distribution": {\n'
             '    "natural_habitat": "...",\n'

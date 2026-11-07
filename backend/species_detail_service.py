@@ -370,6 +370,49 @@ DEFAULT_FAMILY_BIOLOGY = {
 }
 
 
+def predict_lifespan_string(common_name: str, family: str = "", order: str = "") -> str:
+    norm_name = (common_name or "").lower()
+    norm_fam = (family or "").lower()
+    norm_order = (order or "").lower()
+    
+    if "peafowl" in norm_name or "peacock" in norm_name:
+        return "Average wild lifespan: 10–15 years; Maximum recorded: up to 23–25 years in captivity/protected reserves."
+    if "scops owl" in norm_name or "screech owl" in norm_name:
+        return "Average wild lifespan: 4–7 years; Maximum recorded: up to 12–15 years in protected conditions."
+    if "owl" in norm_name or "strigi" in norm_order or "strigi" in norm_fam:
+        return "Average wild lifespan: 6–10 years; Maximum recorded: up to 20–25 years in captivity."
+    if "sparrow" in norm_name:
+        return "Average wild lifespan: 3–5 years; Maximum recorded: up to 12–13 years in captivity."
+    if "crow" in norm_name or "raven" in norm_name:
+        return "Average wild lifespan: 7–12 years; Maximum recorded: up to 25–30 years in captivity."
+    if "bulbul" in norm_name:
+        return "Average wild lifespan: 4–6 years; Maximum recorded: up to 11–13 years in captivity."
+    if "koel" in norm_name or "cuckoo" in norm_name:
+        return "Average wild lifespan: 6–9 years; Maximum recorded: up to 14–15 years."
+    if "kingfisher" in norm_name:
+        return "Average wild lifespan: 4–7 years; Maximum recorded: up to 12–15 years."
+    if "parrot" in norm_name or "parakeet" in norm_name:
+        return "Average wild lifespan: 12–20 years; Maximum recorded: up to 35–50+ years in captivity."
+    if "eagle" in norm_name or "vulture" in norm_name or "kite" in norm_name or "hawk" in norm_name:
+        return "Average wild lifespan: 15–20 years; Maximum recorded: up to 35–45 years in protected reserves."
+    if "pigeon" in norm_name or "dove" in norm_name:
+        return "Average wild lifespan: 4–8 years; Maximum recorded: up to 15–20 years in captivity."
+    if "crane" in norm_name or "stork" in norm_name or "heron" in norm_name:
+        return "Average wild lifespan: 10–15 years; Maximum recorded: up to 25–30 years."
+    if "duck" in norm_name or "goose" in norm_name:
+        return "Average wild lifespan: 8–15 years; Maximum recorded: up to 20–28 years."
+    
+    if "accipitri" in norm_order or "falconi" in norm_order:
+        return "Average wild lifespan: 12–18 years; Maximum recorded: up to 25–38 years."
+    if "psittaci" in norm_order:
+        return "Average wild lifespan: 12–20 years; Maximum recorded: up to 35–50 years in captivity."
+    if "galliformes" in norm_order:
+        return "Average wild lifespan: 6–12 years; Maximum recorded: up to 18–24 years in captivity."
+    if "passeri" in norm_order or "idae" in norm_fam:
+        return "Average wild lifespan: 3–6 years; Maximum recorded: up to 10–14 years in protected conditions."
+    
+    return "Average wild lifespan: 5–10 years; Maximum recorded: up to 15–20 years in protected environments."
+
 class SpeciesDetailService:
     """
     Central Biological Data Service for Drishti.
@@ -470,7 +513,8 @@ class SpeciesDetailService:
         sec_b = {
             "appearance": physical or fam_traits["appearance"],
             "colour_features": bird.get("colour_features") or physical or f"Features characteristic plumage coloration and markings typical of the {family} family.",
-            "size_characteristics": bird.get("size_characteristics") or fam_traits["size_characteristics"]
+            "size_characteristics": bird.get("size_characteristics") or fam_traits["size_characteristics"],
+            "lifespan_longevity": bird.get("lifespan_longevity") or predict_lifespan_string(common_name, family, order)
         }
 
         # ─── SECTION C: HABITAT AND DISTRIBUTION ───
