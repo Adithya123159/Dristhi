@@ -182,19 +182,10 @@ export default function LandingPage({
                 {/* Guest Pill */}
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-600 hover:text-emerald-800 rounded-full hover:bg-emerald-50/90 border border-slate-200/80 hover:border-emerald-300 transition-all shadow-2xs"
+                  className="hidden sm:inline-flex items-center gap-2 px-4.5 py-2.5 text-[14px] font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50/70 hover:bg-emerald-100/90 rounded-full border border-emerald-200/80 hover:border-emerald-300 shadow-xs hover:shadow-sm transition-all"
                 >
                   <span>Guest</span>
-                  <span className="text-slate-400">&rarr;</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-      </div>
-                >
-                  <span>Guest</span>
-                  <span className="text-slate-400">&rarr;</span>
+                  <span className="text-emerald-500 font-extrabold">&rarr;</span>
                 </button>
               </div>
             )}
