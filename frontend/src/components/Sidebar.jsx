@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  Home, 
   LayoutDashboard, 
   ScanLine, 
   Volume2,
@@ -29,7 +28,6 @@ export default function Sidebar({
   setIsMobileDrawerOpen
 }) {
   const menuItems = [
-    { id: 'landing', label: 'Landing Page', icon: Home },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'identify', label: 'Identify Image', icon: ScanLine },
     { id: 'identify-audio', label: 'Identify Audio', icon: Volume2 },
