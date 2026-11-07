@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import StructuredBirdResult from '../components/StructuredBirdResult';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const IMAGE_STAGES = [
   'Validating file integrity...',
@@ -490,11 +491,14 @@ export default function IdentifyBird({
 
       {/* ─── IDENTIFICATION RESULT VIEW ─── */}
       {predictionResult && (
-        <StructuredBirdResult
-          result={predictionResult}
-          onReset={handleClear}
-          setSelectedSpeciesModal={setSelectedSpeciesModal}
-        />
+        <ErrorBoundary onReset={handleClear}>
+          <StructuredBirdResult
+            result={predictionResult}
+            onReset={handleClear}
+            setSelectedSpeciesModal={setSelectedSpeciesModal}
+            previewSrc={imagePreview}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );

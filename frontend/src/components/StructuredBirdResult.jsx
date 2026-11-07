@@ -22,10 +22,21 @@ import {
 import { api } from '../services/api';
 import { getStatusBadge } from '../utils/statusBadges';
 
+function ConservationBadge({ status }) {
+  const badge = getStatusBadge(status);
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.color}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+      <span>{badge.label}</span>
+    </span>
+  );
+}
+
 export default function StructuredBirdResult({ 
   result, 
   onReset, 
-  setSelectedSpeciesModal 
+  setSelectedSpeciesModal,
+  previewSrc
 }) {
   const [viewMode, setViewMode] = useState('original'); // 'original' | 'gradcam'
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -71,19 +82,25 @@ export default function StructuredBirdResult({
     setIsPlayingAudio(false);
   };
 
-  const audioSrc = result.audio_url 
-    ? (result.audio_url.startsWith('http') ? result.audio_url : `${api.getBaseUrl()}${result.audio_url}`) 
-    : null;
+  const resolveUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+    const base = api.getBaseUrl();
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${cleanUrl}`;
+  };
 
-  const imageSrc = viewMode === 'gradcam' && result.gradcam_url
-    ? `${api.getBaseUrl()}${result.gradcam_url}`
-    : (result.uploaded_image_url 
-        ? `${api.getBaseUrl()}${result.uploaded_image_url}` 
-        : (result.annotated_image_url ? `${api.getBaseUrl()}${result.annotated_image_url}` : null));
+  const audioSrc = resolveUrl(result.audio_url);
 
-  const spectrogramSrc = result.spectrogram_url 
-    ? `${api.getBaseUrl()}${result.spectrogram_url}` 
-    : null;
+  const rawImage = viewMode === 'gradcam' && result.gradcam_url
+    ? result.gradcam_url
+    : (result.uploaded_image_url || result.annotated_image_url || result.image_url || null);
+  
+  const imageSrc = resolveUrl(rawImage) || previewSrc;
+
+  const spectrogramSrc = resolveUrl(result.spectrogram_url);
 
   // Open encyclopedia modal
   const handleOpenEncyclopedia = () => {
@@ -118,7 +135,7 @@ export default function StructuredBirdResult({
                 <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
                 <span>{isAudio ? 'Acoustic CNN' : 'MobileNetV2 Deep Learning'}</span>
               </span>
-              {getStatusBadge(conservationStatus)}
+              <ConservationBadge status={conservationStatus} />
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
@@ -322,7 +339,7 @@ export default function StructuredBirdResult({
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">IUCN Status</span>
-              <div className="pt-0.5">{getStatusBadge(conservationStatus)}</div>
+              <div className="pt-0.5"><ConservationBadge status={conservationStatus} /></div>
             </div>
           </div>
         </div>
@@ -522,7 +539,7 @@ export default function StructuredBirdResult({
         </div>
 
         {/* ─── TOP PREDICTIONS CANDIDATES ─── */}
-        {result.top_predictions && result.top_predictions.length > 1 && (
+        {Array.isArray(result.top_predictions) && result.top_predictions.length > 1 && (
           <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-3">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
               Top Ranked Species Candidates
