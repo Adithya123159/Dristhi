@@ -2,253 +2,229 @@ import React, { useState, useEffect } from 'react';
 import {
   ScanLine,
   Volume2,
-  Bird,
   History,
   ArrowRight,
   Cpu,
-  CheckCircle2,
-  Clock
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function DashboardHome({ setCurrentTab, setSelectedSpeciesModal }) {
-  const [stats, setStats] = useState({
-    total_classifications: 0,
-    supported_species_count: 100
-  });
+export default function DashboardHome({ setCurrentTab, onSelectIdentify }) {
   const [recentHistory, setRecentHistory] = useState([]);
-  const [sampleSpecies, setSampleSpecies] = useState([]);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [statsData, historyData, speciesData] = await Promise.all([
-          api.getStats(),
-          api.getHistory(4, 0),
-          api.getSpecies({ limit: 4 })
-        ]);
-        setStats(statsData);
+        const historyData = await api.getHistory(3, 0);
         setRecentHistory(historyData.history || []);
-        setSampleSpecies(speciesData.species || []);
       } catch (err) {
-        console.error('Failed to load dashboard data:', err);
+        console.error('Failed to load dashboard history:', err);
       }
     }
     loadData();
   }, []);
 
+  const handleIdentifyMode = (mode) => {
+    if (onSelectIdentify) {
+      onSelectIdentify(mode);
+    } else {
+      setCurrentTab('identify');
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
-      {/* Hero Section - Clean & Minimal */}
-      <div className="p-8 sm:p-10 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div className="space-y-3 max-w-xl">
-          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
-            Deep Learning System
+      {/* Header Banner - Clean, Modern & Global */}
+      <div className="p-8 sm:p-10 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="space-y-3 max-w-2xl">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Global Multimodal AI System</span>
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Bird Species Classification
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Global Avian Identification
           </h1>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            Upload an image to identify bird species and view biological details.
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+            Multimodal artificial intelligence for visual and acoustic bird species recognition worldwide with comprehensive biological profiles.
           </p>
+        </div>
+      </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+      {/* Redesigned Statistics Row - Exactly Two Modern Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        {/* Card 1: AI Engine */}
+        <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100">
+            <Cpu className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">AI Engine</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5 block">Multimodal AI</span>
+            <span className="text-xs text-slate-500 font-medium mt-0.5 block">Intelligent Bird Recognition</span>
+          </div>
+        </div>
+
+        {/* Card 2: Identification Modes */}
+        <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0 border border-teal-100">
+            <Layers className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Identification Modes</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5 block">Image & Audio</span>
+            <span className="text-xs text-slate-500 font-medium mt-0.5 block">Visual and Acoustic Recognition</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Primary Action Section - Identify Bird (Prominent Card) */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-white via-white to-emerald-50/30 border-2 border-emerald-500/20 shadow-sm space-y-6">
+        <div>
+          <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full mb-1.5">
+            Primary Identification
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Identify Bird
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 mt-1 max-w-2xl leading-relaxed">
+            Upload a bird image or audio recording to identify its species and explore its biological characteristics.
+          </p>
+        </div>
+
+        {/* Dual Input Options */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+          {/* Option 1: Identify Using Image */}
+          <div
+            onClick={() => handleIdentifyMode('image')}
+            className="p-6 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-5"
+          >
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <ScanLine className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                  Identify Using Image
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                  Upload photographs for visual neural detection, Grad-CAM attention analysis, and full taxonomic classification.
+                </p>
+              </div>
+            </div>
             <button
-              onClick={() => setCurrentTab('identify')}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-sm hover:bg-emerald-700 transition-colors"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleIdentifyMode('image');
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-xs hover:bg-emerald-700 group-hover:bg-emerald-700 transition-all"
             >
               <ScanLine className="w-4 h-4" />
-              <span>Identify Bird</span>
-            </button>
-
-            <button
-              onClick={() => setCurrentTab('species')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
-            >
-              <span>Species Catalog (100)</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Hero Visual Icon */}
-        <div className="hidden md:flex w-28 h-28 rounded-2xl bg-emerald-50 text-emerald-600 items-center justify-center flex-shrink-0">
-          <Bird className="w-14 h-14" />
-        </div>
-      </div>
-
-      {/* Stats Row - 4 Clean Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-medium block">Supported Species</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 block">100</span>
-          <span className="text-xs text-emerald-600 font-medium mt-0.5 block">Indian birds</span>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-medium block">AI Engine</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 block">Multimodal AI</span>
-          <span className="text-xs text-slate-500 font-medium mt-0.5 block">Vision & Audio</span>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-medium block">Speed</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 block">&lt; 100ms</span>
-          <span className="text-xs text-slate-500 font-medium mt-0.5 block">Fast inference</span>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-medium block">Total Classified</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 block">{stats.total_classifications}</span>
-          <span className="text-xs text-slate-500 font-medium mt-0.5 block">Saved in history</span>
-        </div>
-      </div>
-
-      {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div
-          onClick={() => setCurrentTab('identify')}
-          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-md transition-all cursor-pointer group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-            <ScanLine className="w-5 h-5" />
-          </div>
-          <h3 className="font-semibold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors">
-            Identify Bird
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">
-            Upload an image to get species predictions and confidence scores.
-          </p>
-        </div>
-
-        <div
-          onClick={() => setCurrentTab('species')}
-          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-md transition-all cursor-pointer group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-3">
-            <Bird className="w-5 h-5" />
-          </div>
-          <h3 className="font-semibold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors">
-            Supported Species
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">
-            Browse and search all 100 supported bird species.
-          </p>
-        </div>
-
-        <div
-          onClick={() => setCurrentTab('history')}
-          className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-md transition-all cursor-pointer group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-3">
-            <History className="w-5 h-5" />
-          </div>
-          <h3 className="font-semibold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors">
-            History
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">
-            View past image classifications and downloaded results.
-          </p>
-        </div>
-      </div>
-
-      {/* Sample Species Preview */}
-      {sampleSpecies.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-800">Sample Species</h2>
-            <button
-              onClick={() => setCurrentTab('species')}
-              className="text-xs text-emerald-600 font-medium hover:underline flex items-center gap-1"
-            >
-              <span>View all 100</span>
-              <ArrowRight className="w-3 h-3" />
+              <span>Identify Using Image</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {sampleSpecies.map((sp) => (
-              <div
-                key={sp.species_id}
-                onClick={() => setSelectedSpeciesModal(sp)}
-                className="p-3 bg-white rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-sm transition-all cursor-pointer group"
-              >
-                <div className="h-32 rounded-xl bg-slate-100 overflow-hidden mb-2.5">
-                  <img
-                    src={sp.image_url}
-                    alt={sp.common_name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    onError={(e) => {
-                      e.target.src = "https://images.unsplash.com/photo-1549608276-5786777e6587?auto=format&fit=crop&w=600&q=80";
-                    }}
-                  />
-                </div>
-                <h4 className="font-semibold text-xs text-slate-900 truncate group-hover:text-emerald-600">
-                  {sp.common_name}
-                </h4>
-                <p className="text-[11px] text-slate-400 italic truncate font-serif mt-0.5">
-                  {sp.scientific_name}
+          {/* Option 2: Identify Using Audio */}
+          <div
+            onClick={() => handleIdentifyMode('audio')}
+            className="p-6 rounded-2xl bg-white border border-slate-200/90 hover:border-teal-500 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-5"
+          >
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                <Volume2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">
+                  Identify Using Audio
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                  Upload audio recordings for bioacoustic frequency matching, Mel Spectrograms, and audio playback.
                 </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleIdentifyMode('audio');
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-xs hover:bg-emerald-800 group-hover:bg-teal-700 transition-all"
+            >
+              <Volume2 className="w-4 h-4" />
+              <span>Identify Using Audio</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary Navigation Section - History */}
+      <div className="space-y-4">
+        <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0">
+              <History className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Classification History
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Review past multimodal identifications, biological data, and downloaded records.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('history')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors whitespace-nowrap self-start sm:self-auto"
+          >
+            <span>View All History</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Recent Activity List (if records exist) */}
+        {recentHistory.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-200/90 divide-y divide-slate-100 overflow-hidden shadow-xs">
+            <div className="p-3.5 px-4 bg-slate-50/70 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+              <span>Recent Identifications</span>
+              <span>Confidence</span>
+            </div>
+            {recentHistory.slice(0, 3).map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setCurrentTab('history')}
+                className="p-3.5 px-4 flex items-center justify-between gap-3 text-xs hover:bg-slate-50/80 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 font-bold">
+                    {item.input_type === 'audio' ? <Volume2 className="w-4 h-4" /> : <ScanLine className="w-4 h-4" />}
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-semibold text-slate-900 block truncate">
+                      {item.predicted_common_name || item.predicted_species || 'Identified Avian'}
+                    </span>
+                    <span className="text-[11px] text-slate-400 italic font-serif truncate block">
+                      {item.predicted_scientific_name || item.scientific_name || ''}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <span className="font-bold text-emerald-600 block">
+                    {item.confidence ? `${(item.confidence * 100).toFixed(1)}%` : '—'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block">
+                    {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      )
-      }
-
-      {/* Recent Identifications (Only if exists) */}
-      {
-        recentHistory.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-800">Recent Identifications</h2>
-              <button
-                onClick={() => setCurrentTab('history')}
-                className="text-xs text-emerald-600 font-medium hover:underline"
-              >
-                View all
-              </button>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
-              {recentHistory.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-3.5 px-4 flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
-                      <img
-                        src={`${api.getBaseUrl()}${item.image_url}`}
-                        alt={item.predicted_common_name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="font-semibold text-slate-900 block truncate">
-                        {item.predicted_common_name}
-                      </span>
-                      <span className="text-[11px] text-slate-400 italic font-serif truncate block">
-                        {item.predicted_scientific_name || item.predicted_species_id}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-right flex-shrink-0">
-                    <span className="font-bold text-emerald-600 block">
-                      {(item.confidence * 100).toFixed(1)}%
-                    </span>
-                    <span className="text-[10px] text-slate-400 block">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
+      </div>
     </div>
   );
 }
