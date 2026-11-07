@@ -311,7 +311,7 @@ export default function StructuredBirdResult({
             <span>Section A &bull; Basic Identification</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-1">
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Common Name</span>
               <span className="text-sm font-bold text-slate-900 block">{commonName}</span>
@@ -323,13 +323,18 @@ export default function StructuredBirdResult({
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Species</span>
-              <span className="text-sm font-semibold text-slate-900 block">{species}</span>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Genus</span>
+              <span className="text-sm font-bold font-serif italic text-emerald-900 block">{genus}</span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Bird Family</span>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Family</span>
               <span className="text-sm font-semibold text-slate-900 block">{family}</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Order</span>
+              <span className="text-sm font-semibold text-slate-900 block">{order}</span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
@@ -345,8 +350,8 @@ export default function StructuredBirdResult({
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">IUCN Status</span>
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1 sm:col-span-2 xl:col-span-2">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">IUCN Conservation Status</span>
               <div className="pt-0.5"><ConservationBadge status={conservationStatus} /></div>
             </div>
           </div>
@@ -365,21 +370,21 @@ export default function StructuredBirdResult({
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">General Appearance</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {physical.appearance || 'Robust avian structure adapted to environmental niche.'}
+                {physical.appearance || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Colour & Distinctive Features</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {physical.colour_features || 'Characteristic plumage markings and diagnostic coloration.'}
+                {physical.colour_features || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Size & Morphometrics</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {physical.size_characteristics || 'Proportional body length and wingspan suited for native habitats.'}
+                {physical.size_characteristics || 'Information unavailable'}
               </p>
             </div>
           </div>
@@ -398,21 +403,21 @@ export default function StructuredBirdResult({
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Natural Habitat</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {habitat.natural_habitat || 'Tropical and subtropical forest tracts, open woodlands, and rural trees.'}
+                {habitat.natural_habitat || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Geographic Distribution</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {habitat.geographic_distribution || 'Endemic or resident across the Indian Subcontinent.'}
+                {habitat.geographic_distribution || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Commonly Found Environments</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {habitat.common_environments || 'Agricultural edges, village groves, scrub forests, and national parks.'}
+                {habitat.common_environments || 'Information unavailable'}
               </p>
             </div>
           </div>
@@ -430,29 +435,29 @@ export default function StructuredBirdResult({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Primary Diet</span>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {feeding.primary_diet || 'Omnivorous forage'}
+              <p className="text-xs sm:text-sm font-semibold text-emerald-800 leading-relaxed">
+                {feeding.primary_diet || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">What the Bird Eats</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {feeding.what_it_eats || 'Insects, seeds, wild fruits, and small invertebrates.'}
+                {feeding.what_it_eats || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Feeding Behaviour</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {feeding.feeding_behaviour || 'Actively forages ground or foliage surfaces for sustenance.'}
+                {feeding.feeding_behaviour || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Hunting / Foraging Habits</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {feeding.hunting_habits || 'Diurnal foraging rhythm synchronized with seasonal food availability.'}
+                {feeding.hunting_habits || 'Information unavailable'}
               </p>
             </div>
           </div>
@@ -471,28 +476,28 @@ export default function StructuredBirdResult({
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">General Behaviour</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {behaviour.general_behaviour || 'Diurnal activity with distinct roosting and perching routines.'}
+                {behaviour.general_behaviour || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Social Behaviour</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {behaviour.social_behaviour || 'Monogamous pairs, small family units, or loose foraging parties.'}
+                {behaviour.social_behaviour || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Nesting Habits</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {behaviour.nesting_habits || 'Constructs specialized nests in sheltered tree forks, cavities, or dense scrub.'}
+                {behaviour.nesting_habits || 'Information unavailable'}
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
               <span className="text-xs font-bold text-slate-700 block">Breeding Behaviour</span>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {behaviour.breeding_behaviour || 'Seasonal breeding courtship during favorable climate and monsoon intervals.'}
+                {behaviour.breeding_behaviour || 'Information unavailable'}
               </p>
             </div>
           </div>
@@ -513,7 +518,7 @@ export default function StructuredBirdResult({
                 <span>Unique Characteristics</span>
               </span>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                {novelty.unique_characteristics || 'Distinctive traits celebrated across South Asian biodiversity documentation.'}
+                {novelty.unique_characteristics || 'Information unavailable'}
               </p>
             </div>
 
@@ -522,7 +527,7 @@ export default function StructuredBirdResult({
                 <span>Special Adaptations</span>
               </span>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                {novelty.special_adaptations || 'Specialized plumage, sensory perception, and anatomical adaptations.'}
+                {novelty.special_adaptations || 'Information unavailable'}
               </p>
             </div>
 
@@ -531,7 +536,7 @@ export default function StructuredBirdResult({
                 <span>Ecological Importance</span>
               </span>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                {novelty.ecological_importance || 'Vital ecological role as seed disperser, insect controller, and trophic regulator.'}
+                {novelty.ecological_importance || 'Information unavailable'}
               </p>
             </div>
 
@@ -540,11 +545,29 @@ export default function StructuredBirdResult({
                 <span>Rare / Lesser-Known Facts</span>
               </span>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                {novelty.rare_facts || 'Documented in ornithological literature as an indispensable native species.'}
+                {novelty.rare_facts || 'Information unavailable'}
               </p>
             </div>
           </div>
         </div>
+
+        {/* SCIENTIFIC SOURCES & VERIFICATION FOOTER */}
+        {sources && sources.length > 0 && (
+          <div className="px-5 py-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span className="font-bold text-slate-800">Verified Reference Standards:</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-medium text-slate-600">
+              {sources.map((src, idx) => (
+                <span key={idx} className="inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>{src}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ─── TOP PREDICTIONS CANDIDATES ─── */}
         {Array.isArray(result.top_predictions) && result.top_predictions.length > 1 && (
