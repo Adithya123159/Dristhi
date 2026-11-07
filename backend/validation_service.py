@@ -70,15 +70,16 @@ class ImageValidationService:
         """
         Validates whether the uploaded image contains a recognizable bird.
         Rejects non-bird subjects (cars, humans, dogs, blank images, abstract graphics)
-        with the exact required user-facing message:
-        'No bird detected. Please upload a valid bird image.'
+        with the clear user-facing message:
+        'Invalid Input: No bird detected in the uploaded image. Please upload a clear photo of a bird.'
         """
-        REJECTION_MSG = "No bird detected. Please upload a valid bird image."
+        REJECTION_MSG = "Invalid Input: No bird detected in the uploaded image. Please upload a clear photo of a bird."
 
-        # 1. Check Gemini verification if available
+        # 1. Check Gemini multimodal verification if available
         if gemini_result and isinstance(gemini_result, dict):
             if gemini_result.get("is_bird") is False:
-                return False, REJECTION_MSG
+                detected_subj = gemini_result.get("detected_object") or "non-bird object"
+                return False, f"Invalid Input: No bird detected ({detected_subj}). Please upload a clear photo of a bird."
 
         # 2. Check basic computer vision heuristics (blank, uniform, or corrupted images)
         try:
@@ -87,15 +88,19 @@ class ImageValidationService:
                 return False, REJECTION_MSG
             
             color_std = float(np.std(cv_img))
-            if color_std < 10.0:  # Solid color, blank canvas, or almost zero variation
-                return False, REJECTION_MSG
+            if color_std < 12.0:  # Solid color, blank canvas, or almost zero variation
+                return False, "Invalid Input: Blank or uniform image detected. Please upload a photo of a bird."
+            
+            gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+            laplacian_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+            if laplacian_var < 8.0:
+                return False, "Invalid Input: Image is too blurry or indistinct to detect a bird subject. Please upload a clear photo."
         except Exception:
             return False, REJECTION_MSG
 
-        # 3. Model Confidence / Entropy threshold check:
-        # When a completely non-bird image is passed to the classifier,
-        # the model confidence across trained avian classes drops below reasonable bounds.
-        if top_confidence < 0.20:
+        # 3. Model Confidence threshold check:
+        # Non-bird subjects produce low entropy across avian classes (typically < 0.35)
+        if top_confidence < 0.35:
             return False, REJECTION_MSG
 
         return True, "Bird detected"

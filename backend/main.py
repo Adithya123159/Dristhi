@@ -232,7 +232,8 @@ async def identify_bird_image(
             ok, g_res = gemini_service.identify_image(saved_path, effective_api_key.strip())
             if ok:
                 if g_res.get("is_bird") is False:
-                    rejection_msg = "No bird detected. Please upload a valid bird image."
+                    detected_obj = g_res.get("detected_object") or "non-bird object"
+                    rejection_msg = f"Invalid Input: No bird detected ({detected_obj}). Please upload a clear photo of a bird."
                     record_identification(
                         input_type="image",
                         uploaded_filename=file.filename or file_id,
@@ -243,7 +244,7 @@ async def identify_bird_image(
                         confidence_score=0.0,
                         top_predictions=[],
                         rejection_reason=rejection_msg,
-                        telemetry={"detected_object": g_res.get("detected_object", "non-bird object")}
+                        telemetry={"detected_object": detected_obj}
                     )
                     raise HTTPException(status_code=400, detail=rejection_msg)
 
@@ -373,10 +374,10 @@ async def identify_bird_image(
         is_bird, presence_msg = image_validator.verify_bird_presence(
             saved_path,
             top_confidence=confidence,
-            gemini_result=gemini_check
+            gemini_result=None
         )
         if not is_bird:
-            rejection_msg = "No bird detected. Please upload a valid bird image."
+            rejection_msg = presence_msg or "Invalid Input: No bird detected in the uploaded image. Please upload a clear photo of a bird."
             record_identification(
                 input_type="image",
                 uploaded_filename=file.filename or file_id,
@@ -536,7 +537,7 @@ async def identify_bird_audio(
     # 2. Bird Sound Vocalization Verification (Bioacoustics check)
     detection = audio_validator.detect_bird_sound(saved_path)
     if not detection.get("is_bird_sound"):
-        rejection_msg = "No recognizable bird sound detected. Please upload a valid bird recording."
+        rejection_msg = detection.get("rejection_message") or "Invalid Input: No recognizable bird vocalization detected. Please upload a valid bird recording."
         record_identification(
             input_type="audio",
             uploaded_filename=file.filename or file_id,
@@ -567,7 +568,8 @@ async def identify_bird_audio(
             ok, g_res = gemini_service.identify_audio(saved_path, effective_api_key.strip())
             if ok:
                 if g_res.get("is_bird_sound") is False:
-                    rejection_msg = "No recognizable bird sound detected. Please upload a valid bird recording."
+                    detected_snd = g_res.get("detected_sound") or "non-bird audio"
+                    rejection_msg = f"Invalid Input: No bird vocalization detected ({detected_snd}). Please upload a valid bird recording."
                     record_identification(
                         input_type="audio",
                         uploaded_filename=file.filename or file_id,
@@ -578,7 +580,7 @@ async def identify_bird_audio(
                         confidence_score=0.0,
                         top_predictions=[],
                         rejection_reason=rejection_msg,
-                        telemetry={"detected_sound": g_res.get("detected_sound", "non-bird audio")}
+                        telemetry={"detected_sound": detected_snd}
                     )
                     raise HTTPException(status_code=400, detail=rejection_msg)
 

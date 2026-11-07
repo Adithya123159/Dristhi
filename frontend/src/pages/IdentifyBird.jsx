@@ -173,12 +173,18 @@ export default function IdentifyBird({
       console.error('Classification request error:', err);
       const msg = err.message || 'An error occurred during identification.';
       // Provide clean user-facing error message matching specifications
-      if (activeTab === 'image' && (msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('not a bird'))) {
-        setErrorMessage('No bird detected. Please upload a valid bird image.');
-      } else if (activeTab === 'audio' && (msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('sound') || msg.toLowerCase().includes('vocalization'))) {
-        setErrorMessage('No recognizable bird sound detected. Please upload a valid bird recording.');
+      if (activeTab === 'image') {
+        if (msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('not a bird') || msg.toLowerCase().includes('invalid')) {
+          setErrorMessage(msg.startsWith('Invalid Input') ? msg : `Invalid Input: ${msg}`);
+        } else {
+          setErrorMessage(`Invalid Input: ${msg}`);
+        }
       } else {
-        setErrorMessage(msg);
+        if (msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('sound') || msg.toLowerCase().includes('vocalization') || msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('silent')) {
+          setErrorMessage(msg.startsWith('Invalid Input') ? msg : `Invalid Input: ${msg}`);
+        } else {
+          setErrorMessage(`Invalid Input: ${msg}`);
+        }
       }
     } finally {
       setIsAnalyzing(false);
@@ -234,14 +240,26 @@ export default function IdentifyBird({
           <div className="pt-6 space-y-6">
             {/* ERROR ALERT BOX */}
             {errorMessage && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3.5 animate-fadeIn">
-                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-amber-900">
-                    {activeTab === 'image' ? 'No Bird Detected' : 'No Bird Sound Detected'}
-                  </h4>
-                  <p className="text-xs sm:text-sm text-amber-800 leading-relaxed font-medium">
+              <div className="p-4 sm:p-5 rounded-2xl bg-rose-50 border-2 border-rose-200/90 text-rose-950 flex items-start gap-3.5 animate-fadeIn shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <AlertTriangle className="w-5 h-5 text-rose-600" />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-2xs">
+                      Invalid Input
+                    </span>
+                    <h4 className="text-sm font-bold text-rose-950">
+                      {activeTab === 'image' ? 'No Bird Detected in Image' : 'No Bird Sound Detected in Audio'}
+                    </h4>
+                  </div>
+                  <p className="text-xs sm:text-sm text-rose-900 leading-relaxed font-semibold">
                     {errorMessage}
+                  </p>
+                  <p className="text-[11px] text-rose-700/80 font-normal pt-1">
+                    {activeTab === 'image'
+                      ? 'Drishti requires a photograph containing a real bird specimen. Uploads of human portraits, vehicles, household items, or non-avian subjects are rejected as invalid input.'
+                      : 'Drishti requires an audio recording containing authentic bird calls, songs, or chirps. Human speech, traffic noise, music, or silent clips are rejected as invalid input.'}
                   </p>
                 </div>
               </div>
