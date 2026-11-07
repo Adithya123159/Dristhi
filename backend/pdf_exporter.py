@@ -362,3 +362,4 @@ def generate_species_pdf_bytes(species: Dict[str, Any]) -> bytes:
                     os.remove(p)
                 except OSError:
                     pass
+
