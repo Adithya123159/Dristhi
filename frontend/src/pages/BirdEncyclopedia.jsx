@@ -66,7 +66,7 @@ export default function BirdEncyclopedia({ setSelectedSpeciesModal }) {
           </h2>
           <p className="text-sm text-slate-300 leading-relaxed">
             In-depth biological profiles, behavioral patterns, feeding habits, and habitat dynamics 
-            for the 100 species in our classification domain.
+            for avian species across our taxonomic classification database.
           </p>
         </div>
       </div>

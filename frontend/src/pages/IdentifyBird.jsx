@@ -201,7 +201,7 @@ export default function IdentifyBird({
               <span>Multimodal Bird Identification</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-              Deep learning computer vision & bioacoustic voice analysis for 100 Indian bird species
+              Deep learning computer vision & bioacoustic voice analysis across avian species
             </p>
           </div>
 

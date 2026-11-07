@@ -24,7 +24,7 @@ export default function AboutProject() {
               About Project
             </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Deep learning classification system for 100 Indian bird species.
+                Deep learning classification system for Indian and global bird species.
               </p>
             </div>
 
@@ -44,7 +44,7 @@ export default function AboutProject() {
                           </li>
                             <li className="flex items-center gap-2">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                              <span>Support 100 Indian bird species with biological and conservation data.</span>
+                              <span>Dynamic avian species coverage with real-time biological and conservation intelligence.</span>
                             </li>
                               <li className="flex items-center gap-2">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
