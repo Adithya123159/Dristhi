@@ -143,12 +143,15 @@ def get_identifications(
             if input_type and input_type.lower() != 'all':
                 query["input_type"] = input_type.lower()
             if detection_status and detection_status.lower() != 'all':
-                query["detection_status"] = detection_status.lower()
+                if detection_status.lower() == 'rejected':
+                    query["detection_status"] = {"$regex": "^rejected"}
+                elif detection_status.lower() == 'success':
+                    query["detection_status"] = "success"
+                else:
+                    query["detection_status"] = detection_status.lower()
 
             cursor = col.find(query, {"_id": 0}).sort("timestamp", pymongo.DESCENDING).skip(offset).limit(limit)
-            records = list(cursor)
-            if records:
-                return records
+            return list(cursor)
     except Exception as e:
         print(f"MongoDB fetch notice: {e}")
 
