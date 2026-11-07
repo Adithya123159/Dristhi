@@ -20,6 +20,7 @@ import { api } from './services/api';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState('landing');
+  const [identifyInputMode, setIdentifyInputMode] = useState('image');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isServerOnline, setIsServerOnline] = useState(false);
@@ -98,24 +99,32 @@ export default function App() {
     );
   }
 
+  const handleSelectIdentify = (mode) => {
+    setIdentifyInputMode(mode);
+    setCurrentTab('identify');
+  };
+
   const renderPage = () => {
     switch (currentTab) {
       case 'dashboard':
         return (
           <DashboardHome 
             setCurrentTab={setCurrentTab} 
+            onSelectIdentify={handleSelectIdentify}
             setSelectedSpeciesModal={setSelectedSpeciesModal} 
           />
         );
       case 'identify':
         return (
           <IdentifyBird 
+            initialInputType={identifyInputMode}
             setSelectedSpeciesModal={setSelectedSpeciesModal} 
           />
         );
       case 'identify-audio':
         return (
-          <IdentifyAudio 
+          <IdentifyBird 
+            initialInputType="audio"
             setSelectedSpeciesModal={setSelectedSpeciesModal} 
           />
         );
