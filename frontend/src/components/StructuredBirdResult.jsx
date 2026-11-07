@@ -52,15 +52,21 @@ export default function StructuredBirdResult({
   const behaviour = info.behaviour_lifestyle || {};
   const novelty = info.interesting_information || {};
 
-  const commonName = basic.common_name || result.predicted_species || 'Identified Bird';
-  const scientificName = basic.scientific_name || result.scientific_name || 'Aves indet.';
-  const family = basic.family || 'Aves';
-  const species = basic.species || scientificName;
+  const commonName = basic.common_name || result.predicted_species || 'Information unavailable';
+  const scientificName = basic.scientific_name || result.scientific_name || 'Information unavailable';
+  const genus = basic.genus || (scientificName !== 'Information unavailable' ? scientificName.split(' ')[0] : 'Information unavailable');
+  const family = basic.family || 'Information unavailable';
+  const order = basic.order || 'Information unavailable';
   const confidenceScore = typeof basic.confidence === 'number' 
     ? basic.confidence 
     : (typeof result.confidence === 'number' ? result.confidence : 0.95);
   const confidencePct = basic.confidence_percentage || `${Math.round(confidenceScore * 100)}%`;
   const conservationStatus = basic.conservation_status || 'Least Concern (LC)';
+  const sources = info.sources || result.sources || [
+    'IUCN Red List of Threatened Species',
+    'eBird / Cornell Lab of Ornithology',
+    'Birds of the World'
+  ];
 
   const inputType = result.input_type || 'image';
   const isAudio = inputType === 'audio';
