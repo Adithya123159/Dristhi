@@ -2,15 +2,14 @@ import React from 'react';
 import { 
   LayoutDashboard, 
   ScanLine, 
-  Volume2,
+  Volume2, 
   Bird, 
-  Menu 
+  BookOpen 
 } from 'lucide-react';
 
 export default function MobileBottomNav({ 
   currentTab, 
-  setCurrentTab, 
-  onOpenMobileDrawer 
+  setCurrentTab 
 }) {
   return (
     <nav 
@@ -71,13 +70,17 @@ export default function MobileBottomNav({
         <span className="text-[10px] leading-tight">Species</span>
       </button>
 
-      {/* More / Menu Drawer Toggle */}
+      {/* Encyclopedia */}
       <button
-        onClick={onOpenMobileDrawer}
-        className="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all"
+        onClick={() => setCurrentTab('encyclopedia')}
+        className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
+          currentTab === 'encyclopedia'
+            ? 'text-emerald-700 font-bold'
+            : 'text-slate-500 hover:text-slate-800'
+        }`}
       >
-        <Menu className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px] leading-tight">More</span>
+        <BookOpen className="w-5 h-5 mb-0.5" />
+        <span className="text-[10px] leading-tight">Encyclopedia</span>
       </button>
     </nav>
   );
