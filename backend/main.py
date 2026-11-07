@@ -815,7 +815,17 @@ def get_history(
         limit=limit,
         offset=offset
     )
-    return {"history": records, "count": len(records)}
+    stats = get_aggregate_stats()
+    return {
+        "history": records,
+        "count": len(records),
+        "counts": {
+            "all": stats.get("total_identifications", len(records)),
+            "image": stats.get("image_identifications", sum(1 for r in records if r.get("input_type") == "image")),
+            "audio": stats.get("audio_identifications", sum(1 for r in records if r.get("input_type") == "audio")),
+            "rejected": stats.get("rejection_count", sum(1 for r in records if r.get("detection_status") != "success"))
+        }
+    }
 
 @app.get("/api/history/{id}")
 def get_single_history(id: str):
