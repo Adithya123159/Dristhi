@@ -32,6 +32,9 @@ def build_species_html(species: Dict[str, Any]) -> str:
     distribution = html.escape(species.get("geographical_distribution") or "Native or migratory distribution documented across regional biodiversity registers.")
     image_url = species.get("image_url") or ""
 
+    from backend.species_detail_service import predict_lifespan_string
+    lifespan = html.escape(species.get("lifespan_longevity") or predict_lifespan_string(common_name, family, order))
+
     # Status badge color
     status_lower = conservation_status.lower()
     badge_bg = "#ecfdf5"
@@ -297,8 +300,11 @@ def build_species_html(species: Dict[str, Any]) -> str:
       <p class="section-body">{diet}</p>
     </div>
     <div class="section-card">
-      <div class="section-title">Physical Traits & Morphology</div>
+      <div class="section-title">Physical Traits & Morphometrics</div>
       <p class="section-body">{physical}</p>
+      <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-size: 8pt; color: #047857;">
+        <b>Living Period & Lifespan:</b> {lifespan}
+      </div>
     </div>
     <div class="section-card">
       <div class="section-title">Geographical Distribution</div>

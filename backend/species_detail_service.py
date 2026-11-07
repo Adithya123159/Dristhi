@@ -626,15 +626,18 @@ class SpeciesDetailService:
             appearance = raw_phys
             colour_features = "Information unavailable"
             size_char = "Information unavailable"
+            lifespan_char = predict_lifespan_string(common_name, family, order)
         else:
             appearance = raw_phys.get("appearance") or g_data.get("appearance") or "Information unavailable"
             colour_features = raw_phys.get("colour_features") or "Information unavailable"
             size_char = raw_phys.get("size_characteristics") or "Information unavailable"
+            lifespan_char = raw_phys.get("lifespan_longevity") or predict_lifespan_string(common_name, family, order)
 
         sec_b = {
             "appearance": appearance,
             "colour_features": colour_features,
-            "size_characteristics": size_char
+            "size_characteristics": size_char,
+            "lifespan_longevity": lifespan_char
         }
 
         # ─── SECTION C: HABITAT AND DISTRIBUTION ───
