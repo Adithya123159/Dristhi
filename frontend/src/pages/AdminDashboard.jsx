@@ -139,9 +139,9 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span className="text-sm font-bold text-slate-900">Gemini Vision + MobileNetV2</span>
+            <span className="text-sm font-bold text-slate-900">Drishti Neural Vision AI</span>
           </div>
-          <p className="text-[11px] text-slate-400">Deep species classification + Grad-CAM</p>
+          <p className="text-[11px] text-slate-400">Multimodal species classification + Grad-CAM</p>
         </div>
 
         {/* Bioacoustics */}
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span className="text-sm font-bold text-slate-900">Librosa Mel CNN</span>
+            <span className="text-sm font-bold text-slate-900">Drishti Bioacoustic AI</span>
           </div>
           <p className="text-[11px] text-slate-400">1.5 - 8.5 kHz harmonic verification</p>
         </div>
