@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import birdBackground from '../assets/bird-background.jpg';
+import heroPeacock from '../assets/hero-peacock.jpg';
 import { 
   Bird, 
   ScanLine, 
@@ -11,7 +12,10 @@ import {
   ChevronRight,
   Menu,
   X,
-  Compass
+  Compass,
+  Zap,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 export default function LandingPage({ 
