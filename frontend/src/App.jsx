@@ -129,14 +129,11 @@ export default function App() {
           />
         );
       case 'species':
-        return (
-          <SupportedSpecies 
-            setSelectedSpeciesModal={setSelectedSpeciesModal} 
-          />
-        );
       case 'encyclopedia':
         return (
-          <BirdEncyclopedia 
+          <DashboardHome 
+            setCurrentTab={setCurrentTab} 
+            onSelectIdentify={handleSelectIdentify}
             setSelectedSpeciesModal={setSelectedSpeciesModal} 
           />
         );
