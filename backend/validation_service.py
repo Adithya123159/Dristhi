@@ -60,7 +60,7 @@ class ImageValidationService:
 
     def detect_birds(self, file_path: str, conf_threshold: float = 0.25) -> Dict[str, Any]:
         """
-        Validates the image file and prepares paths for classification without YOLO.
+        Validates the image file and prepares paths for classification.
         """
         return {
             "is_bird": True,
