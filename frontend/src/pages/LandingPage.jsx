@@ -65,127 +65,127 @@ export default function LandingPage({
       </div>
 
       {/* ─── STYLISH FLOATING GLASSMORPHIC HEADER ─── */}
-      <div className="relative z-30 w-full max-w-7xl mx-auto pt-3.5 sm:pt-5 px-3 sm:px-6 flex-shrink-0">
-        <header className="w-full bg-white/85 backdrop-blur-xl border border-white/95 shadow-xl shadow-emerald-950/6 ring-1 ring-slate-900/5 rounded-3xl px-5 sm:px-7 py-3 sm:py-3.5 flex items-center justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-950/10">
+      <div className="relative z-30 w-full max-w-7xl mx-auto pt-2.5 sm:pt-4 px-3 sm:px-6 flex-shrink-0">
+        <header className="w-full bg-white/90 backdrop-blur-xl border border-white/90 shadow-md shadow-emerald-950/5 ring-1 ring-slate-900/5 rounded-2xl sm:rounded-3xl px-4 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 hover:shadow-lg">
           {/* Drishti Brand */}
           <div 
             onClick={() => onNavigateTab('landing')}
-            className="flex items-center gap-3.5 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group flex-shrink-0"
           >
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/25 group-hover:scale-105 group-hover:shadow-emerald-600/50 group-hover:rotate-1 transition-all duration-300">
-                <Bird className="w-6 h-6 drop-shadow-xs" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-500/25 group-hover:scale-105 transition-all duration-300">
+                <Bird className="w-5 h-5 drop-shadow-xs" />
               </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
             </div>
 
             <div>
-              <div className="flex items-center gap-2.5">
-                <span className="font-black text-2xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-900 bg-clip-text text-transparent group-hover:to-emerald-600 transition-all">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-lg sm:text-xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-900 bg-clip-text text-transparent group-hover:to-emerald-600 transition-all whitespace-nowrap">
                   Drishti
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border border-emerald-200/90 shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/90 whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                   <span>100 Species</span>
                 </span>
               </div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700/85">
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-700/85 whitespace-nowrap">
                 Avian Ecological Intelligence
               </p>
             </div>
           </div>
 
-          {/* Center Navigation Dock — Bigger & More Attractive */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-slate-100/90 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 shadow-inner ring-1 ring-slate-900/5">
+          {/* Center Navigation Dock — Sleek & Compact Single-Line */}
+          <nav className="hidden lg:flex items-center gap-1 bg-slate-100/80 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-inner ring-1 ring-slate-900/5 flex-shrink-0">
             <button
               onClick={() => onNavigateTab('identify')}
-              className="px-5 py-2.5 text-[15px] font-bold text-emerald-950 bg-white rounded-full shadow-md shadow-emerald-950/10 border-2 border-emerald-400/80 flex items-center gap-2.5 hover:shadow-lg hover:border-emerald-500 hover:scale-105 active:scale-95 transition-all group"
+              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-bold text-emerald-950 bg-white rounded-full shadow-xs border border-emerald-300 flex items-center gap-1.5 whitespace-nowrap hover:shadow-sm hover:scale-102 active:scale-95 transition-all group"
             >
-              <ScanLine className="w-5 h-5 text-emerald-600 group-hover:rotate-6 group-hover:scale-110 transition-all" />
+              <ScanLine className="w-4 h-4 text-emerald-600 group-hover:rotate-6 transition-transform" />
               <span>AI Classifier</span>
             </button>
             <button
               onClick={() => onNavigateTab('species')}
-              className="px-5 py-2.5 text-[15px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white rounded-full transition-all flex items-center gap-2.5 group hover:shadow-sm hover:scale-105 active:scale-95"
+              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
             >
-              <Bird className="w-4.5 h-4.5 text-slate-400 group-hover:text-emerald-600 group-hover:scale-110 transition-all" />
+              <Bird className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               <span>Species Catalog</span>
             </button>
             <button
               onClick={() => onNavigateTab('encyclopedia')}
-              className="px-5 py-2.5 text-[15px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white rounded-full transition-all flex items-center gap-2.5 group hover:shadow-sm hover:scale-105 active:scale-95"
+              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
             >
-              <BookOpen className="w-4.5 h-4.5 text-slate-400 group-hover:text-emerald-600 group-hover:scale-110 transition-all" />
+              <BookOpen className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               <span>Encyclopedia</span>
             </button>
             <button
               onClick={() => onNavigateTab('dashboard')}
-              className="px-5 py-2.5 text-[15px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white rounded-full transition-all flex items-center gap-2.5 group hover:shadow-sm hover:scale-105 active:scale-95"
+              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
             >
-              <Compass className="w-4.5 h-4.5 text-slate-400 group-hover:text-emerald-600 group-hover:scale-110 transition-all" />
+              <Compass className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               <span>Dashboard</span>
             </button>
           </nav>
 
-          {/* Right Action Controls — Bigger & Tactile */}
-          <div className="flex items-center gap-3">
+          {/* Right Action Controls — Sleek & Compact */}
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
             {currentUser ? (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <div 
                   onClick={() => onNavigateTab('dashboard')}
-                  className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200/70 cursor-pointer transition-colors shadow-2xs"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200/70 cursor-pointer transition-colors shadow-2xs whitespace-nowrap"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-xs font-bold text-white shadow-2xs">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-[10px] font-bold text-white shadow-2xs">
                     {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                   </div>
-                  <span className="text-sm font-bold text-slate-800 max-w-[120px] truncate">
+                  <span className="text-xs font-bold text-slate-800 max-w-[100px] truncate">
                     {currentUser.name}
                   </span>
                 </div>
 
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold text-[15px] shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/30 hover:scale-105 transition-all flex items-center gap-2"
+                  className="px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-[13px] shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-400/30 hover:scale-102 transition-all flex items-center gap-1.5 whitespace-nowrap"
                 >
                   <span>Open App</span>
-                  <ArrowRight className="w-4.5 h-4.5" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
                 <button
                   onClick={onLogout}
-                  className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors"
                   title="Logout"
                 >
-                  <LogIn className="w-5 h-5 rotate-180" />
+                  <LogIn className="w-4 h-4 rotate-180" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {/* Log In */}
                 <button
                   onClick={() => onNavigateTab('login')}
-                  className="px-5 py-2.5 rounded-full text-[15px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 transition-all flex items-center gap-2 shadow-sm hover:shadow-md active:scale-95 group"
+                  className="px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 border border-slate-200/80 transition-all flex items-center gap-1.5 whitespace-nowrap shadow-2xs active:scale-95"
                 >
-                  <LogIn className="w-4.5 h-4.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                  <LogIn className="w-3.5 h-3.5 text-slate-400" />
                   <span>Log In</span>
                 </button>
 
                 {/* Register Button */}
                 <button
                   onClick={() => onNavigateTab('register')}
-                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold text-[15px] shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/30 hover:shadow-lg hover:shadow-emerald-600/40 hover:-translate-y-0.5 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5"
+                  className="px-4.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-[13px] shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-400/30 hover:shadow-md hover:scale-102 active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
                 >
-                  <UserPlus className="w-5 h-5 drop-shadow-xs" />
+                  <UserPlus className="w-3.5 h-3.5" />
                   <span>Register</span>
                 </button>
 
                 {/* Guest Pill */}
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-[15px] font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50/80 hover:bg-emerald-100 rounded-full border border-emerald-200 hover:border-emerald-300 shadow-xs hover:shadow-sm hover:scale-105 active:scale-95 transition-all group"
+                  className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs sm:text-[13px] font-bold text-slate-600 hover:text-emerald-800 rounded-full hover:bg-emerald-50/90 border border-slate-200/80 hover:border-emerald-300 transition-all whitespace-nowrap shadow-2xs"
                 >
                   <span>Guest</span>
-                  <ArrowRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               </div>
             )}
