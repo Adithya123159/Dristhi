@@ -125,7 +125,7 @@ export default function Settings() {
             className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
           <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
-            Used across both <strong>Bird Photograph Identification</strong> and <strong>Bird Voice / Audio Identification</strong>. When omitted, Drishti operates in offline mode using local MobileNetV2 and Librosa CNN models.
+            Used across both <strong>Bird Photograph Identification</strong> and <strong>Bird Voice / Audio Identification</strong> to provide high-precision species classification and structured biological telemetry.
           </p>
         </div>
 
