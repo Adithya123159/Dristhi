@@ -1,0 +1,202 @@
+<USER_REQUEST>
+I want to improve the existing dashboard of my project:
+
+**Project Name: Drishti – AI-Based Multimodal Bird Identification System**
+
+My objective is to make Drishti a global bird identification application capable of identifying bird species worldwide rather than restricting it to 100 predefined Indian bird species.
+
+I want you to modify the existing dashboard UI and remove unnecessary limitations and sections.
+
+## 1. REMOVE THE 100-SPECIES LIMITATION
+
+Currently, the dashboard displays:
+
+- Supported Species: 100
+- Indian Birds
+- Browse and search all 100 supported bird species.
+
+I want to remove this fixed limitation.
+
+New requirements:
+
+- Do not restrict bird identification to 100 predefined species.
+- Aim to identify bird species from anywhere in the world.
+- Support identification of Indian, Asian, African, European, American and other global bird species.
+- Use the existing AI image identification capabilities for broader species recognition.
+- Retrieve biological information dynamically based on the identified species.
+- Do not depend exclusively on a predefined species catalogue.
+
+IMPORTANT:
+A fixed database of 100 species must not restrict the AI identification functionality.
+
+If the existing classification model supports only 100 classes, inspect its architecture and limitations. Do not falsely advertise unlimited recognition or pretend that it supports species outside its training classes.
+
+Use the existing multimodal API or suitable identification pipeline for broader recognition. Keep image and audio identification capabilities separate where their technical requirements differ.
+
+## 2. REDESIGN THE DASHBOARD STATISTICS
+
+Currently, the dashboard contains four cards:
+
+1. Supported Species – 100
+2. AI Engine – Multimodal AI
+3. Speed – <100ms
+4. Total Classified
+
+Remove the unnecessary statistics.
+
+Use only two statistics cards:
+
+**Card 1: AI Engine**
+- Main Text: Multimodal AI
+- Subtitle: Intelligent Bird Recognition
+
+**Card 2: Identification Modes**
+- Main Text: Image & Audio
+- Subtitle: Visual and Acoustic Recognition
+
+Remove:
+- Fixed 100 Supported Species.
+- Unverified <100ms performance claims.
+- Any misleading statistics.
+
+Total Classified can remain only if it represents the actual number of completed identifications stored in the database. Otherwise, remove it.
+
+## 3. REDESIGN THE MAIN DASHBOARD ACTION AREA
+
+Currently, the dashboard contains:
+
+- Identify Bird
+- Supported Species
+- History
+
+I want a cleaner design focused on the primary functionality.
+
+### Main Primary Card: Identify Bird
+
+Title: Identify Bird
+
+Description:
+"Upload a bird image or audio recording to identify its species and explore its biological characteristics."
+
+The identification page should provide two input options:
+
+1. Identify Using Image
+2. Identify Using Audio
+
+Both options must lead to their respective existing identification workflows.
+
+Make this the most prominent section of the dashboard.
+
+### History
+
+Keep History as a secondary navigation option if its existing functionality is working.
+
+Remove the separate Supported Species dashboard card because worldwide recognition should not depend on browsing a fixed catalogue.
+
+Remove the Sample Species section and other unnecessary catalogue-related dashboard elements.
+
+## 4. UI DESIGN REQUIREMENTS
+
+Improve the dashboard with a modern, professional and minimal design.
+
+Design guidelines:
+
+- Maintain the existing Drishti branding.
+- Retain the green colour theme.
+- Use clean typography.
+- Maintain consistent spacing and alignment.
+- Use subtle borders and shadows.
+- Use appropriately sized icons.
+- Avoid unnecessary empty spaces.
+- Make the primary identification section visually prominent.
+- Ensure the layout is responsive across desktop, tablet and mobile screens.
+
+Do not overcrowd the dashboard.
+
+The dashboard should immediately communicate that Drishti identifies birds through images and audio.
+
+## 5. PRESERVE EXISTING FUNCTIONALITY
+
+Strictly follow these restrictions:
+
+- Do not modify the landing page.
+- Do not change the existing image classification model unnecessarily.
+- Do not break the audio identification workflow.
+- Do not remove the identification history functionality.
+- Do not modify existing working backend APIs unnecessarily.
+- Do not change database configuration.
+- Do not introduce unrelated features.
+- Do not add chatbots, maps, quizzes, user communities or recommendation systems.
+- Reuse existing components wherever possible.
+
+## 6. GLOBAL BIRD IDENTIFICATION REQUIREMENT
+
+The ultimate goal is to identify birds beyond a predefined Indian species dataset.
+
+For image identification:
+- Validate the uploaded image.
+- Check whether it contains a recognizable bird.
+- Identify the possible bird species.
+- Display the common and scientific names.
+- Retrieve the corresponding biological profile.
+- Handle unknown or uncertain species appropriately.
+
+For audio identification:
+- Validate the uploaded recording.
+- Detect recognizable bird vocalization.
+- Identify the possible species using an appropriate audio-capable model.
+- Display the same structured biological profile.
+- Handle uncertain or unsupported recordings appropriately.
+
+Never fabricate species names or claim that an identification is certain when the model is unsure.
+
+## 7. FINAL DASHBOARD STRUCTURE
+
+The final dashboard should have:
+
+**Statistics:**
+- AI Engine – Multimodal AI
+- Identification Modes – Image & Audio
+
+**Main Action:**
+- Identify Bird – Image and Audio Identification
+
+**Secondary Navigation:**
+- History
+
+No fixed species count.
+No unnecessary species catalogue cards.
+No unverified speed statistics.
+No additional modules.
+
+## FINAL OBJECTIVE
+
+Transform the existing Drishti dashboard into a clean, professional, global bird identification interface.
+
+The application should focus on one central workflow:
+
+Upload Image / Audio → Validate Input → Identify Bird Species → Retrieve Biological Information → Display Structured Bird Profile.
+
+Before implementing, inspect the existing frontend, backend, API integrations and ML models.
+
+Understand which components currently handle image identification and audio identification.
+
+Make the necessary changes without breaking existing functionality.
+
+After implementation, test the dashboard responsiveness and both identification workflows.
+
+**Important: Do not just change the displayed text from 100 to unlimited. The actual identification pipeline must be capable of handling species beyond the existing 100-class restriction wherever the underlying models and APIs support it.**
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-07T14:28:27+05:30.
+
+The user's current state is as follows:
+Active Document: d:\Dristhi\.gitignore (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 31
+Other open documents:
+- d:\Dristhi\backend\database.py (LANGUAGE_UNSPECIFIED)
+- d:\Dristhi\backend\species_detail_service.py (LANGUAGE_UNSPECIFIED)
+- d:\Dristhi\frontend\src\components\ConfidenceMeter.jsx (LANGUAGE_UNSPECIFIED)
+- d:\Dristhi\frontend\src\pages\AboutProject.jsx (LANGUAGE_UNSPECIFIED)
+- d:\Dristhi\frontend\src\components\StructuredBirdResult.jsx (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>
