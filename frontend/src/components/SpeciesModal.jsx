@@ -41,14 +41,24 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
 
           {/* Species Badge & Title overlay */}
           <div className="absolute bottom-4 left-6 right-6">
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badge.color}`}>
                 <span className={`w-2 h-2 rounded-full ${badge.dot}`} />
                 {badge.label}
               </span>
+              {species.genus && (
+                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 text-white backdrop-blur-md">
+                  Genus: <span className="italic">{species.genus}</span>
+                </span>
+              )}
               {species.family && (
                 <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 text-white backdrop-blur-md">
                   Family: {species.family}
+                </span>
+              )}
+              {species.order && (
+                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 text-white backdrop-blur-md">
+                  Order: {species.order}
                 </span>
               )}
             </div>
