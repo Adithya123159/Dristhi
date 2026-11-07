@@ -86,13 +86,13 @@ export default function App() {
     );
   }
 
-  if (currentTab === 'login' || currentTab === 'register') {
+  // Enforce authentication gate: unauthenticated guests cannot enter dashboard or identification
+  if (!currentUser) {
     return (
       <AuthPage 
-        initialMode={currentTab}
+        initialMode={currentTab === 'register' ? 'register' : 'login'}
         onSuccess={handleAuthSuccess}
         onNavigateHome={() => setCurrentTab('landing')}
-        onSkip={() => setCurrentTab('dashboard')}
       />
     );
   }

@@ -31,6 +31,14 @@ export default function LandingPage({
     loadStats();
   }, []);
 
+  const handleProtectedNavigate = (targetTab) => {
+    if (currentUser) {
+      onNavigateTab(targetTab);
+    } else {
+      onNavigateTab('login');
+    }
+  };
+
   return (
     <div className="min-h-screen lg:h-screen lg:max-h-screen overflow-y-auto lg:overflow-hidden bg-slate-50 text-slate-800 flex flex-col justify-between font-sans selection:bg-emerald-600 selection:text-white relative">
       
@@ -215,7 +223,7 @@ export default function LandingPage({
           {/* Primary Action Button */}
           <div className="mt-6 sm:mt-8">
             <button
-              onClick={() => onNavigateTab('identify')}
+              onClick={() => handleProtectedNavigate('identify')}
               className="px-7 sm:px-9 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-emerald-600/30 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
             >
               <ScanLine className="w-5 h-5 group-hover:rotate-6 transition-transform" />
@@ -241,7 +249,7 @@ export default function LandingPage({
           {/* Bottom-Right: Clean Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2.5 w-full sm:w-auto">
             <button
-              onClick={() => onNavigateTab('identify')}
+              onClick={() => handleProtectedNavigate('identify')}
               className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/95 backdrop-blur-md hover:bg-white text-slate-800 border border-slate-300/90 hover:border-emerald-300 font-bold text-xs tracking-wider uppercase shadow-sm hover:shadow-md hover:scale-102 transition-all flex items-center justify-center gap-2 group"
             >
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">
@@ -251,7 +259,7 @@ export default function LandingPage({
             </button>
 
             <button
-              onClick={() => onNavigateTab('dashboard')}
+              onClick={() => handleProtectedNavigate('dashboard')}
               className="w-full sm:w-auto min-w-[200px] px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-emerald-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-md hover:shadow-lg hover:scale-102 transition-all text-center flex items-center justify-center gap-2"
             >
               <span>EXPLORE DASHBOARD</span>
