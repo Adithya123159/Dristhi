@@ -12,7 +12,9 @@ from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form, Header, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, Response
+import re
+from backend.pdf_exporter import generate_species_pdf_bytes
 import requests
 
 # Add project root to sys.path so modules can be imported
@@ -1013,6 +1015,42 @@ def login_user(data: UserLogin):
         },
         "token": f"user_tok_{user['id']}_{hash_password(user['email'])[:16]}"
     }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7.5 PDF EXPORT ENDPOINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/export/species-pdf")
+async def export_species_pdf(species: dict = Body(...)):
+    """Generate and return a print-ready A4 PDF field dossier for a bird species."""
+    try:
+        pdf_bytes = generate_species_pdf_bytes(species)
+        common_name = species.get("common_name", "Species")
+        safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', common_name)
+        filename = f"{safe_name}_Drishti_Field_Dossier.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Access-Control-Expose-Headers": "Content-Disposition"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to compile species PDF: {str(e)}")
+
+@app.get("/api/export/project-report-pdf")
+async def export_project_report_pdf():
+    """Download the full VTU/VCET academic project report PDF."""
+    report_path = os.path.join(PROJECT_ROOT, "Drishti_Project_Report.pdf")
+    if os.path.exists(report_path):
+        return FileResponse(
+            report_path,
+            media_type="application/pdf",
+            filename="Drishti_Project_Report.pdf"
+        )
+    raise HTTPException(status_code=404, detail="Project report PDF not found on server.")
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. SERVE BUILT REACT FRONTEND SPA

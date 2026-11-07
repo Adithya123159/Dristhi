@@ -252,5 +252,28 @@ export const api = {
     } catch (e) {
       return { success: false, error: e.message };
     }
+  },
+
+  async downloadSpeciesPdf(species) {
+    const res = await fetch(`${getBaseUrl()}/api/export/species-pdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(species)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to download species PDF');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = (species.common_name || 'Species').replace(/[^a-zA-Z0-9_\-]/g, '_');
+    a.download = `${safeName}_Drishti_Field_Dossier.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return true;
   }
 };

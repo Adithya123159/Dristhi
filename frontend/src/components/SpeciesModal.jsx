@@ -1,11 +1,84 @@
-import React from 'react';
-import { X, Globe, Feather, Utensils, Shield, MapPin, ExternalLink, Compass } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  X, 
+  Feather, 
+  Utensils, 
+  MapPin, 
+  Compass, 
+  Download, 
+  Check, 
+  AlertCircle 
+} from 'lucide-react';
 import { getStatusBadge } from '../utils/statusBadges';
+import { api } from '../services/api';
 
 export default function SpeciesModal({ species, isOpen, onClose }) {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
   if (!isOpen || !species) return null;
 
   const badge = getStatusBadge(species.conservation_status);
+
+  const handleDownloadPdf = async () => {
+    setIsDownloading(true);
+    setErrorMessage(null);
+    setDownloadSuccess(false);
+
+    try {
+      await api.downloadSpeciesPdf(species);
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 3000);
+    } catch (err) {
+      console.warn('Backend PDF endpoint error, falling back to printable view:', err);
+      // Client-side print fallback if network / backend fails
+      triggerPrintFallback(species);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const triggerPrintFallback = (spec) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Popup blocker prevented PDF generation. Please allow popups.');
+      return;
+    }
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${spec.common_name || 'Species'} — Drishti Field Dossier</title>
+        <style>
+          @page { size: A4; margin: 15mm; }
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1e293b; padding: 20px; line-height: 1.5; }
+          .hdr { border-bottom: 2px solid #059669; padding-bottom: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; }
+          .title { font-size: 26px; font-weight: 800; color: #0f172a; margin: 0; }
+          .sci { font-size: 16px; font-style: italic; color: #047857; margin: 4px 0 12px 0; font-family: Georgia, serif; }
+          .card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+          .label { font-size: 11px; font-weight: bold; text-transform: uppercase; color: #059669; margin-bottom: 4px; }
+        </style>
+      </head>
+      <body>
+        <div class="hdr">
+          <div><h2 style="margin:0;color:#065f46;">Drishti Avian Intelligence</h2><small>Species Field Dossier</small></div>
+          <div style="text-align:right;"><small>${spec.conservation_status || 'Least Concern'}</small></div>
+        </div>
+        <h1 class="title">${spec.common_name || 'Bird Species'}</h1>
+        <div class="sci">${spec.scientific_name || ''} &bull; Genus: ${spec.genus || 'N/A'} &bull; Family: ${spec.family || 'N/A'}</div>
+        <div class="card"><div class="label">Ecological Summary</div><div>${spec.description || 'N/A'}</div></div>
+        <div class="card"><div class="label">Natural Habitat</div><div>${spec.habitat || 'N/A'}</div></div>
+        <div class="card"><div class="label">Diet & Ecological Niche</div><div>${spec.diet || 'N/A'}</div></div>
+        <div class="card"><div class="label">Physical Traits</div><div>${spec.physical_characteristics || 'N/A'}</div></div>
+        <div class="card"><div class="label">Geographical Distribution</div><div>${spec.geographical_distribution || 'N/A'}</div></div>
+        <script>window.onload = function() { window.print(); window.close(); };</script>
+      </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -31,13 +104,36 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
 
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors backdrop-blur-md"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Action buttons (Download PDF + Close) in Top Header */}
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isDownloading}
+              className="px-3 py-1.5 rounded-full bg-black/45 hover:bg-emerald-600 text-white transition-colors backdrop-blur-md flex items-center gap-1.5 text-xs font-bold shadow-xs group"
+              title="Download official Species Field Dossier as PDF"
+            >
+              {isDownloading ? (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : downloadSuccess ? (
+                <Check className="w-3.5 h-3.5 text-emerald-300" />
+              ) : (
+                <Download className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="hidden sm:inline">
+                {isDownloading ? 'Generating...' : downloadSuccess ? 'Downloaded!' : 'Download PDF'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-full bg-black/45 text-white hover:bg-black/70 transition-colors backdrop-blur-md"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           {/* Species Badge & Title overlay */}
           <div className="absolute bottom-4 left-6 right-6">
@@ -73,6 +169,13 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
 
         {/* Content Body */}
         <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto">
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* Summary */}
           {species.description && (
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-sm text-slate-700 leading-relaxed">
@@ -133,16 +236,39 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 px-6 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
+        <div className="p-4 px-6 bg-slate-50 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
           <span className="text-xs text-slate-500 font-mono">
-            Species ID: {species.species_id}
+            Species ID: {species.species_id || 'N/A'}
           </span>
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-xs"
-          >
-            Close Explorer
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isDownloading}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 shadow-xs border ${
+                downloadSuccess
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                  : 'bg-white hover:bg-emerald-50 border-slate-300 hover:border-emerald-500 text-slate-700 hover:text-emerald-800'
+              } disabled:opacity-50 group`}
+              title="Download official Species Field Dossier as PDF"
+            >
+              {isDownloading ? (
+                <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+              ) : downloadSuccess ? (
+                <Check className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <Download className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
+              )}
+              <span>{isDownloading ? 'Generating PDF...' : downloadSuccess ? 'PDF Downloaded!' : 'Download PDF'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-xs"
+            >
+              Close Explorer
+            </button>
+          </div>
         </div>
       </div>
     </div>
