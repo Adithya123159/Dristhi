@@ -246,12 +246,15 @@ async def identify_bird_image(
                     raise HTTPException(status_code=400, detail=rejection_msg)
 
                 # Species successfully identified via API
-                common_name = g_res.get("common_name", "Identified Bird")
-                scientific_name = g_res.get("scientific_name", "Aves indet.")
-                confidence = float(g_res.get("confidence", 0.98))
-                family = g_res.get("family", "Aves")
+                raw_basic = g_res.get("basic_identification") or {}
+                common_name = raw_basic.get("common_name") or g_res.get("common_name") or "Identified Bird"
+                scientific_name = raw_basic.get("scientific_name") or g_res.get("scientific_name") or "Aves indet."
+                confidence = float(raw_basic.get("confidence") or g_res.get("confidence") or 0.98)
+                family = raw_basic.get("family") or g_res.get("family") or "Aves"
 
                 structured_info = species_detail_service.build_from_gemini_result(g_res, "image")
+                genus = structured_info["basic_identification"]["genus"]
+                order = structured_info["basic_identification"]["order"]
 
                 # Format enriched top predictions
                 raw_top = g_res.get("top_predictions", [])
@@ -265,7 +268,7 @@ async def identify_bird_image(
                         "common_name": item.get("common_name", ""),
                         "scientific_name": item.get("scientific_name", ""),
                         "family": family,
-                        "conservation_status": g_res.get("conservation_status", "Least Concern (LC)")
+                        "conservation_status": structured_info["basic_identification"].get("conservation_status", "Least Concern (LC)")
                     })
                 if not enriched_top:
                     enriched_top.append({
@@ -275,7 +278,7 @@ async def identify_bird_image(
                         "common_name": common_name,
                         "scientific_name": scientific_name,
                         "family": family,
-                        "conservation_status": g_res.get("conservation_status", "Least Concern (LC)")
+                        "conservation_status": structured_info["basic_identification"].get("conservation_status", "Least Concern (LC)")
                     })
 
                 # Grad-CAM visual heatmap overlay

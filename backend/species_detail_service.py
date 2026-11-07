@@ -448,15 +448,18 @@ class SpeciesDetailService:
         distribution = bird.get("geographical_distribution", "Widespread across the Indian Subcontinent.")
         description = bird.get("description", "")
 
-        # Look up family biological traits
+        # Look up family biological traits & order
         fam_traits = FAMILY_BIOLOGY.get(family, DEFAULT_FAMILY_BIOLOGY)
+        genus = bird.get("genus") or (scientific_name.split()[0] if scientific_name else "Information unavailable")
+        order = bird.get("order") or FAMILY_TO_ORDER.get(family, "Information unavailable")
 
         # ─── SECTION A: BASIC IDENTIFICATION ───
         sec_a = {
             "common_name": common_name,
             "scientific_name": scientific_name,
-            "species": scientific_name,
+            "genus": genus,
             "family": family,
+            "order": order,
             "confidence": round(float(confidence), 4),
             "confidence_percentage": f"{round(float(confidence) * 100, 1)}%",
             "conservation_status": conservation,
@@ -466,8 +469,8 @@ class SpeciesDetailService:
         # ─── SECTION B: PHYSICAL CHARACTERISTICS ───
         sec_b = {
             "appearance": physical or fam_traits["appearance"],
-            "colour_features": physical or f"Features characteristic plumage coloration and markings typical of the {family} family.",
-            "size_characteristics": fam_traits["size_characteristics"]
+            "colour_features": bird.get("colour_features") or physical or f"Features characteristic plumage coloration and markings typical of the {family} family.",
+            "size_characteristics": bird.get("size_characteristics") or fam_traits["size_characteristics"]
         }
 
         # ─── SECTION C: HABITAT AND DISTRIBUTION ───
@@ -508,6 +511,11 @@ class SpeciesDetailService:
             "feeding_habits": sec_d,
             "behaviour_lifestyle": sec_e,
             "interesting_information": sec_f,
+            "sources": [
+                "IUCN Red List of Threatened Species",
+                "eBird / Cornell Lab of Ornithology",
+                "Birds of the World"
+            ],
             "description": description,
             "image_url": bird.get("image_url", "")
         }
@@ -519,78 +527,134 @@ class SpeciesDetailService:
     ) -> Dict[str, Any]:
         """
         Builds the complete 6-section biological profile directly from Gemini API results,
-        blended with scientifically validated taxonomic family traits.
+        preserving fine-grained species-specific details and authentic ornithological standards.
         """
-        common_name = g_data.get("common_name") or "Identified Bird"
-        scientific_name = g_data.get("scientific_name") or "Aves indet."
-        family = g_data.get("family") or "Aves"
-        confidence = float(g_data.get("confidence") or 0.95)
-        conservation = g_data.get("conservation_status") or "Least Concern (LC)"
-        habitat = g_data.get("habitat") or "Woodlands, forest tracts, and open country."
-        diet = g_data.get("diet") or "Insects, seeds, fruits, and small invertebrates."
-        physical = g_data.get("physical_characteristics") or "Characteristic plumage coloration and avian body structure."
-        distribution = g_data.get("geographical_distribution") or "Native or resident across the Indian Subcontinent."
-        description = g_data.get("description") or f"{common_name} ({scientific_name}) documented by Drishti."
+        raw_basic = g_data.get("basic_identification") or {}
+        common_name = raw_basic.get("common_name") or g_data.get("common_name") or "Information unavailable"
+        scientific_name = raw_basic.get("scientific_name") or g_data.get("scientific_name") or "Information unavailable"
 
-        # Cross-reference local DB if available for high-res catalog image or extra metadata
+        # Genus extraction
+        genus = raw_basic.get("genus")
+        if not genus and scientific_name != "Information unavailable":
+            parts = scientific_name.strip().split()
+            if len(parts) >= 1:
+                genus = parts[0]
+        genus = genus or "Information unavailable"
+
+        family = raw_basic.get("family") or g_data.get("family") or "Information unavailable"
+        
+        # Order resolution
+        order = raw_basic.get("order") or g_data.get("order")
+        if (not order or order == "Information unavailable") and family != "Information unavailable":
+            order = FAMILY_TO_ORDER.get(family, "Information unavailable")
+        order = order or "Information unavailable"
+
+        # Confidence handling
+        confidence = raw_basic.get("confidence")
+        if confidence is None:
+            confidence = g_data.get("confidence", 0.95)
+        try:
+            confidence_val = float(confidence)
+        except (ValueError, TypeError):
+            confidence_val = 0.95
+
+        confidence_pct = raw_basic.get("confidence_percentage") or f"{round(confidence_val * 100, 1)}%"
+        conservation = raw_basic.get("conservation_status") or g_data.get("conservation_status") or "Least Concern (LC)"
+
         local_bird = self.find_bird(common_name) or self.find_bird(scientific_name)
-        if local_bird:
-            if not family or family == "Aves":
-                family = local_bird.get("family", family)
-            if not conservation or conservation == "Data Deficient (DD)":
-                conservation = local_bird.get("conservation_status", conservation)
-
-        fam_traits = FAMILY_BIOLOGY.get(family, DEFAULT_FAMILY_BIOLOGY)
 
         # ─── SECTION A: BASIC IDENTIFICATION ───
         sec_a = {
             "common_name": common_name,
             "scientific_name": scientific_name,
-            "species": scientific_name,
+            "genus": genus,
             "family": family,
-            "confidence": round(float(confidence), 4),
-            "confidence_percentage": f"{round(float(confidence) * 100, 1)}%",
+            "order": order,
+            "confidence": round(confidence_val, 4),
+            "confidence_percentage": confidence_pct,
             "conservation_status": conservation,
             "species_id": local_bird.get("species_id", common_name.lower().replace(" ", "_")) if local_bird else common_name.lower().replace(" ", "_")
         }
 
         # ─── SECTION B: PHYSICAL CHARACTERISTICS ───
+        raw_phys = g_data.get("physical_characteristics") or {}
+        if isinstance(raw_phys, str):
+            appearance = raw_phys
+            colour_features = "Information unavailable"
+            size_char = "Information unavailable"
+        else:
+            appearance = raw_phys.get("appearance") or g_data.get("appearance") or "Information unavailable"
+            colour_features = raw_phys.get("colour_features") or "Information unavailable"
+            size_char = raw_phys.get("size_characteristics") or "Information unavailable"
+
         sec_b = {
-            "appearance": physical,
-            "colour_features": fam_traits.get("colour_features", f"Distinctive plumage patterns and markings typical of {common_name}."),
-            "size_characteristics": fam_traits.get("size_characteristics", DEFAULT_FAMILY_BIOLOGY["size_characteristics"])
+            "appearance": appearance,
+            "colour_features": colour_features,
+            "size_characteristics": size_char
         }
 
         # ─── SECTION C: HABITAT AND DISTRIBUTION ───
+        raw_hab = g_data.get("habitat_distribution") or {}
+        if isinstance(raw_hab, str):
+            natural_hab = raw_hab
+            geo_dist = g_data.get("geographical_distribution") or "Information unavailable"
+            common_env = "Information unavailable"
+        else:
+            natural_hab = raw_hab.get("natural_habitat") or g_data.get("habitat") or "Information unavailable"
+            geo_dist = raw_hab.get("geographic_distribution") or g_data.get("geographical_distribution") or "Information unavailable"
+            common_env = raw_hab.get("common_environments") or "Information unavailable"
+
         sec_c = {
-            "natural_habitat": habitat,
-            "geographic_distribution": distribution,
-            "common_environments": fam_traits.get("common_environments", DEFAULT_FAMILY_BIOLOGY["common_environments"])
+            "natural_habitat": natural_hab,
+            "geographic_distribution": geo_dist,
+            "common_environments": common_env
         }
 
         # ─── SECTION D: FEEDING HABITS ───
+        raw_feed = g_data.get("feeding_habits") or {}
+        if isinstance(raw_feed, str):
+            primary_diet = raw_feed
+            what_eats = g_data.get("diet") or "Information unavailable"
+            feed_behav = "Information unavailable"
+            hunt_habits = "Information unavailable"
+        else:
+            primary_diet = raw_feed.get("primary_diet") or "Information unavailable"
+            what_eats = raw_feed.get("what_it_eats") or g_data.get("diet") or "Information unavailable"
+            feed_behav = raw_feed.get("feeding_behaviour") or "Information unavailable"
+            hunt_habits = raw_feed.get("hunting_habits") or "Information unavailable"
+
         sec_d = {
-            "primary_diet": fam_traits.get("primary_diet", "Opportunistic omnivore"),
-            "what_it_eats": diet,
-            "feeding_behaviour": fam_traits.get("feeding_behaviour", DEFAULT_FAMILY_BIOLOGY["feeding_behaviour"]),
-            "hunting_habits": fam_traits.get("hunting_habits", DEFAULT_FAMILY_BIOLOGY["hunting_habits"])
+            "primary_diet": primary_diet,
+            "what_it_eats": what_eats,
+            "feeding_behaviour": feed_behav,
+            "hunting_habits": hunt_habits
         }
 
         # ─── SECTION E: BEHAVIOUR AND LIFESTYLE ───
+        raw_behav = g_data.get("behaviour_lifestyle") or {}
         sec_e = {
-            "general_behaviour": fam_traits.get("general_behaviour", DEFAULT_FAMILY_BIOLOGY["general_behaviour"]),
-            "social_behaviour": fam_traits.get("social_behaviour", DEFAULT_FAMILY_BIOLOGY["social_behaviour"]),
-            "nesting_habits": fam_traits.get("nesting_habits", DEFAULT_FAMILY_BIOLOGY["nesting_habits"]),
-            "breeding_behaviour": fam_traits.get("breeding_behaviour", DEFAULT_FAMILY_BIOLOGY["breeding_behaviour"])
+            "general_behaviour": raw_behav.get("general_behaviour") or "Information unavailable",
+            "social_behaviour": raw_behav.get("social_behaviour") or "Information unavailable",
+            "nesting_habits": raw_behav.get("nesting_habits") or "Information unavailable",
+            "breeding_behaviour": raw_behav.get("breeding_behaviour") or "Information unavailable"
         }
 
         # ─── SECTION F: INTERESTING INFORMATION / NOVELTY ───
+        raw_novelty = g_data.get("interesting_information") or {}
         sec_f = {
-            "unique_characteristics": fam_traits.get("unique_characteristics", f"Renowned for distinctive morphology and scientific significance across South Asian biodiversity."),
-            "special_adaptations": fam_traits.get("special_adaptations", DEFAULT_FAMILY_BIOLOGY["special_adaptations"]),
-            "ecological_importance": fam_traits.get("ecological_importance", DEFAULT_FAMILY_BIOLOGY["ecological_importance"]),
-            "rare_facts": fam_traits.get("rare_facts", DEFAULT_FAMILY_BIOLOGY["rare_facts"])
+            "unique_characteristics": raw_novelty.get("unique_characteristics") or "Information unavailable",
+            "special_adaptations": raw_novelty.get("special_adaptations") or "Information unavailable",
+            "ecological_importance": raw_novelty.get("ecological_importance") or "Information unavailable",
+            "rare_facts": raw_novelty.get("rare_facts") or "Information unavailable"
         }
+
+        sources = g_data.get("sources") or [
+            "IUCN Red List of Threatened Species",
+            "eBird / Cornell Lab of Ornithology",
+            "Birds of the World"
+        ]
+
+        description = g_data.get("description") or f"{common_name} ({scientific_name}) documented by Drishti."
 
         return {
             "basic_identification": sec_a,
@@ -599,6 +663,7 @@ class SpeciesDetailService:
             "feeding_habits": sec_d,
             "behaviour_lifestyle": sec_e,
             "interesting_information": sec_f,
+            "sources": sources,
             "description": description,
             "image_url": local_bird.get("image_url", "") if local_bird else ""
         }
@@ -614,42 +679,48 @@ class SpeciesDetailService:
         return {
             "basic_identification": {
                 "common_name": clean_name,
-                "scientific_name": "Aves indet.",
-                "species": clean_name,
-                "family": "Aves",
+                "scientific_name": "Information unavailable",
+                "genus": "Information unavailable",
+                "family": "Information unavailable",
+                "order": "Information unavailable",
                 "confidence": round(float(confidence), 4),
                 "confidence_percentage": f"{round(float(confidence) * 100, 1)}%",
                 "conservation_status": "Data Deficient (DD)",
                 "species_id": identifier
             },
             "physical_characteristics": {
-                "appearance": DEFAULT_FAMILY_BIOLOGY["appearance"],
-                "colour_features": "Plumage displays characteristic avian color patterns and contours.",
-                "size_characteristics": DEFAULT_FAMILY_BIOLOGY["size_characteristics"]
+                "appearance": "Information unavailable",
+                "colour_features": "Information unavailable",
+                "size_characteristics": "Information unavailable"
             },
             "habitat_distribution": {
-                "natural_habitat": "Woodlands, forest tracts, riverine wetlands, and open plains.",
-                "geographic_distribution": "Indian Subcontinent and neighboring tropical regions.",
-                "common_environments": DEFAULT_FAMILY_BIOLOGY["common_environments"]
+                "natural_habitat": "Information unavailable",
+                "geographic_distribution": "Information unavailable",
+                "common_environments": "Information unavailable"
             },
             "feeding_habits": {
-                "primary_diet": DEFAULT_FAMILY_BIOLOGY["primary_diet"],
-                "what_it_eats": "Natural seed, invertebrate, and fruit resources available in native habitats.",
-                "feeding_behaviour": DEFAULT_FAMILY_BIOLOGY["feeding_behaviour"],
-                "hunting_habits": DEFAULT_FAMILY_BIOLOGY["hunting_habits"]
+                "primary_diet": "Information unavailable",
+                "what_it_eats": "Information unavailable",
+                "feeding_behaviour": "Information unavailable",
+                "hunting_habits": "Information unavailable"
             },
             "behaviour_lifestyle": {
-                "general_behaviour": DEFAULT_FAMILY_BIOLOGY["general_behaviour"],
-                "social_behaviour": DEFAULT_FAMILY_BIOLOGY["social_behaviour"],
-                "nesting_habits": DEFAULT_FAMILY_BIOLOGY["nesting_habits"],
-                "breeding_behaviour": DEFAULT_FAMILY_BIOLOGY["breeding_behaviour"]
+                "general_behaviour": "Information unavailable",
+                "social_behaviour": "Information unavailable",
+                "nesting_habits": "Information unavailable",
+                "breeding_behaviour": "Information unavailable"
             },
             "interesting_information": {
-                "unique_characteristics": DEFAULT_FAMILY_BIOLOGY["unique_characteristics"],
-                "special_adaptations": DEFAULT_FAMILY_BIOLOGY["special_adaptations"],
-                "ecological_importance": DEFAULT_FAMILY_BIOLOGY["ecological_importance"],
-                "rare_facts": DEFAULT_FAMILY_BIOLOGY["rare_facts"]
+                "unique_characteristics": "Information unavailable",
+                "special_adaptations": "Information unavailable",
+                "ecological_importance": "Information unavailable",
+                "rare_facts": "Information unavailable"
             },
+            "sources": [
+                "IUCN Red List of Threatened Species",
+                "eBird / Cornell Lab of Ornithology",
+                "Birds of the World"
+            ],
             "description": f"Identified avian specimen ({clean_name}) recorded by Drishti intelligence engine.",
             "image_url": ""
         }
