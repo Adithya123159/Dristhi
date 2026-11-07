@@ -18,8 +18,7 @@ import { api } from '../services/api';
 export default function AuthPage({ 
   initialMode = 'login', 
   onSuccess, 
-  onNavigateHome,
-  onSkip 
+  onNavigateHome
 }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
   const [name, setName] = useState('');
@@ -106,13 +105,6 @@ export default function AuthPage({
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Landing</span>
         </button>
-
-        <button
-          onClick={onSkip}
-          className="text-xs text-emerald-800 hover:text-emerald-950 transition-colors font-semibold"
-        >
-          Explore as Guest &rarr;
-        </button>
       </div>
 
       {/* Auth Card Container */}
@@ -130,8 +122,8 @@ export default function AuthPage({
           </h2>
           <p className="text-xs text-emerald-800/80 font-medium mt-1 max-w-xs mx-auto">
             {mode === 'login' 
-              ? 'Enter your credentials to access your ecological observation history.' 
-              : 'Join to classify and save native Indian bird species.'}
+              ? 'Sign in with your registered credentials to access the identification dashboard.' 
+              : 'Register an account to identify bird species and access the dashboard.'}
           </p>
         </div>
 
