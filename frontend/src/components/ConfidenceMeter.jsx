@@ -18,7 +18,7 @@ export default function ConfidenceMeter({ confidence }) {
 
       {/* Progress Bar with rounded ends */}
       <div className="h-2.5 w-full bg-slate-200/80 rounded-full overflow-hidden">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-700 ease-out ${bgColor}`}
           style={{ width: `${percentage}%` }}
         />
