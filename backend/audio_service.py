@@ -51,7 +51,7 @@ class AudioValidationService:
         max_rms = float(np.max(rms))
 
         if mean_rms < 0.0015 and max_rms < 0.004:
-            return False, "Invalid Audio: Audio is silent or empty. Please upload an audio recording containing audible bird sounds.", {
+            return False, "No recognizable bird sound detected. Please upload a valid bird recording.", {
                 "duration_seconds": round(duration, 2),
                 "mean_rms": round(mean_rms, 6),
                 "max_rms": round(max_rms, 6),

@@ -483,3 +483,4 @@ class SpeciesDetailService:
 
 # Singleton service instance
 species_detail_service = SpeciesDetailService()
+
