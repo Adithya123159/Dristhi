@@ -185,9 +185,9 @@ export default function IdentifyBird({
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12 animate-fadeIn">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12 animate-fadeIn w-full">
       {/* ─── HEADER: DUAL INPUT METHOD SELECTOR ─── */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
@@ -199,11 +199,11 @@ export default function IdentifyBird({
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200/80 self-start sm:self-auto">
+          <div className="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200/80 self-start sm:self-auto flex-shrink-0">
             <button
               type="button"
               onClick={() => handleTabSwitch('image')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
                 activeTab === 'image'
                   ? 'bg-white text-emerald-800 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -395,24 +395,24 @@ export default function IdentifyBird({
                 ) : (
                   /* AUDIO PREVIEW & CONTROLS */
                   <div className="space-y-5">
-                    <div className="p-6 rounded-2xl bg-slate-900 text-white border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5">
+                    <div className="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-w-0">
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
                         <div className="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center flex-shrink-0">
                           <Volume2 className="w-6 h-6" />
                         </div>
-                        <div className="truncate">
-                          <p className="text-sm font-bold text-slate-100 truncate">
-                            {selectedAudio.name}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-slate-100 truncate" title={selectedAudio?.name}>
+                            {selectedAudio?.name}
                           </p>
                           <p className="text-xs text-slate-400">
-                            {(selectedAudio.size / (1024 * 1024)).toFixed(2)} MB &bull; Audio Vocalization Clip
+                            {(selectedAudio?.size / (1024 * 1024)).toFixed(2)} MB &bull; Audio Vocalization Clip
                           </p>
                         </div>
                       </div>
 
                       {/* Native Audio Player Preview */}
                       {audioPreviewUrl && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           <audio 
                             src={audioPreviewUrl} 
                             controls 
@@ -422,34 +422,39 @@ export default function IdentifyBird({
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                      <button
-                        type="button"
-                        onClick={handleClear}
-                        disabled={isAnalyzing}
-                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
-                      >
-                        Change Recording
-                      </button>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/90 min-w-0">
+                      <div className="text-xs text-slate-500 font-medium hidden sm:block">
+                        Bioacoustic analysis ready
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={handleClear}
+                          disabled={isAnalyzing}
+                          className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors whitespace-nowrap"
+                        >
+                          Change Recording
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={handleIdentify}
-                        disabled={isAnalyzing}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50"
-                      >
-                        {isAnalyzing ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Analyzing Acoustics...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Volume2 className="w-4 h-4" />
-                            <span>Identify Bird Recording</span>
-                          </>
-                        )}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={handleIdentify}
+                          disabled={isAnalyzing}
+                          className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50 whitespace-nowrap"
+                        >
+                          {isAnalyzing ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <span>Analyzing Acoustics...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 className="w-4 h-4" />
+                              <span>Identify Bird Recording</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
