@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import birdBackground from '../assets/bird-background.jpg';
-import heroPeacock from '../assets/hero-peacock.jpg';
 import { 
   Bird, 
   ScanLine, 
@@ -12,10 +11,7 @@ import {
   ChevronRight,
   Menu,
   X,
-  Compass,
-  Zap,
-  CheckCircle2,
-  Sparkles
+  Compass
 } from 'lucide-react';
 
 export default function LandingPage({ 
@@ -214,135 +210,37 @@ export default function LandingPage({
       {/* ─── 2. MAIN HERO SECTION (SPLIT 2-COLUMN STRUCTURE MATCHING REFERENCE) ─── */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 sm:px-10 py-4 sm:py-8 flex flex-col justify-between">
         
-        {/* Main Content Row: Left Column (Text & Primary CTA) + Right Column (Center Focal Orb) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto w-full">
+        {/* Main Content Row: Left-Aligned Hero Section */}
+        <div className="flex-1 flex flex-col justify-center max-w-2xl lg:max-w-3xl my-auto py-8 sm:py-16">
           
-          {/* Left Column (Headline, Paragraph, and Speak-to-Expert Style Button) */}
-          <div className="lg:col-span-7 xl:col-span-7 flex flex-col items-start text-left">
-            
-            {/* Eyebrow Label */}
-            <p className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-emerald-700 mb-3 sm:mb-4">
-              ACTIVATE THE POWER OF DRISHTI AI
-            </p>
+          {/* Eyebrow Label */}
+          <p className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-emerald-700 mb-3 sm:mb-4">
+            ACTIVATE THE POWER OF DRISHTI AI
+          </p>
 
-            {/* Massive Bold Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.08] max-w-2xl">
-              Identify Any Indian Bird with{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700">
-                Neural Vision.
-              </span>
-            </h1>
+          {/* Massive Bold Headline */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.08] max-w-2xl">
+            Identify Any Indian Bird with{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700">
+              Neural Vision.
+            </span>
+          </h1>
 
-            {/* Sub-paragraph */}
-            <p className="mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
-              Upload any bird photograph to instantly discover its common name, scientific taxonomy, dietary niche, native habitat, and IUCN conservation rating in under 50ms with multimodal deep learning.
-            </p>
+          {/* Sub-paragraph */}
+          <p className="mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
+            Upload any bird photograph to instantly discover its common name, scientific taxonomy, dietary niche, native habitat, and IUCN conservation rating in under 50ms with multimodal deep learning.
+          </p>
 
-            {/* Primary Action Button (Placed on Left below paragraph) */}
-            <div className="mt-6 sm:mt-8">
-              <button
-                onClick={() => onNavigateTab('identify')}
-                className="px-7 sm:px-9 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-emerald-600/30 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
-              >
-                <ScanLine className="w-5 h-5 group-hover:rotate-6 transition-transform" />
-                <span>IDENTIFY A BIRD NOW</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: High-Tech Avian Neural Vision Portal */}
-          <div className="lg:col-span-5 xl:col-span-5 flex items-center justify-center relative py-6 sm:py-0">
-            
-            {/* Outer Rotating Radar & Telemetry Orbit Rings */}
-            <div className="relative w-72 h-72 sm:w-88 sm:h-88 xl:w-[410px] xl:h-[410px] flex items-center justify-center">
-              
-              {/* Outer soft ambient radar glow */}
-              <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-3xl animate-pulse" />
-              <div className="absolute -inset-2 rounded-full border border-emerald-400/25 animate-spin" style={{ animationDuration: '35s' }} />
-              <div className="absolute -inset-6 rounded-full border border-dashed border-emerald-500/20 animate-spin" style={{ animationDuration: '50s', animationDirection: 'reverse' }} />
-
-              {/* ── 4 Orbiting Telemetry Micro-Badges ── */}
-              {/* Top-Left: Sub-50ms Latency */}
-              <div className="absolute -top-1 -left-2 sm:-left-4 z-20 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-[11px] font-extrabold text-slate-800">
-                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>Sub-50ms Latency</span>
-              </div>
-
-              {/* Top-Right: 98.6% Accuracy */}
-              <div className="absolute -top-1 -right-2 sm:-right-4 z-20 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/95 backdrop-blur-md text-white shadow-md text-[11px] font-extrabold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                <span>98.6% Accuracy</span>
-              </div>
-
-              {/* Bottom-Left: 100 Species Mapped */}
-              <div className="absolute -bottom-1 -left-2 sm:-left-4 z-20 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-[11px] font-bold text-slate-700">
-                <Bird className="w-3.5 h-3.5 text-emerald-600" />
-                <span>100 Native Species</span>
-              </div>
-
-              {/* Bottom-Right: YOLOv8 + Gemini AI */}
-              <div className="absolute -bottom-1 -right-2 sm:-right-4 z-20 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-[11px] font-bold text-slate-700">
-                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                <span>YOLOv8 &bull; Gemini AI</span>
-              </div>
-
-              {/* ── Core Avian Neural Vision Lens ── */}
-              <div 
-                onClick={() => onNavigateTab('identify')}
-                className="w-64 h-64 sm:w-80 sm:h-80 xl:w-92 xl:h-92 rounded-full overflow-hidden shadow-[0_25px_60px_rgba(6,78,59,0.3)] ring-4 ring-white/95 border-4 border-emerald-500/40 relative cursor-pointer group hover:shadow-[0_30px_70px_rgba(6,78,59,0.45)] transition-all duration-500"
-                title="Click to Test Neural Bird Classifier"
-              >
-                {/* Focal Avian Artwork (Majestic Indian Peafowl) */}
-                <img 
-                  src={heroPeacock} 
-                  alt="Neural Target: Indian Peafowl"
-                  className="w-full h-full object-cover object-center group-hover:scale-108 transition-all duration-700 select-none"
-                />
-
-                {/* Cinematic Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-slate-950/40 pointer-events-none" />
-
-                {/* Animated Horizontal Scan Beam */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399] animate-pulse pointer-events-none" />
-
-                {/* YOLOv8 Neural Bounding Box Target Overlay */}
-                <div className="absolute inset-8 sm:inset-10 rounded-2xl border-2 border-emerald-400/80 pointer-events-none transition-all group-hover:border-emerald-300">
-                  {/* Top Target Label */}
-                  <div className="absolute -top-3.5 left-2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-600 text-white font-mono text-[9px] sm:text-[10px] font-bold tracking-tight shadow-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                    <span>AI DETECT: Indian Peafowl</span>
-                  </div>
-
-                  {/* Top-Right Confidence Pill */}
-                  <div className="absolute -top-3.5 right-2 px-2 py-0.5 rounded-md bg-slate-950/90 text-emerald-300 font-mono text-[9px] sm:text-[10px] font-bold tracking-tight shadow-md border border-emerald-400/30">
-                    <span>98.6%</span>
-                  </div>
-
-                  {/* Corner Reticle Brackets */}
-                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-white" />
-                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-white" />
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-white" />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-white" />
-
-                  {/* Target Crosshair */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-60">
-                    <div className="w-6 h-6 border border-emerald-400/40 rounded-full flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Center / Bottom Interactive Launch Badge */}
-                <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
-                  <div className="px-4 sm:px-5 py-2 rounded-full bg-slate-950/85 backdrop-blur-md border border-emerald-400/80 text-white font-black text-[11px] sm:text-xs tracking-wider uppercase shadow-xl flex items-center gap-2 group-hover:bg-emerald-600 group-hover:border-emerald-300 group-hover:scale-105 transition-all">
-                    <ScanLine className="w-4 h-4 text-emerald-400 group-hover:text-white" />
-                    <span>ACTIVATE NEURAL SCAN</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-emerald-400 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Primary Action Button (Placed on Left below paragraph) */}
+          <div className="mt-6 sm:mt-8">
+            <button
+              onClick={() => onNavigateTab('identify')}
+              className="px-7 sm:px-9 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-emerald-600/30 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
+            >
+              <ScanLine className="w-5 h-5 group-hover:rotate-6 transition-transform" />
+              <span>IDENTIFY A BIRD NOW</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         </div>
 
