@@ -2,9 +2,8 @@ import React from 'react';
 import { 
   LayoutDashboard, 
   ScanLine, 
-  Volume2, 
   Bird, 
-  BookOpen 
+  History 
 } from 'lucide-react';
 
 export default function MobileBottomNav({ 
@@ -14,12 +13,12 @@ export default function MobileBottomNav({
   return (
     <nav 
       aria-label="Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-3 py-1.5 flex items-center justify-around lg:hidden shadow-lg shadow-slate-900/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-4 py-2 flex items-center justify-around lg:hidden shadow-lg shadow-slate-900/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
     >
       {/* Dashboard */}
       <button
         onClick={() => setCurrentTab('dashboard')}
-        className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
+        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
           currentTab === 'dashboard'
             ? 'text-emerald-700 font-bold'
             : 'text-slate-500 hover:text-slate-800'
@@ -29,58 +28,45 @@ export default function MobileBottomNav({
         <span className="text-[10px] leading-tight">Dashboard</span>
       </button>
 
-      {/* Vision / Image */}
+      {/* Center Action: Identify Bird (Vision + Audio) */}
       <button
         onClick={() => setCurrentTab('identify')}
-        className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
-          currentTab === 'identify'
-            ? 'text-emerald-700 font-bold'
-            : 'text-slate-500 hover:text-slate-800'
-        }`}
-      >
-        <ScanLine className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px] leading-tight">Vision AI</span>
-      </button>
-
-      {/* Center Audio Identify Action Button */}
-      <button
-        onClick={() => setCurrentTab('identify-audio')}
-        className="relative -top-3.5 flex flex-col items-center justify-center group"
+        className="relative -top-3 flex flex-col items-center justify-center group"
       >
         <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform group-active:scale-95 ${
-          currentTab === 'identify-audio'
+          currentTab === 'identify' || currentTab === 'identify-audio'
             ? 'bg-emerald-600 text-white shadow-emerald-600/40 ring-4 ring-emerald-100'
             : 'bg-emerald-600 text-white shadow-emerald-600/30'
         }`}>
-          <Volume2 className="w-6 h-6" />
+          <ScanLine className="w-6 h-6" />
         </div>
-        <span className="text-[10px] font-bold text-emerald-800 mt-0.5">Audio AI</span>
+        <span className="text-[10px] font-bold text-emerald-800 mt-0.5">Identify</span>
       </button>
 
-      {/* Species (100) */}
+      {/* Species Catalog */}
       <button
         onClick={() => setCurrentTab('species')}
-        className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
-          currentTab === 'species'
+        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
+          currentTab === 'species' || currentTab === 'encyclopedia'
             ? 'text-emerald-700 font-bold'
             : 'text-slate-500 hover:text-slate-800'
         }`}
       >
         <Bird className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px] leading-tight">Species</span>
+        <span className="text-[10px] leading-tight">Catalog</span>
       </button>
 
-      {/* Encyclopedia */}
+      {/* History */}
       <button
-        onClick={() => setCurrentTab('encyclopedia')}
-        className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
-          currentTab === 'encyclopedia'
+        onClick={() => setCurrentTab('history')}
+        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
+          currentTab === 'history'
             ? 'text-emerald-700 font-bold'
             : 'text-slate-500 hover:text-slate-800'
         }`}
       >
-        <BookOpen className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px] leading-tight">Encyclopedia</span>
+        <History className="w-5 h-5 mb-0.5" />
+        <span className="text-[10px] leading-tight">History</span>
       </button>
     </nav>
   );

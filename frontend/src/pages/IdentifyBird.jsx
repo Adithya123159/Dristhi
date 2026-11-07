@@ -304,13 +304,13 @@ export default function IdentifyBird({
                       </button>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/90 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
                           <ImageIcon className="w-5 h-5" />
                         </div>
-                        <div className="truncate">
-                          <p className="text-sm font-bold text-slate-900 truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-slate-900 truncate" title={selectedImage?.name}>
                             {selectedImage?.name}
                           </p>
                           <p className="text-xs text-slate-500 font-medium">
@@ -319,12 +319,12 @@ export default function IdentifyBird({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         <button
                           type="button"
                           onClick={handleClear}
                           disabled={isAnalyzing}
-                          className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                          className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors whitespace-nowrap"
                         >
                           Change Image
                         </button>
@@ -332,7 +332,7 @@ export default function IdentifyBird({
                           type="button"
                           onClick={handleIdentify}
                           disabled={isAnalyzing}
-                          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50"
+                          className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50 whitespace-nowrap"
                         >
                           {isAnalyzing ? (
                             <>

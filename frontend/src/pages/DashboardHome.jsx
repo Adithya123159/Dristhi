@@ -55,25 +55,17 @@ export default function DashboardHome({ setCurrentTab, setSelectedSpeciesModal }
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={() => setCurrentTab('identify')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-medium text-sm shadow-sm hover:bg-emerald-700 transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-sm hover:bg-emerald-700 transition-colors"
             >
               <ScanLine className="w-4 h-4" />
-              <span>Identify Image</span>
-            </button>
-
-            <button
-              onClick={() => setCurrentTab('identify-audio')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm shadow-sm hover:bg-teal-700 transition-colors"
-            >
-              <Volume2 className="w-4 h-4" />
-              <span>Identify Audio</span>
+              <span>Identify Bird</span>
             </button>
 
             <button
               onClick={() => setCurrentTab('species')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
             >
-              <span>View Species (100)</span>
+              <span>Species Catalog (100)</span>
             </button>
           </div>
         </div>
