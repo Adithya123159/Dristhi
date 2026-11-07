@@ -56,34 +56,81 @@ class GeminiMultimodalService:
             return False, {"error": f"Failed to read image file: {e}"}
 
         prompt = (
-            "You are an expert avian biologist and ornithological computer vision classifier.\n"
-            "Analyze this uploaded photograph with extreme scientific accuracy:\n\n"
-            "STEP 1: STRICT OBJECT VALIDATION\n"
-            "- Does this image clearly show a live, wild, or captive bird? (Return is_bird: true ONLY if a bird is clearly visible).\n"
-            "- If the image contains a human/person, dog, cat, car, vehicle, phone, building, furniture, landscape without birds, "
-            "or ANY non-bird object, you MUST set is_bird to false and describe what is actually present in 'detected_object' (e.g. 'sports car', 'person portrait', 'golden retriever').\n\n"
-            "STEP 2: SPECIES CLASSIFICATION\n"
-            "- If is_bird is true, identify the bird species accurately (especially prioritizing native and resident birds of India and South Asia if applicable).\n"
-            "- Provide common name, scientific binomial nomenclature, calibrated confidence score between 0.0 and 1.0, taxonomic family, order, native habitat, dietary niche, physical plumage characteristics, geographical distribution, IUCN conservation status, and a 2-3 sentence description.\n"
-            "- Provide a list of top 5 most probable species candidates in 'top_predictions', each with 'common_name', 'scientific_name', and 'confidence'.\n\n"
+            "You are an expert ornithologist and senior avian taxonomist specializing in South Asian and global avifauna.\n"
+            "Analyze this uploaded bird photograph with rigorous scientific precision:\n\n"
+            "STEP 1: STRICT BIRD VALIDATION\n"
+            "- Set is_bird to true ONLY if the image depicts a real bird (wild, captive, perched, or in flight).\n"
+            "- If the image depicts a human/portrait, dog, cat, car, vehicle, phone, building, furniture, landscape without birds, "
+            "or ANY non-bird object, you MUST set is_bird to false and describe the non-bird subject in 'detected_object' (e.g. 'sports car', 'person portrait', 'golden retriever').\n\n"
+            "STEP 2: COMPREHENSIVE SPECIES BIOLOGICAL PROFILE\n"
+            "If is_bird is true, identify the species accurately and generate an authentic, species-specific biological profile conforming strictly to eBird, Cornell Lab of Ornithology, and IUCN Red List standards.\n\n"
+            "Taxonomy Requirements:\n"
+            "- Genus: Specific taxonomic genus (e.g. 'Pavo', 'Eudynamys', 'Passer').\n"
+            "- Family: Valid taxonomic family (e.g. 'Phasianidae', 'Cuculidae', 'Passeridae').\n"
+            "- Order: Valid taxonomic order (e.g. 'Galliformes', 'Cuculiformes', 'Passeriformes').\n"
+            "- Conservation Status: Official IUCN Red List rating with standard code (e.g. 'Least Concern (LC)', 'Vulnerable (VU)', 'Endangered (EN)', 'Critically Endangered (CR)').\n"
+            "- Do NOT duplicate scientific name under species.\n\n"
+            "Physical Characteristics Requirements:\n"
+            "- Appearance: Detailed plumage structure, posture, and sexual dimorphism (clear differences between male and female).\n"
+            "- Colour Features: Diagnostic feather markings, eye color, bill color, facial patterns, and crest details.\n"
+            "- Size Morphometrics: Verified adult body length, wingspan, and body mass with units (e.g., cm, g, kg). If reliable data is not documented, state 'Information unavailable'.\n\n"
+            "Habitat, Diet & Behaviour Requirements:\n"
+            "- Habitat & Distribution: Actual natural habitat, resident/migratory distribution in the Indian Subcontinent and globally, and native environments.\n"
+            "- Feeding Habits: Explicit primary diet category (e.g., 'Omnivorous', 'Frugivorous', 'Insectivorous', 'Carnivorous', 'Granivorous', 'Piscivorous'), actual preferred food items, feeding strategy, and hunting habits.\n"
+            "- Behaviour & Lifestyle: Diurnal/nocturnal cycle, roosting habits, flocking/solitary social structure, authentic nesting architecture (or brood parasitism when applicable, e.g. for cuckoos), and breeding courtship.\n\n"
+            "Ecological Novelty Requirements:\n"
+            "- Species-specific unique biological adaptations, ecological niche (e.g. seed dispersal, pollination, apex scavenging, pest control), and lesser-known authenticated scientific facts.\n"
+            "- Sources: Cite authoritative references ['IUCN Red List of Threatened Species', 'eBird / Cornell Lab of Ornithology', 'Birds of the World'].\n\n"
             "OUTPUT FORMAT: Valid JSON ONLY adhering strictly to this schema:\n"
             "{\n"
             '  "is_bird": true,\n'
             '  "detected_object": null,\n'
-            '  "common_name": "House Sparrow",\n'
-            '  "scientific_name": "Passer domesticus",\n'
-            '  "confidence": 0.96,\n'
-            '  "family": "Passeridae",\n'
-            '  "order": "Passeriformes",\n'
-            '  "conservation_status": "Least Concern (LC)",\n'
-            '  "habitat": "Urban landscapes, rural villages, farms, and suburban gardens.",\n'
-            '  "diet": "Granivorous & insectivorous — seeds, grains, table crumbs, caterpillars.",\n'
-            '  "physical_characteristics": "Compact passerine with stout seed-eating bill. Males feature grey crown and black bib.",\n'
-            '  "geographical_distribution": "Widespread across the Indian Subcontinent and worldwide.",\n'
-            '  "description": "The house sparrow is a small passerine bird found across India and the world.",\n'
+            '  "basic_identification": {\n'
+            '    "common_name": "Indian Peafowl",\n'
+            '    "scientific_name": "Pavo cristatus",\n'
+            '    "genus": "Pavo",\n'
+            '    "family": "Phasianidae",\n'
+            '    "order": "Galliformes",\n'
+            '    "confidence": 0.99,\n'
+            '    "confidence_percentage": "99.0%",\n'
+            '    "conservation_status": "Least Concern (LC)"\n'
+            '  },\n'
+            '  "physical_characteristics": {\n'
+            '    "appearance": "...",\n'
+            '    "colour_features": "...",\n'
+            '    "size_characteristics": "..."\n'
+            '  },\n'
+            '  "habitat_distribution": {\n'
+            '    "natural_habitat": "...",\n'
+            '    "geographic_distribution": "...",\n'
+            '    "common_environments": "..."\n'
+            '  },\n'
+            '  "feeding_habits": {\n'
+            '    "primary_diet": "...",\n'
+            '    "what_it_eats": "...",\n'
+            '    "feeding_behaviour": "...",\n'
+            '    "hunting_habits": "..."\n'
+            '  },\n'
+            '  "behaviour_lifestyle": {\n'
+            '    "general_behaviour": "...",\n'
+            '    "social_behaviour": "...",\n'
+            '    "nesting_habits": "...",\n'
+            '    "breeding_behaviour": "..."\n'
+            '  },\n'
+            '  "interesting_information": {\n'
+            '    "unique_characteristics": "...",\n'
+            '    "special_adaptations": "...",\n'
+            '    "ecological_importance": "...",\n'
+            '    "rare_facts": "..."\n'
+            '  },\n'
+            '  "sources": [\n'
+            '    "IUCN Red List of Threatened Species",\n'
+            '    "eBird / Cornell Lab of Ornithology",\n'
+            '    "Birds of the World"\n'
+            '  ],\n'
+            '  "description": "...",\n'
             '  "top_predictions": [\n'
-            '    {"common_name": "House Sparrow", "scientific_name": "Passer domesticus", "confidence": 0.96},\n'
-            '    {"common_name": "Spanish Sparrow", "scientific_name": "Passer hispaniolensis", "confidence": 0.02}\n'
+            '    {"common_name": "Indian Peafowl", "scientific_name": "Pavo cristatus", "confidence": 0.99}\n'
             '  ]\n'
             "}"
         )
@@ -160,37 +207,82 @@ class GeminiMultimodalService:
 
         prompt = (
             "You are an expert avian bioacoustician, ornithologist, and sound classifier specializing in bird songs, calls, chirps, and bioacoustics.\n"
-            "Listen to and analyze this uploaded audio recording carefully:\n\n"
+            "Listen to and analyze this uploaded audio recording with rigorous scientific precision:\n\n"
             "STEP 1: STRICT BIOACOUSTIC VALIDATION\n"
             "- Does this audio recording contain genuine bird vocalizations, songs, chirps, trills, whistles, or calls? "
             "(Set is_bird_sound: true if bird sounds are audible, even with background ambient sound).\n"
             "- If the recording is ONLY human speech, music, dog barking, vehicle/traffic engine noise, mechanical rumble, or pure silence without any bird sounds, "
             "you MUST set is_bird_sound to false and describe the non-bird sound in 'detected_sound' (e.g. 'human speech conversation', 'car traffic rumble', 'silence').\n\n"
-            "STEP 2: SPECIES VOCALIZATION IDENTIFICATION\n"
-            "- If is_bird_sound is true, identify the bird species from its song pattern, chirp frequency, pitch modulation, and harmonic cadence.\n"
-            "- Prioritize resident and native species of India and South Asia if the sound matches.\n"
-            "- Provide common name, scientific name, confidence score (0.0 to 1.0), vocalization type (e.g., 'mating song', 'territorial call', 'alarm whistle', 'dawn chorus'), "
-            "vocalization acoustic description, family, order, habitat, diet, geographical distribution, conservation status, and description.\n"
-            "- Provide a list of top 5 candidate species in 'top_predictions', each with 'common_name', 'scientific_name', and 'confidence'.\n\n"
+            "STEP 2: SPECIES VOCALIZATION IDENTIFICATION & COMPLETE BIOLOGICAL PROFILE\n"
+            "If is_bird_sound is true, identify the bird species from its song pattern, chirp frequency, pitch modulation, and harmonic cadence.\n"
+            "Generate a complete, scientifically authenticated species profile conforming strictly to eBird, Cornell Lab of Ornithology, and IUCN Red List standards.\n\n"
+            "Taxonomy Requirements:\n"
+            "- Genus: Specific taxonomic genus (e.g. 'Eudynamys', 'Pavo', 'Passer').\n"
+            "- Family: Valid taxonomic family (e.g. 'Cuculidae', 'Phasianidae', 'Passeridae').\n"
+            "- Order: Valid taxonomic order (e.g. 'Cuculiformes', 'Galliformes', 'Passeriformes').\n"
+            "- Conservation Status: Official IUCN Red List rating with standard code (e.g. 'Least Concern (LC)', 'Vulnerable (VU)', 'Endangered (EN)').\n"
+            "- Do NOT duplicate scientific name under species.\n\n"
+            "Physical Characteristics Requirements:\n"
+            "- Appearance: Detailed plumage structure, sexual dimorphism (e.g. male glossy black vs female spotted brown for Asian Koel).\n"
+            "- Colour Features: Diagnostic color patterns, eye color, bill color, and wing plumage.\n"
+            "- Size Morphometrics: Verified adult body length, wingspan, and weight measurements with units (e.g., cm, g, kg). If unavailable, use 'Information unavailable'.\n\n"
+            "Habitat, Diet & Behaviour Requirements:\n"
+            "- Habitat & Distribution: Actual natural habitat, resident/migratory distribution in the Indian Subcontinent, and common native environments.\n"
+            "- Feeding Habits: Explicit primary diet category (e.g., 'Frugivorous', 'Insectivorous', 'Omnivorous'), preferred food items, feeding strategy, and hunting habits.\n"
+            "- Behaviour & Lifestyle: Acoustic calls, diurnal habits, social structure, authentic nesting patterns (explicitly detail brood parasitism if applicable), and breeding season.\n\n"
+            "Ecological Novelty Requirements:\n"
+            "- Unique characteristics, acoustic or anatomical adaptations, ecological importance (seed dispersal, insect regulation), and authenticated lesser-known facts.\n"
+            "- Sources: Cite authoritative references ['IUCN Red List of Threatened Species', 'eBird / Cornell Lab of Ornithology', 'Birds of the World'].\n\n"
             "OUTPUT FORMAT: Valid JSON ONLY adhering strictly to this schema:\n"
             "{\n"
             '  "is_bird_sound": true,\n'
             '  "detected_sound": null,\n'
-            '  "common_name": "Asian Koel",\n'
-            '  "scientific_name": "Eudynamys scolopaceus",\n'
-            '  "confidence": 0.94,\n'
-            '  "vocalization_type": "Repetitive rising whistling call (Koo-Ooo)",\n'
-            '  "vocalization_description": "Loud, resonant rising whistle repeated at rapid intervals, typical of male territorial dawn vocalization.",\n'
-            '  "family": "Cuculidae",\n'
-            '  "order": "Cuculiformes",\n'
-            '  "conservation_status": "Least Concern (LC)",\n'
-            '  "habitat": "Light woodland, urban gardens, cultivations, and parks across India.",\n'
-            '  "diet": "Frugivorous & insectivorous — wild figs, berries, and caterpillars.",\n'
-            '  "geographical_distribution": "Common resident throughout the Indian Subcontinent.",\n'
-            '  "description": "The Asian koel is a member of the cuckoo order known for its resonant, musical calls in summer.",\n'
+            '  "basic_identification": {\n'
+            '    "common_name": "Asian Koel",\n'
+            '    "scientific_name": "Eudynamys scolopaceus",\n'
+            '    "genus": "Eudynamys",\n'
+            '    "family": "Cuculidae",\n'
+            '    "order": "Cuculiformes",\n'
+            '    "confidence": 0.95,\n'
+            '    "confidence_percentage": "95.0%",\n'
+            '    "conservation_status": "Least Concern (LC)"\n'
+            '  },\n'
+            '  "physical_characteristics": {\n'
+            '    "appearance": "...",\n'
+            '    "colour_features": "...",\n'
+            '    "size_characteristics": "..."\n'
+            '  },\n'
+            '  "habitat_distribution": {\n'
+            '    "natural_habitat": "...",\n'
+            '    "geographic_distribution": "...",\n'
+            '    "common_environments": "..."\n'
+            '  },\n'
+            '  "feeding_habits": {\n'
+            '    "primary_diet": "...",\n'
+            '    "what_it_eats": "...",\n'
+            '    "feeding_behaviour": "...",\n'
+            '    "hunting_habits": "..."\n'
+            '  },\n'
+            '  "behaviour_lifestyle": {\n'
+            '    "general_behaviour": "...",\n'
+            '    "social_behaviour": "...",\n'
+            '    "nesting_habits": "...",\n'
+            '    "breeding_behaviour": "..."\n'
+            '  },\n'
+            '  "interesting_information": {\n'
+            '    "unique_characteristics": "...",\n'
+            '    "special_adaptations": "...",\n'
+            '    "ecological_importance": "...",\n'
+            '    "rare_facts": "..."\n'
+            '  },\n'
+            '  "sources": [\n'
+            '    "IUCN Red List of Threatened Species",\n'
+            '    "eBird / Cornell Lab of Ornithology",\n'
+            '    "Birds of the World"\n'
+            '  ],\n'
+            '  "description": "...",\n'
             '  "top_predictions": [\n'
-            '    {"common_name": "Asian Koel", "scientific_name": "Eudynamys scolopaceus", "confidence": 0.94},\n'
-            '    {"common_name": "Indian Cuckoo", "scientific_name": "Cuculus micropterus", "confidence": 0.03}\n'
+            '    {"common_name": "Asian Koel", "scientific_name": "Eudynamys scolopaceus", "confidence": 0.95}\n'
             '  ]\n'
             "}"
         )
