@@ -13,7 +13,14 @@ class GeminiMultimodalService:
     Enforces strict bird vs non-bird validation.
     """
 
-    SUPPORTED_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    SUPPORTED_MODELS = [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-flash-latest",
+        "gemini-flash-lite-latest",
+        "gemini-3.8-flash",
+        "gemini-2.5-flash"
+    ]
 
     @staticmethod
     def _clean_json_response(raw_text: str) -> str:
@@ -99,7 +106,7 @@ class GeminiMultimodalService:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key.strip()}"
             headers = {"Content-Type": "application/json"}
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=6)
+                res = requests.post(url, headers=headers, json=payload, timeout=25)
                 if res.status_code == 200:
                     break
                 elif res.status_code in (400, 401, 403):
@@ -108,10 +115,11 @@ class GeminiMultimodalService:
                     if "API_KEY_INVALID" in msg or "API key not valid" in msg or res.status_code in (401, 403):
                         return False, {"error": "Invalid Google Gemini API Key. Please verify your API key."}
                     last_error = msg
+                else:
+                    last_error = f"HTTP {res.status_code}: {res.text[:120]}"
             except Exception as e:
                 last_error = str(e)
-                # If network connection fails (offline / proxy error), don't delay other models
-                break
+                continue
 
         if not res or res.status_code != 200:
             return False, {"error": f"Gemini Vision API request failed: {last_error or 'Network error'}"}
@@ -205,7 +213,7 @@ class GeminiMultimodalService:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key.strip()}"
             headers = {"Content-Type": "application/json"}
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=6)
+                res = requests.post(url, headers=headers, json=payload, timeout=25)
                 if res.status_code == 200:
                     break
                 elif res.status_code in (400, 401, 403):
@@ -214,9 +222,11 @@ class GeminiMultimodalService:
                     if "API_KEY_INVALID" in msg or "API key not valid" in msg or res.status_code in (401, 403):
                         return False, {"error": "Invalid Google Gemini API Key. Please verify your API key."}
                     last_error = msg
+                else:
+                    last_error = f"HTTP {res.status_code}: {res.text[:120]}"
             except Exception as e:
                 last_error = str(e)
-                break
+                continue
 
         if not res or res.status_code != 200:
             return False, {"error": f"Gemini Audio API request failed: {last_error or 'Network error'}"}
