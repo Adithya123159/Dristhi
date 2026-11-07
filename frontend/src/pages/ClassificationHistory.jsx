@@ -22,6 +22,12 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
   const [loading, setLoading] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
   const [filterType, setFilterType] = useState('all'); // 'all', 'image', 'audio', 'rejected'
+  const [tabCounts, setTabCounts] = useState({
+    all: 0,
+    image: 0,
+    audio: 0,
+    rejected: 0
+  });
   const [activeAudioPlaying, setActiveAudioPlaying] = useState(null);
 
   useEffect(() => {
@@ -38,6 +44,9 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
 
       const data = await api.getHistory(params);
       setHistoryItems(data.history || []);
+      if (data.counts) {
+        setTabCounts(data.counts);
+      }
     } catch (e) {
       console.error('Failed to load history:', e);
     } finally {
@@ -50,6 +59,7 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
     try {
       await api.deleteHistoryItem(id);
       setHistoryItems((prev) => prev.filter((item) => (item.identification_id || item.id) !== id));
+      loadHistory();
     } catch (err) {
       alert('Could not delete history record');
     }
@@ -59,6 +69,7 @@ export default function ClassificationHistory({ setSelectedSpeciesModal }) {
     try {
       await api.clearHistory();
       setHistoryItems([]);
+      setTabCounts({ all: 0, image: 0, audio: 0, rejected: 0 });
       setConfirmClear(false);
     } catch (err) {
       alert('Could not clear history');
