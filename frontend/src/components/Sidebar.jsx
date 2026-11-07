@@ -31,8 +31,6 @@ export default function Sidebar({
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'identify', label: 'Identify Image', icon: ScanLine },
     { id: 'identify-audio', label: 'Identify Audio', icon: Volume2 },
-    { id: 'species', label: 'Supported Species', icon: Bird },
-    { id: 'encyclopedia', label: 'Bird Encyclopedia', icon: BookOpen },
     { id: 'history', label: 'Classification History', icon: History },
     { id: 'admin', label: 'Admin Dashboard', icon: ShieldCheck },
     { id: 'about', label: 'About Project', icon: Info },

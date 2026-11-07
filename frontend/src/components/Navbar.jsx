@@ -24,7 +24,6 @@ export default function Navbar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'identify', label: 'Identify Bird', icon: ScanLine },
-    { id: 'species', label: 'Species Catalog', icon: Bird },
     { id: 'history', label: 'History', icon: History },
   ];
 

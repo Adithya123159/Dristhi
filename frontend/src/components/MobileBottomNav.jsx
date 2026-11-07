@@ -43,19 +43,6 @@ export default function MobileBottomNav({
         <span className="text-[10px] font-bold text-emerald-800 mt-0.5">Identify</span>
       </button>
 
-      {/* Species Catalog */}
-      <button
-        onClick={() => setCurrentTab('species')}
-        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
-          currentTab === 'species' || currentTab === 'encyclopedia'
-            ? 'text-emerald-700 font-bold'
-            : 'text-slate-500 hover:text-slate-800'
-        }`}
-      >
-        <Bird className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px] leading-tight">Catalog</span>
-      </button>
-
       {/* History */}
       <button
         onClick={() => setCurrentTab('history')}
