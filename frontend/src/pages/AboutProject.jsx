@@ -3,19 +3,18 @@ import { Cpu, CheckCircle2 } from 'lucide-react';
 
 export default function AboutProject() {
   const steps = [
-    { num: '1', title: 'Input Image', desc: 'Resized to 224x224 and normalized for MobileNetV2.' },
-    { num: '2', title: 'Feature Extraction', desc: 'Pre-trained MobileNetV2 convolutional layers extract visual features.' },
-    { num: '3', title: 'Classification Head', desc: 'GlobalAveragePooling2D, Dropout (0.2), and Softmax over 100 classes.' },
-    { num: '4', title: 'Species Output', desc: 'Returns top predicted bird species with confidence and biological data.' },
+    { num: '1', title: 'Input Specimen', desc: 'Preprocessed and validated for avian characteristics.' },
+    { num: '2', title: 'Multimodal Neural Analysis', desc: 'Deep vision and bioacoustic analysis extract taxonomic features.' },
+    { num: '3', title: 'Species Classification', desc: 'High-confidence species classification calibrated across 100 classes.' },
+    { num: '4', title: 'Species Output', desc: 'Returns top predicted bird species with complete 6-section biological profile.' },
   ];
 
   const tech = [
     { name: 'React 18', desc: 'Frontend UI' },
-    { name: 'Tailwind CSS', desc: 'Minimal styling' },
+    { name: 'Tailwind CSS', desc: 'Modern styling' },
     { name: 'FastAPI', desc: 'Python API server' },
-    { name: 'TensorFlow / Keras', desc: 'Deep learning model' },
-    { name: 'MobileNetV2', desc: 'CNN architecture' },
-    { name: 'SQLite', desc: 'Prediction history storage' },
+    { name: 'Multimodal AI API', desc: 'Vision and bioacoustics' },
+    { name: 'MongoDB', desc: 'Telemetry & history storage' },
   ];
 
   return (
@@ -33,7 +32,7 @@ export default function AboutProject() {
               <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
                 <h3 className="font-semibold text-sm text-slate-900">Project Overview</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  This project classifies bird species from images using deep learning (MobileNetV2) and provides biological details such as scientific name, family, habitat, diet, and IUCN conservation status.
+                  This project classifies bird species from images and bioacoustic recordings using multimodal deep learning and provides structured biological details such as scientific name, family, habitat, diet, and IUCN conservation status.
                 </p>
 
                       <div className="pt-2">
