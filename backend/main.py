@@ -20,9 +20,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-# Ensure Keras, Matplotlib and Ultralytics stay within workspace
+# Ensure Keras and Matplotlib stay within workspace
 os.environ.setdefault("KERAS_HOME", os.path.join(PROJECT_ROOT, '.keras'))
-os.environ.setdefault("YOLO_CONFIG_DIR", os.path.join(PROJECT_ROOT, '.yolo'))
 os.environ.setdefault("MPLCONFIGDIR", os.path.join(PROJECT_ROOT, '.matplotlib'))
 
 from src.predict import BirdClassifier
@@ -112,7 +111,7 @@ async def lifespan(app: FastAPI):
     print("Loading Species Database...")
     load_species_database()
 
-    print("Initializing Image Validation & YOLO Service...")
+    print("Initializing Image Validation Service...")
     image_validator = ImageValidationService()
 
     print("Initializing Audio Validation & Classification Services...")
@@ -163,7 +162,7 @@ def health_check():
     return {
         "status": "healthy",
         "vision_model_loaded": classifier_instance is not None,
-        "yolo_detector_loaded": image_validator is not None,
+        "image_validator_loaded": image_validator is not None,
         "audio_pipeline_ready": audio_validator is not None and audio_classifier is not None,
         "mongodb_connected": is_mongo_connected(),
         "species_count": len(bird_database),
@@ -187,8 +186,8 @@ async def identify_bird_image(
     """
     Multimodal Image Bird Identification Pipeline:
     - If API Key is provided: Uses Google Gemini Multimodal Vision AI for fine-grained identification,
-      taxonomic telemetry, and strict non-bird rejection, coupled with YOLO bounding box localization.
-    - If No API Key: Uses local YOLOv8 detection + MobileNetV2 neural classifier + Grad-CAM explainability.
+      taxonomic telemetry, and species classification.
+    - If No API Key: Uses MobileNetV2 neural classifier + Grad-CAM explainability.
     """
     global classifier_instance, image_validator, gradcam_service, gemini_service
     thresholds = get_system_thresholds()
@@ -219,7 +218,7 @@ async def identify_bird_image(
         )
         raise HTTPException(status_code=400, detail=reason)
 
-    # Always extract YOLO bounding boxes for visual overlay
+    # Prepare image for classification
     detection = image_validator.detect_birds(saved_path, conf_threshold=0.20)
     annotated_path = detection.get("annotated_image_path", saved_path)
     cropped_path = detection.get("cropped_image_path", saved_path)
@@ -329,7 +328,7 @@ async def identify_bird_image(
         }
 
     # ─────────────────────────────────────────────────────────────
-    # PATH B: LOCAL OFFLINE YOLOv8 + MOBILENETV2 PIPELINE
+    # PATH B: LOCAL OFFLINE MOBILENETV2 PIPELINE
     # ─────────────────────────────────────────────────────────────
     if not detection.get("is_bird"):
         rejection_msg = detection.get("rejection_message", "Invalid Image: No bird detected. Please upload an image containing a bird.")
@@ -404,8 +403,7 @@ async def identify_bird_image(
             top_predictions=enriched_top,
             annotated_url=annotated_url,
             telemetry={
-                "provider": "Local YOLOv8 + MobileNetV2",
-                "bird_boxes": detection.get("boxes", []),
+                "provider": "Local MobileNetV2",
                 "confidence_tier": confidence_tier
             }
         )
@@ -416,8 +414,8 @@ async def identify_bird_image(
             "identification_id": ident_id,
             "input_type": "image",
             "is_bird": True,
-            "validated_by": "Local YOLOv8 + MobileNetV2",
-            "bird_count": detection.get("bird_count", 1),
+            "validated_by": "Deep Learning MobileNetV2",
+            "bird_count": 1,
             "confidence_tier": confidence_tier,
             "prediction": {
                 "species_id": species_id,
@@ -782,7 +780,7 @@ def get_admin_metrics():
         "supported_species_count": len(bird_database),
         "taxonomic_families": len(families),
         "threatened_species": endangered,
-        "vision_model": "Google Gemini Vision + YOLOv8 + MobileNetV2",
+        "vision_model": "Google Gemini Vision + MobileNetV2",
         "audio_model": "Google Gemini Audio + Librosa Mel CNN",
         "thresholds": thresholds
     }

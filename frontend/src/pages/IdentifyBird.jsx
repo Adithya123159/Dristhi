@@ -27,7 +27,7 @@ import { getStatusBadge } from '../utils/statusBadges';
 const STAGES = [
   { id: 1, label: 'Uploading Image' },
   { id: 2, label: 'Validating Quality' },
-  { id: 3, label: 'YOLO Bird Detection' },
+  { id: 3, label: 'Neural Feature Extraction' },
   { id: 4, label: 'Grad-CAM Heatmap' },
   { id: 5, label: 'Classifying Species' }
 ];
@@ -41,7 +41,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
   const [predictionResult, setPredictionResult] = useState(null);
   const [error, setError] = useState(null);
   const [isNotBird, setIsNotBird] = useState(false);
-  const [viewMode, setViewMode] = useState('annotated'); // 'annotated', 'gradcam', 'cropped', 'original'
+  const [viewMode, setViewMode] = useState('original'); // 'original', 'gradcam'
   const [apiKey, setApiKey] = useState('');
   const [showKeyBar, setShowKeyBar] = useState(false);
 
@@ -151,14 +151,8 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
   // Determine active visual to display
   const getActiveImageSrc = () => {
     if (!predictionResult) return imagePreview;
-    if (viewMode === 'annotated' && predictionResult.annotated_image_url) {
-      return `${api.getBaseUrl()}${predictionResult.annotated_image_url}`;
-    }
     if (viewMode === 'gradcam' && predictionResult.gradcam_url) {
       return `${api.getBaseUrl()}${predictionResult.gradcam_url}`;
-    }
-    if (viewMode === 'cropped' && predictionResult.cropped_image_url) {
-      return `${api.getBaseUrl()}${predictionResult.cropped_image_url}`;
     }
     return imagePreview;
   };
@@ -177,7 +171,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                 Neural Avian Vision Classifier
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 font-medium">
-                YOLOv8 bird localization &bull; MobileNetV2 species classification &bull; Grad-CAM explainability
+                Deep learning species classification &bull; Gemini Multimodal Vision &bull; Grad-CAM explainability
               </p>
             </div>
           </div>
@@ -208,10 +202,6 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
               <span>Enter Gemini API Key</span>
             </button>
           )}
-
-          <span className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            YOLOv8 Active
-          </span>
         </div>
       </div>
 
@@ -350,35 +340,24 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                   />
 
                   {/* View Mode Overlay Tabs if prediction results are present */}
-                  {predictionResult && (
+                  {predictionResult && predictionResult.gradcam_url && (
                     <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-md rounded-xl p-1.5 flex items-center justify-center gap-1 text-[11px] font-bold text-slate-700 border border-slate-200 shadow-sm">
                       <button
-                        onClick={() => setViewMode('annotated')}
-                        className={`px-2.5 py-1 rounded-lg transition-colors ${
-                          viewMode === 'annotated' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        YOLO Bounding Box
-                      </button>
-
-                      {predictionResult.gradcam_url && (
-                        <button
-                          onClick={() => setViewMode('gradcam')}
-                          className={`px-2.5 py-1 rounded-lg transition-colors ${
-                            viewMode === 'gradcam' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
-                          }`}
-                        >
-                          Grad-CAM Heatmap
-                        </button>
-                      )}
-
-                      <button
                         onClick={() => setViewMode('original')}
-                        className={`px-2.5 py-1 rounded-lg transition-colors ${
+                        className={`px-3 py-1 rounded-lg transition-colors ${
                           viewMode === 'original' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
                         }`}
                       >
                         Original
+                      </button>
+
+                      <button
+                        onClick={() => setViewMode('gradcam')}
+                        className={`px-3 py-1 rounded-lg transition-colors ${
+                          viewMode === 'gradcam' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        Grad-CAM Heatmap
                       </button>
                     </div>
                   )}
@@ -480,7 +459,7 @@ export default function IdentifyBird({ setSelectedSpeciesModal }) {
                 <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-xs sm:text-sm">
-                    {isNotBird ? 'Image Rejected by YOLO Gatekeeper' : 'Classification Error'}
+                    {isNotBird ? 'Image Rejected: No Bird Detected' : 'Classification Error'}
                   </h4>
                   <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">{error}</p>
                 </div>
