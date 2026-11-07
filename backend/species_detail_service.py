@@ -429,6 +429,97 @@ class SpeciesDetailService:
             "image_url": bird.get("image_url", "")
         }
 
+    def build_from_gemini_result(
+        self,
+        g_data: Dict[str, Any],
+        input_type: str = "image"
+    ) -> Dict[str, Any]:
+        """
+        Builds the complete 6-section biological profile directly from Gemini API results,
+        blended with scientifically validated taxonomic family traits.
+        """
+        common_name = g_data.get("common_name") or "Identified Bird"
+        scientific_name = g_data.get("scientific_name") or "Aves indet."
+        family = g_data.get("family") or "Aves"
+        confidence = float(g_data.get("confidence") or 0.95)
+        conservation = g_data.get("conservation_status") or "Least Concern (LC)"
+        habitat = g_data.get("habitat") or "Woodlands, forest tracts, and open country."
+        diet = g_data.get("diet") or "Insects, seeds, fruits, and small invertebrates."
+        physical = g_data.get("physical_characteristics") or "Characteristic plumage coloration and avian body structure."
+        distribution = g_data.get("geographical_distribution") or "Native or resident across the Indian Subcontinent."
+        description = g_data.get("description") or f"{common_name} ({scientific_name}) documented by Drishti."
+
+        # Cross-reference local DB if available for high-res catalog image or extra metadata
+        local_bird = self.find_bird(common_name) or self.find_bird(scientific_name)
+        if local_bird:
+            if not family or family == "Aves":
+                family = local_bird.get("family", family)
+            if not conservation or conservation == "Data Deficient (DD)":
+                conservation = local_bird.get("conservation_status", conservation)
+
+        fam_traits = FAMILY_BIOLOGY.get(family, DEFAULT_FAMILY_BIOLOGY)
+
+        # ─── SECTION A: BASIC IDENTIFICATION ───
+        sec_a = {
+            "common_name": common_name,
+            "scientific_name": scientific_name,
+            "species": scientific_name,
+            "family": family,
+            "confidence": round(float(confidence), 4),
+            "confidence_percentage": f"{round(float(confidence) * 100, 1)}%",
+            "conservation_status": conservation,
+            "species_id": local_bird.get("species_id", common_name.lower().replace(" ", "_")) if local_bird else common_name.lower().replace(" ", "_")
+        }
+
+        # ─── SECTION B: PHYSICAL CHARACTERISTICS ───
+        sec_b = {
+            "appearance": physical,
+            "colour_features": fam_traits.get("colour_features", f"Distinctive plumage patterns and markings typical of {common_name}."),
+            "size_characteristics": fam_traits.get("size_characteristics", DEFAULT_FAMILY_BIOLOGY["size_characteristics"])
+        }
+
+        # ─── SECTION C: HABITAT AND DISTRIBUTION ───
+        sec_c = {
+            "natural_habitat": habitat,
+            "geographic_distribution": distribution,
+            "common_environments": fam_traits.get("common_environments", DEFAULT_FAMILY_BIOLOGY["common_environments"])
+        }
+
+        # ─── SECTION D: FEEDING HABITS ───
+        sec_d = {
+            "primary_diet": fam_traits.get("primary_diet", "Opportunistic omnivore"),
+            "what_it_eats": diet,
+            "feeding_behaviour": fam_traits.get("feeding_behaviour", DEFAULT_FAMILY_BIOLOGY["feeding_behaviour"]),
+            "hunting_habits": fam_traits.get("hunting_habits", DEFAULT_FAMILY_BIOLOGY["hunting_habits"])
+        }
+
+        # ─── SECTION E: BEHAVIOUR AND LIFESTYLE ───
+        sec_e = {
+            "general_behaviour": fam_traits.get("general_behaviour", DEFAULT_FAMILY_BIOLOGY["general_behaviour"]),
+            "social_behaviour": fam_traits.get("social_behaviour", DEFAULT_FAMILY_BIOLOGY["social_behaviour"]),
+            "nesting_habits": fam_traits.get("nesting_habits", DEFAULT_FAMILY_BIOLOGY["nesting_habits"]),
+            "breeding_behaviour": fam_traits.get("breeding_behaviour", DEFAULT_FAMILY_BIOLOGY["breeding_behaviour"])
+        }
+
+        # ─── SECTION F: INTERESTING INFORMATION / NOVELTY ───
+        sec_f = {
+            "unique_characteristics": fam_traits.get("unique_characteristics", f"Renowned for distinctive morphology and scientific significance across South Asian biodiversity."),
+            "special_adaptations": fam_traits.get("special_adaptations", DEFAULT_FAMILY_BIOLOGY["special_adaptations"]),
+            "ecological_importance": fam_traits.get("ecological_importance", DEFAULT_FAMILY_BIOLOGY["ecological_importance"]),
+            "rare_facts": fam_traits.get("rare_facts", DEFAULT_FAMILY_BIOLOGY["rare_facts"])
+        }
+
+        return {
+            "basic_identification": sec_a,
+            "physical_characteristics": sec_b,
+            "habitat_distribution": sec_c,
+            "feeding_habits": sec_d,
+            "behaviour_lifestyle": sec_e,
+            "interesting_information": sec_f,
+            "description": description,
+            "image_url": local_bird.get("image_url", "") if local_bird else ""
+        }
+
     def _build_generic_structured_info(
         self,
         identifier: str,
