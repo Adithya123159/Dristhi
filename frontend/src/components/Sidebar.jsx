@@ -78,7 +78,7 @@ export default function Sidebar({
                 <span className="font-extrabold text-base text-slate-900 tracking-tight">
                   Drishti
                 </span>
-                <span className="text-[11px] font-semibold text-emerald-700 truncate">100 Species</span>
+                <span className="text-[11px] font-semibold text-emerald-700 truncate">Global Avian AI</span>
               </div>
             )}
           </div>
