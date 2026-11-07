@@ -114,7 +114,9 @@ export default function StructuredBirdResult({
       setSelectedSpeciesModal({
         common_name: commonName,
         scientific_name: scientificName,
+        genus: genus,
         family: family,
+        order: order,
         conservation_status: conservationStatus,
         habitat: habitat.natural_habitat,
         diet: feeding.what_it_eats,
@@ -148,7 +150,7 @@ export default function StructuredBirdResult({
               {commonName}
             </h1>
             <p className="text-base sm:text-lg font-serif italic text-emerald-800 font-medium">
-              {scientificName} &bull; <span className="font-sans not-italic text-sm text-slate-500">Family: {family}</span>
+              {scientificName} &bull; <span className="font-sans not-italic text-sm text-slate-500">Genus: <span className="font-serif italic font-semibold text-emerald-900">{genus}</span> &bull; Family: {family} &bull; Order: {order}</span>
             </p>
           </div>
 
