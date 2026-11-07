@@ -205,7 +205,7 @@ class GeminiMultimodalService:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key.strip()}"
             headers = {"Content-Type": "application/json"}
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=30)
+                res = requests.post(url, headers=headers, json=payload, timeout=6)
                 if res.status_code == 200:
                     break
                 elif res.status_code in (400, 401, 403):
@@ -216,6 +216,7 @@ class GeminiMultimodalService:
                     last_error = msg
             except Exception as e:
                 last_error = str(e)
+                break
 
         if not res or res.status_code != 200:
             return False, {"error": f"Gemini Audio API request failed: {last_error or 'Network error'}"}
