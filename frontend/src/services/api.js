@@ -193,8 +193,7 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Registration failed');
-    if (data.token) localStorage.setItem('avian_auth_token', data.token);
-    if (data.user) localStorage.setItem('avian_user_profile', JSON.stringify(data.user));
+    // Do not automatically set session on registration; user must sign in with credentials
     return data;
   },
 

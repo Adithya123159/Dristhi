@@ -53,14 +53,16 @@ export default function AuthPage({
     setLoading(true);
     try {
       if (mode === 'register') {
-        const res = await api.register(name, email, password);
-        setSuccessMsg('Account created successfully! Welcome aboard.');
-        setTimeout(() => {
-          if (onSuccess) onSuccess(res.user);
-        }, 800);
+        await api.register(name, email, password);
+        // Do not directly log in. Switch to sign in mode, keeping the credentials filled in.
+        setMode('login');
+        setConfirmPassword('');
+        setName('');
+        setSuccessMsg('Account registered successfully! Please sign in with the credentials you just filled in.');
+        setError('');
       } else {
         const res = await api.login(email, password);
-        setSuccessMsg(`Welcome back, ${res.user.name || 'Naturalist'}!`);
+        setSuccessMsg(`Welcome back, ${res.user?.name || 'Naturalist'}! Logging you in...`);
         setTimeout(() => {
           if (onSuccess) onSuccess(res.user);
         }, 600);
@@ -262,7 +264,7 @@ export default function AuthPage({
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Sign In' : 'Register'}</span>
+                  <span>{mode === 'login' ? 'Sign In to Drishti' : 'Register Account'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
