@@ -38,9 +38,9 @@ export default function Navbar({
         
         {/* Left: Brand Logo & Title */}
         <div 
-          onClick={() => handleNavClick('landing')}
+          onClick={() => handleNavClick('dashboard')}
           className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group flex-shrink-0"
-          title="Return to Drishti Landing Page"
+          title="Drishti Dashboard"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-xs shadow-emerald-600/30 group-hover:scale-105 transition-all">
             <Bird className="w-5 h-5 drop-shadow-xs" />

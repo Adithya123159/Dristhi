@@ -65,8 +65,8 @@ export default function Sidebar({
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 bg-white">
           <div 
             className="flex items-center gap-3 overflow-hidden cursor-pointer" 
-            onClick={() => handleSelectTab('landing')}
-            title="Drishti Home"
+            onClick={() => handleSelectTab('dashboard')}
+            title="Drishti Dashboard"
           >
             <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center flex-shrink-0 text-white shadow-xs shadow-emerald-600/20">
               <Bird className="w-5 h-5" />

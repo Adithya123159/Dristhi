@@ -30,6 +30,7 @@ export default function App() {
     const savedUser = api.getStoredUser();
     if (savedUser) {
       setCurrentUser(savedUser);
+      setCurrentTab('dashboard');
     }
   }, []);
 
@@ -68,13 +69,13 @@ export default function App() {
     setCurrentTab('landing');
   };
 
-  // Full-page views
-  if (currentTab === 'landing') {
+  // Landing page: only accessible before login for unauthenticated visitors
+  if (!currentUser && currentTab === 'landing') {
     return (
       <>
         <LandingPage 
           onNavigateTab={setCurrentTab} 
-          currentUser={currentUser}
+          currentUser={null}
           onLogout={handleLogout}
         />
         <SpeciesModal
@@ -105,6 +106,7 @@ export default function App() {
   const renderPage = () => {
     switch (currentTab) {
       case 'dashboard':
+      case 'landing':
         return (
           <DashboardHome 
             setCurrentTab={setCurrentTab} 

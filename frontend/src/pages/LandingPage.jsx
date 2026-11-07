@@ -83,7 +83,7 @@ export default function LandingPage({
         
         {/* Brand Logo (Left) */}
         <div 
-          onClick={() => onNavigateTab('landing')}
+          onClick={() => onNavigateTab(currentUser ? 'dashboard' : 'landing')}
           className="flex items-center gap-3 cursor-pointer group flex-shrink-0"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-600/30 group-hover:scale-105 transition-all">
