@@ -96,44 +96,44 @@ export default function LandingPage({
           </div>
 
           {/* Center Navigation Dock — Sleek & Compact Single-Line */}
-          <nav className="hidden lg:flex items-center gap-1 bg-slate-100/80 backdrop-blur-md p-1 rounded-full border border-slate-200/80 shadow-inner ring-1 ring-slate-900/5 flex-shrink-0">
+          <nav className="hidden lg:flex items-center gap-1.5 bg-slate-100/80 backdrop-blur-md p-1.5 rounded-full border border-slate-200/80 shadow-inner ring-1 ring-slate-900/5 flex-shrink-0">
             <button
               onClick={() => onNavigateTab('identify')}
-              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-bold text-emerald-950 bg-white rounded-full shadow-xs border border-emerald-300 flex items-center gap-1.5 whitespace-nowrap hover:shadow-sm hover:scale-102 active:scale-95 transition-all group"
+              className="px-4.5 py-2 text-xs sm:text-[13px] font-bold text-emerald-950 bg-white rounded-full shadow-xs border border-emerald-300/90 flex items-center gap-2 whitespace-nowrap hover:shadow-sm hover:scale-102 active:scale-95 transition-all group"
             >
               <ScanLine className="w-4 h-4 text-emerald-600 group-hover:rotate-6 transition-transform" />
               <span>AI Classifier</span>
             </button>
             <button
               onClick={() => onNavigateTab('species')}
-              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
+              className="px-4 py-2 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-2 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
             >
               <Bird className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               <span>Species Catalog</span>
             </button>
             <button
               onClick={() => onNavigateTab('encyclopedia')}
-              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
+              className="px-4 py-2 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-2 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
             >
               <BookOpen className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               <span>Encyclopedia</span>
             </button>
             <button
               onClick={() => onNavigateTab('dashboard')}
-              className="px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
+              className="px-4 py-2 text-xs sm:text-[13px] font-semibold text-slate-700 hover:text-emerald-950 hover:bg-white/80 rounded-full transition-all flex items-center gap-2 whitespace-nowrap hover:shadow-2xs hover:scale-102 active:scale-95 group"
             >
               <Compass className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
               <span>Dashboard</span>
             </button>
           </nav>
 
-          {/* Right Action Controls — Sleek & Compact */}
-          <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+          {/* Right Action Controls — Comfortably Sized Widths */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
             {currentUser ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <div 
                   onClick={() => onNavigateTab('dashboard')}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200/70 cursor-pointer transition-colors shadow-2xs whitespace-nowrap"
+                  className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200/70 cursor-pointer transition-colors shadow-2xs whitespace-nowrap"
                 >
                   <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-[10px] font-bold text-white shadow-2xs">
                     {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
@@ -145,7 +145,7 @@ export default function LandingPage({
 
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-[13px] shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-400/30 hover:scale-102 transition-all flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-[13px] shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-400/30 hover:scale-102 transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   <span>Open App</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -153,36 +153,36 @@ export default function LandingPage({
 
                 <button
                   onClick={onLogout}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors"
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors"
                   title="Logout"
                 >
                   <LogIn className="w-4 h-4 rotate-180" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2 sm:gap-2.5">
                 {/* Log In */}
                 <button
                   onClick={() => onNavigateTab('login')}
-                  className="px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 border border-slate-200/80 transition-all flex items-center gap-1.5 whitespace-nowrap shadow-2xs active:scale-95"
+                  className="px-5 py-2 rounded-full text-xs sm:text-[13px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-2xs active:scale-95"
                 >
                   <LogIn className="w-3.5 h-3.5 text-slate-400" />
                   <span>Log In</span>
                 </button>
 
-                {/* Register Button */}
+                {/* Register Button - Wider with generous breathing room */}
                 <button
                   onClick={() => onNavigateTab('register')}
-                  className="px-4.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-[13px] shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-400/30 hover:shadow-md hover:scale-102 active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-6 py-2 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs sm:text-[13px] shadow-sm shadow-emerald-600/30 ring-1 ring-emerald-400/30 hover:shadow-md hover:scale-102 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
                 >
-                  <UserPlus className="w-3.5 h-3.5" />
+                  <UserPlus className="w-4 h-4" />
                   <span>Register</span>
                 </button>
 
                 {/* Guest Pill */}
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs sm:text-[13px] font-bold text-slate-600 hover:text-emerald-800 rounded-full hover:bg-emerald-50/90 border border-slate-200/80 hover:border-emerald-300 transition-all whitespace-nowrap shadow-2xs"
+                  className="hidden sm:inline-flex items-center justify-center gap-1.5 px-4.5 py-2 text-xs sm:text-[13px] font-bold text-slate-600 hover:text-emerald-800 rounded-full hover:bg-emerald-50/90 border border-slate-200/80 hover:border-emerald-300 transition-all whitespace-nowrap shadow-2xs"
                 >
                   <span>Guest</span>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
