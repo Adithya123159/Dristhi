@@ -213,11 +213,19 @@ export default function SpeciesModal({ species, isOpen, onClose }) {
               <div className="p-2.5 rounded-xl bg-teal-50 text-teal-600 mt-0.5">
                 <Feather className="w-5 h-5" />
               </div>
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Physical Traits</h4>
-                <p className="text-sm font-medium text-slate-800 mt-0.5">
-                  {species.physical_characteristics || 'Distinct plumage patterns tailored for specialized flight and camouflage.'}
-                </p>
+              <div className="space-y-1.5 flex-1">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Physical Traits</h4>
+                  <p className="text-sm font-medium text-slate-800 mt-0.5">
+                    {species.physical_characteristics || 'Distinct plumage patterns tailored for specialized flight and camouflage.'}
+                  </p>
+                </div>
+                {species.lifespan_longevity && (
+                  <div className="pt-2 border-t border-slate-100 text-xs text-slate-600">
+                    <span className="font-bold text-emerald-800">Living Period: </span>
+                    <span>{species.lifespan_longevity}</span>
+                  </div>
+                )}
               </div>
             </div>
 

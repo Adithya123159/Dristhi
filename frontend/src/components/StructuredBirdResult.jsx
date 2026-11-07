@@ -184,6 +184,7 @@ export default function StructuredBirdResult({
     : (typeof result.confidence === 'number' ? result.confidence : 0.95);
   const confidencePct = basic.confidence_percentage || `${Math.round(confidenceScore * 100)}%`;
   const conservationStatus = basic.conservation_status || 'Least Concern (LC)';
+  const lifespanData = getAvianLifespan(physical.lifespan_longevity, commonName, family, order);
   const sources = info.sources || result.sources || [
     'IUCN Red List of Threatened Species',
     'eBird / Cornell Lab of Ornithology',
@@ -243,6 +244,7 @@ export default function StructuredBirdResult({
         habitat: habitat.natural_habitat,
         diet: feeding.what_it_eats,
         physical_characteristics: physical.appearance,
+        lifespan_longevity: lifespanData.text,
         geographical_distribution: habitat.geographic_distribution,
         description: info.description || `${commonName} (${scientificName}) identified by Drishti.`,
         image_url: info.image_url || imageSrc
@@ -403,7 +405,7 @@ export default function StructuredBirdResult({
         </div>
       </div>
 
-      {/* ─── 6 STRUCTURED BIRD INFORMATION SECTIONS (A THROUGH F) ─── */}
+      {/* ─── COMPREHENSIVE BIRD BIOLOGICAL PROFILE ─── */}
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
@@ -424,13 +426,13 @@ export default function StructuredBirdResult({
           </button>
         </div>
 
-        {/* SECTION A: BASIC IDENTIFICATION */}
+        {/* BASIC IDENTIFICATION */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-emerald-700 font-bold text-base sm:text-lg">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Fingerprint className="w-4 h-4" />
             </div>
-            <span>Section A &bull; Basic Identification</span>
+            <span>Basic Identification</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-1">
@@ -479,13 +481,13 @@ export default function StructuredBirdResult({
           </div>
         </div>
 
-        {/* SECTION B: PHYSICAL CHARACTERISTICS */}
+        {/* PHYSICAL CHARACTERISTICS */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-emerald-700 font-bold text-base sm:text-lg">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Feather className="w-4 h-4" />
             </div>
-            <span>Section B &bull; Physical Characteristics</span>
+            <span>Physical Characteristics</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
@@ -503,22 +505,44 @@ export default function StructuredBirdResult({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
-              <span className="text-xs font-bold text-slate-700 block">Size & Morphometrics</span>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {physical.size_characteristics || 'Information unavailable'}
-              </p>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-3">
+              <div>
+                <span className="text-xs font-bold text-slate-700 block">Size & Morphometrics</span>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-0.5">
+                  {physical.size_characteristics || 'Information unavailable'}
+                </p>
+              </div>
+
+              <div className="pt-2.5 border-t border-slate-200/80 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                  <Clock className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <span>Living Period (Lifespan & Longevity)</span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  {lifespanData.text}
+                </p>
+                <div className="flex flex-wrap gap-2 pt-0.5">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100/80 text-emerald-900 border border-emerald-200">
+                    <span className="text-slate-500 font-semibold">Average:</span>
+                    <span>{lifespanData.avg}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-100/80 text-teal-900 border border-teal-200">
+                    <span className="text-slate-500 font-semibold">Maximum:</span>
+                    <span>{lifespanData.max}</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* SECTION C: HABITAT AND DISTRIBUTION */}
+        {/* HABITAT AND DISTRIBUTION */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-emerald-700 font-bold text-base sm:text-lg">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Compass className="w-4 h-4" />
             </div>
-            <span>Section C &bull; Habitat and Distribution</span>
+            <span>Habitat and Distribution</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
@@ -545,13 +569,13 @@ export default function StructuredBirdResult({
           </div>
         </div>
 
-        {/* SECTION D: FEEDING HABITS */}
+        {/* FEEDING HABITS */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-emerald-700 font-bold text-base sm:text-lg">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Utensils className="w-4 h-4" />
             </div>
-            <span>Section D &bull; Feeding Habits</span>
+            <span>Feeding Habits</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
@@ -585,13 +609,13 @@ export default function StructuredBirdResult({
           </div>
         </div>
 
-        {/* SECTION E: BEHAVIOUR AND LIFESTYLE */}
+        {/* BEHAVIOUR AND LIFESTYLE */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-emerald-700 font-bold text-base sm:text-lg">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Activity className="w-4 h-4" />
             </div>
-            <span>Section E &bull; Behaviour and Lifestyle</span>
+            <span>Behaviour and Lifestyle</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
@@ -625,13 +649,13 @@ export default function StructuredBirdResult({
           </div>
         </div>
 
-        {/* SECTION F: INTERESTING INFORMATION / NOVELTY */}
+        {/* INTERESTING INFORMATION / NOVELTY */}
         <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/70 border border-emerald-200/80 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-emerald-800 font-bold text-base sm:text-lg">
             <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span>Section F &bull; Interesting Information & Ecological Novelty</span>
+            <span>Interesting Information & Ecological Novelty</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
