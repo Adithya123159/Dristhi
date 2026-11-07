@@ -33,6 +33,7 @@ from backend.validation_service import ImageValidationService
 from backend.audio_service import AudioValidationService, AudioClassificationService
 from backend.gradcam_service import GradCAMService
 from backend.gemini_service import GeminiMultimodalService
+from backend.species_detail_service import species_detail_service
 from backend.mongo_db import (
     init_mongo, record_identification, get_identifications,
     delete_identification_record, clear_all_identifications,
@@ -172,7 +173,7 @@ def health_check():
     }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. IMAGE-BASED BIRD IDENTIFICATION PIPELINE (VISION + API KEY)
+# 2. IMAGE-BASED BIRD IDENTIFICATION PIPELINE (VISION CLASSIFIER)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.post("/api/identify/image")
@@ -185,9 +186,14 @@ async def identify_bird_image(
 ):
     """
     Multimodal Image Bird Identification Pipeline:
-    - If API Key is provided: Uses Google Gemini Multimodal Vision AI for fine-grained identification,
-      taxonomic telemetry, and species classification.
-    - If No API Key: Uses MobileNetV2 neural classifier + Grad-CAM explainability.
+    1. Validates image file format, size, dimensions, and readability.
+    2. Verifies bird presence:
+       - Rejects non-bird subjects (cars, humans, dogs, blank images, abstract graphics)
+         with: "No bird detected. Please upload a valid bird image."
+    3. Runs the trained deep learning model (MobileNetV2) to classify species and compute confidence.
+       (Strict Rule: ML predictions are computed by the trained model, NOT replaced with Gemini).
+    4. Attaches full 6-section structured biological information (A through F) via species_detail_service.
+    5. Generates Grad-CAM visual explainability heatmap.
     """
     global classifier_instance, image_validator, gradcam_service, gemini_service
     thresholds = get_system_thresholds()
@@ -202,7 +208,7 @@ async def identify_bird_image(
 
     media_url = f"/uploads/{file_id}"
 
-    # Validate basic file properties
+    # 1. Validate basic file properties
     valid, reason, meta = image_validator.validate_file_properties(saved_path)
     if not valid:
         record_identification(
@@ -218,25 +224,57 @@ async def identify_bird_image(
         )
         raise HTTPException(status_code=400, detail=reason)
 
-    # Prepare image for classification
-    detection = image_validator.detect_birds(saved_path, conf_threshold=0.20)
-    annotated_path = detection.get("annotated_image_path", saved_path)
-    cropped_path = detection.get("cropped_image_path", saved_path)
-    annotated_url = f"/uploads/{os.path.basename(annotated_path)}"
-    cropped_url = f"/uploads/{os.path.basename(cropped_path)}"
-
-    # ─────────────────────────────────────────────────────────────
-    # PATH A: GEMINI MULTIMODAL API KEY INTEGRATION
-    # ─────────────────────────────────────────────────────────────
+    # 2. Bird Presence Verification (Gemini check if available)
+    gemini_check = None
     if effective_api_key and effective_api_key.strip():
-        success, gemini_result = gemini_service.identify_image(saved_path, effective_api_key.strip())
-        if not success:
-            raise HTTPException(status_code=400, detail=gemini_result.get("error", "API key identification failed."))
+        try:
+            ok, g_res = gemini_service.identify_image(saved_path, effective_api_key.strip())
+            if ok:
+                gemini_check = g_res
+                if g_res.get("is_bird") is False:
+                    rejection_msg = "No bird detected. Please upload a valid bird image."
+                    record_identification(
+                        input_type="image",
+                        uploaded_filename=file.filename or file_id,
+                        media_url=media_url,
+                        detection_status="rejected_no_bird",
+                        predicted_species="None",
+                        scientific_name="None",
+                        confidence_score=0.0,
+                        top_predictions=[],
+                        rejection_reason=rejection_msg,
+                        telemetry={"detected_object": g_res.get("detected_object", "non-bird object")}
+                    )
+                    raise HTTPException(status_code=400, detail=rejection_msg)
+        except HTTPException:
+            raise
+        except Exception as e:
+            print("Gemini verification notice (fallback to local):", e)
 
-        # Strict Bird Verification Check
-        if not gemini_result.get("is_bird"):
-            detected_desc = gemini_result.get("detected_object") or "non-bird object"
-            rejection_msg = f"Invalid Image: No bird detected in this image (detected: {detected_desc}). Please upload an image of a bird."
+    # 3. Model Inference using trained MobileNetV2
+    if classifier_instance is None:
+        try:
+            classifier_instance = BirdClassifier()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Vision model initialization failed: {e}")
+
+    try:
+        results = classifier_instance.predict(saved_path, top_k=5)
+        if not results:
+            raise HTTPException(status_code=500, detail="Inference returned empty results.")
+
+        top_match = results[0]
+        species_id = top_match["species_id"]
+        confidence = float(top_match["confidence"])
+
+        # 4. Local Bird Presence Verification Gate
+        is_bird, presence_msg = image_validator.verify_bird_presence(
+            saved_path,
+            top_confidence=confidence,
+            gemini_result=gemini_check
+        )
+        if not is_bird:
+            rejection_msg = "No bird detected. Please upload a valid bird image."
             record_identification(
                 input_type="image",
                 uploaded_filename=file.filename or file_id,
@@ -246,152 +284,47 @@ async def identify_bird_image(
                 scientific_name="None",
                 confidence_score=0.0,
                 top_predictions=[],
-                annotated_url=annotated_url,
-                rejection_reason=rejection_msg,
-                telemetry={"detected_object": detected_desc, "provider": "Google Gemini Vision"}
+                rejection_reason=rejection_msg
             )
             raise HTTPException(status_code=400, detail=rejection_msg)
 
-        # Verified Bird via Gemini!
-        common_name = gemini_result.get("common_name", "Unknown Bird")
-        scientific_name = gemini_result.get("scientific_name", "Aves")
-        confidence = float(gemini_result.get("confidence", 0.95))
+        # 5. Build Enriched Top Predictions
+        enriched_top = []
+        for r in results:
+            d = find_bird_details(r["species_id"])
+            c_name = d.get("common_name", r["species_id"]) if d else r["species_id"]
+            s_name = d.get("scientific_name", "Aves") if d else "Aves"
+            enriched_top.append({
+                "species_id": r["species_id"],
+                "confidence": round(float(r["confidence"]), 4),
+                "confidence_percentage": f"{round(float(r['confidence']) * 100, 1)}%",
+                "common_name": c_name,
+                "scientific_name": s_name,
+                "family": d.get("family", "") if d else "",
+                "conservation_status": d.get("conservation_status", "Least Concern (LC)") if d else "Least Concern (LC)"
+            })
 
-        # Check local DB for cached profile
-        local_details = find_bird_details(common_name) or {}
-        species_id = local_details.get("species_id", f"gemini.{common_name.replace(' ', '_')}")
-
-        top_preds = gemini_result.get("top_predictions", [])
-        if not top_preds:
-            top_preds = [{"common_name": common_name, "scientific_name": scientific_name, "confidence": confidence}]
-
-        # Grad-CAM if available
-        gradcam_url = None
-        if gradcam_service:
-            try:
-                gc_name = f"{os.path.splitext(file_id)[0]}_gradcam.jpg"
-                gc_path = os.path.join(UPLOADS_DIR, gc_name)
-                gradcam_service.save_gradcam_overlay(cropped_path, gc_path)
-                gradcam_url = f"/uploads/{gc_name}"
-            except Exception:
-                pass
-
-        confidence_tier = determine_confidence_level(confidence, thresholds)
-        ident_id = record_identification(
-            input_type="image",
-            uploaded_filename=file.filename or file_id,
-            media_url=media_url,
-            detection_status="success",
-            predicted_species=common_name,
-            scientific_name=scientific_name,
-            confidence_score=confidence,
-            top_predictions=top_preds,
-            annotated_url=annotated_url,
-            telemetry={
-                "provider": "Google Gemini Multimodal Vision",
-                "bird_boxes": detection.get("boxes", []),
-                "confidence_tier": confidence_tier
-            }
-        )
-
-        return {
-            "success": True,
-            "status": "success",
-            "identification_id": ident_id,
-            "input_type": "image",
-            "is_bird": True,
-            "validated_by": "Google Gemini Vision AI",
-            "bird_count": detection.get("bird_count", 1),
-            "confidence_tier": confidence_tier,
-            "prediction": {
-                "species_id": species_id,
-                "common_name": common_name,
-                "scientific_name": scientific_name,
-                "confidence": round(confidence, 4),
-                "family": gemini_result.get("family") or local_details.get("family", "Aves"),
-                "order": gemini_result.get("order") or local_details.get("order", "Passeriformes"),
-                "conservation_status": gemini_result.get("conservation_status") or local_details.get("conservation_status", "Least Concern (LC)"),
-                "habitat": gemini_result.get("habitat") or local_details.get("habitat", "Tropical forests and woodlands"),
-                "diet": gemini_result.get("diet") or local_details.get("diet", "Insects, seeds, berries"),
-                "geographical_distribution": gemini_result.get("geographical_distribution") or local_details.get("geographical_distribution", "Widespread across India"),
-                "physical_characteristics": gemini_result.get("physical_characteristics") or local_details.get("physical_characteristics", ""),
-                "description": gemini_result.get("description") or local_details.get("description", ""),
-                "image_url": local_details.get("image_url", "") or annotated_url
-            },
-            "top_predictions": top_preds,
-            "uploaded_image_url": media_url,
-            "annotated_image_url": annotated_url,
-            "cropped_image_url": cropped_url,
-            "gradcam_url": gradcam_url,
-            "bounding_boxes": detection.get("boxes", []),
-            "image_quality": meta
-        }
-
-    # ─────────────────────────────────────────────────────────────
-    # PATH B: LOCAL OFFLINE MOBILENETV2 PIPELINE
-    # ─────────────────────────────────────────────────────────────
-    if not detection.get("is_bird"):
-        rejection_msg = detection.get("rejection_message", "Invalid Image: No bird detected. Please upload an image containing a bird.")
-        record_identification(
-            input_type="image",
-            uploaded_filename=file.filename or file_id,
-            media_url=media_url,
-            detection_status="rejected_no_bird",
-            predicted_species="None",
-            scientific_name="None",
-            confidence_score=0.0,
-            top_predictions=[],
-            annotated_url=annotated_url,
-            rejection_reason=rejection_msg,
-            telemetry={"detected_objects": detection.get("detected_objects", [])}
-        )
-        raise HTTPException(status_code=400, detail=rejection_msg)
-
-    if classifier_instance is None:
-        try:
-            classifier_instance = BirdClassifier()
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Vision model initialization failed: {e}")
-
-    try:
-        results = classifier_instance.predict(cropped_path, top_k=5)
-        if not results:
-            raise HTTPException(status_code=500, detail="Inference returned empty results.")
-
-        top_match = results[0]
-        species_id = top_match["species_id"]
-        confidence = float(top_match["confidence"])
-
-        # Grad-CAM heatmap
+        # 6. Grad-CAM visual heatmap overlay
         gradcam_filename = f"{os.path.splitext(file_id)[0]}_gradcam.jpg"
         gradcam_path = os.path.join(UPLOADS_DIR, gradcam_filename)
         gradcam_url = None
         if gradcam_service:
             try:
-                gradcam_service.save_gradcam_overlay(cropped_path, gradcam_path)
+                gradcam_service.save_gradcam_overlay(saved_path, gradcam_path)
                 gradcam_url = f"/uploads/{gradcam_filename}"
             except Exception:
                 pass
 
-        enriched_top = []
-        for r in results:
-            d = find_bird_details(r["species_id"])
-            enriched_top.append({
-                "species_id": r["species_id"],
-                "confidence": round(float(r["confidence"]), 4),
-                "common_name": d.get("common_name", r["species_id"]) if d else r["species_id"],
-                "scientific_name": d.get("scientific_name", "Unknown") if d else "Unknown",
-                "family": d.get("family", "") if d else "",
-                "conservation_status": d.get("conservation_status", "Least Concern (LC)") if d else "Least Concern (LC)"
-            })
-
-        top_details = find_bird_details(species_id) or {}
-        common_name = top_details.get("common_name", species_id)
-        scientific_name = top_details.get("scientific_name", "Aves")
+        # 7. Generate Complete 6-Section Structured Biological Data (A to F)
+        structured_info = species_detail_service.get_structured_info(species_id, confidence, "image")
+        common_name = structured_info["basic_identification"]["common_name"]
+        scientific_name = structured_info["basic_identification"]["scientific_name"]
+        family = structured_info["basic_identification"]["family"]
 
         confidence_tier = determine_confidence_level(confidence, thresholds)
         detection_status = "success" if confidence_tier != "low" else "uncertain"
 
+        # Record in database
         ident_id = record_identification(
             input_type="image",
             uploaded_filename=file.filename or file_id,
@@ -401,9 +334,9 @@ async def identify_bird_image(
             scientific_name=scientific_name,
             confidence_score=confidence,
             top_predictions=enriched_top,
-            annotated_url=annotated_url,
+            annotated_url=media_url,
             telemetry={
-                "provider": "Local MobileNetV2",
+                "provider": "MobileNetV2 Deep Learning",
                 "confidence_tier": confidence_tier
             }
         )
@@ -415,29 +348,30 @@ async def identify_bird_image(
             "input_type": "image",
             "is_bird": True,
             "validated_by": "Deep Learning MobileNetV2",
-            "bird_count": 1,
             "confidence_tier": confidence_tier,
+            "predicted_species": common_name,
+            "scientific_name": scientific_name,
+            "confidence": round(confidence, 4),
+            "uploaded_image_url": media_url,
+            "annotated_image_url": media_url,
+            "cropped_image_url": media_url,
+            "gradcam_url": gradcam_url,
+            "structured_info": structured_info,
             "prediction": {
                 "species_id": species_id,
                 "common_name": common_name,
                 "scientific_name": scientific_name,
                 "confidence": round(confidence, 4),
-                "family": top_details.get("family", "Aves"),
-                "order": top_details.get("order", "Passeriformes"),
-                "conservation_status": top_details.get("conservation_status", "Least Concern (LC)"),
-                "habitat": top_details.get("habitat", "Grasslands, scrublands, tropical deciduous forests"),
-                "diet": top_details.get("diet", "Insects, seeds, small invertebrates"),
-                "geographical_distribution": top_details.get("geographical_distribution", "Widespread across India"),
-                "physical_characteristics": top_details.get("physical_characteristics", ""),
-                "description": top_details.get("description", "Documented avian species in Drishti Encyclopedia."),
-                "image_url": top_details.get("image_url", "") or annotated_url
+                "family": family,
+                "conservation_status": structured_info["basic_identification"].get("conservation_status", "Least Concern (LC)"),
+                "habitat": structured_info["habitat_distribution"].get("natural_habitat", ""),
+                "diet": structured_info["feeding_habits"].get("what_it_eats", ""),
+                "physical_characteristics": structured_info["physical_characteristics"].get("appearance", ""),
+                "geographical_distribution": structured_info["habitat_distribution"].get("geographic_distribution", ""),
+                "description": structured_info.get("description", ""),
+                "image_url": structured_info.get("image_url", "") or media_url
             },
             "top_predictions": enriched_top,
-            "uploaded_image_url": media_url,
-            "annotated_image_url": annotated_url,
-            "cropped_image_url": cropped_url,
-            "gradcam_url": gradcam_url,
-            "bounding_boxes": detection.get("boxes", []),
             "image_quality": meta
         }
     except HTTPException:
@@ -445,8 +379,9 @@ async def identify_bird_image(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image classification error: {str(e)}")
 
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. AUDIO-BASED BIRD IDENTIFICATION PIPELINE (BIOACOUSTICS + API KEY)
+# 3. AUDIO-BASED BIRD IDENTIFICATION PIPELINE (BIOACOUSTICS)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.post("/api/identify/audio")
@@ -456,10 +391,16 @@ async def identify_bird_audio(
     x_api_key: Optional[str] = Header(None)
 ):
     """
-    Multimodal Audio/Voice Bird Identification Pipeline:
-    - If API Key is provided: Uses Google Gemini Audio Intelligence for acoustic song/call identification,
-      vocalization cadence analysis, and non-avian audio rejection, with Mel Spectrogram extraction.
-    - If No API Key: Uses local Librosa bioacoustic frequency analysis (1.5 - 8.5 kHz) + Mel Spectrogram CNN.
+    Multimodal Audio Bird Identification Pipeline:
+    1. Validates audio format, size, duration, and silence.
+    2. Analyzes audio for bird vocalizations:
+       - If no recognizable bird vocalization detected:
+         Rejects with: "No recognizable bird sound detected. Please upload a valid bird recording."
+    3. Runs the bioacoustic species classification model.
+       (Strict Rule: ML predictions are computed by the trained model, NOT replaced with Gemini).
+    4. Computes Mel Spectrogram visualization.
+    5. Attaches full 6-section structured biological information (A through F) via species_detail_service.
+    6. Provides audio playback option.
     """
     global audio_validator, audio_classifier, gemini_service
     thresholds = get_system_thresholds()
@@ -474,7 +415,7 @@ async def identify_bird_audio(
 
     media_url = f"/uploads/{file_id}"
 
-    # Validate audio file properties & silence check
+    # 1. Validate audio file properties & silence check
     valid, reason, meta = audio_validator.validate_file(saved_path)
     if not valid:
         record_identification(
@@ -490,113 +431,10 @@ async def identify_bird_audio(
         )
         raise HTTPException(status_code=400, detail=reason)
 
-    # Always generate Mel Spectrogram for visual bioacoustic representation
-    spectrogram_filename = f"{os.path.splitext(file_id)[0]}_spectrogram.png"
-    spectrogram_path = os.path.join(UPLOADS_DIR, spectrogram_filename)
-    spectrogram_url = None
-    try:
-        audio_classifier.generate_mel_spectrogram(saved_path, spectrogram_path)
-        spectrogram_url = f"/uploads/{spectrogram_filename}"
-    except Exception as e:
-        print("Spectrogram generation error:", e)
-
-    # ─────────────────────────────────────────────────────────────
-    # PATH A: GEMINI BIOACOUSTIC AUDIO API KEY INTEGRATION
-    # ─────────────────────────────────────────────────────────────
-    if effective_api_key and effective_api_key.strip():
-        success, gemini_result = gemini_service.identify_audio(saved_path, effective_api_key.strip())
-        if not success:
-            raise HTTPException(status_code=400, detail=gemini_result.get("error", "API key audio identification failed."))
-
-        # Strict Bird Sound Verification Check
-        if not gemini_result.get("is_bird_sound"):
-            detected_desc = gemini_result.get("detected_sound") or "non-bird audio"
-            rejection_msg = f"Invalid Audio: No bird sound detected in this recording (detected: {detected_desc}). Please upload a recording containing bird sounds."
-            record_identification(
-                input_type="audio",
-                uploaded_filename=file.filename or file_id,
-                media_url=media_url,
-                detection_status="rejected_no_bird_sound",
-                predicted_species="None",
-                scientific_name="None",
-                confidence_score=0.0,
-                top_predictions=[],
-                spectrogram_url=spectrogram_url,
-                rejection_reason=rejection_msg,
-                telemetry={"detected_sound": detected_desc, "provider": "Google Gemini Audio"}
-            )
-            raise HTTPException(status_code=400, detail=rejection_msg)
-
-        # Verified Bird Voice via Gemini!
-        common_name = gemini_result.get("common_name", "Unknown Bird")
-        scientific_name = gemini_result.get("scientific_name", "Aves")
-        confidence = float(gemini_result.get("confidence", 0.94))
-
-        local_details = find_bird_details(common_name) or {}
-        species_id = local_details.get("species_id", f"gemini.{common_name.replace(' ', '_')}")
-
-        top_preds = gemini_result.get("top_predictions", [])
-        if not top_preds:
-            top_preds = [{"common_name": common_name, "scientific_name": scientific_name, "confidence": confidence}]
-
-        confidence_tier = determine_confidence_level(confidence, thresholds)
-        ident_id = record_identification(
-            input_type="audio",
-            uploaded_filename=file.filename or file_id,
-            media_url=media_url,
-            detection_status="success",
-            predicted_species=common_name,
-            scientific_name=scientific_name,
-            confidence_score=confidence,
-            top_predictions=top_preds,
-            spectrogram_url=spectrogram_url,
-            telemetry={
-                "provider": "Google Gemini Bioacoustic Audio",
-                "vocalization_type": gemini_result.get("vocalization_type"),
-                "vocalization_description": gemini_result.get("vocalization_description"),
-                "confidence_tier": confidence_tier
-            }
-        )
-
-        return {
-            "success": True,
-            "status": "success",
-            "identification_id": ident_id,
-            "input_type": "audio",
-            "is_bird_sound": True,
-            "validated_by": "Google Gemini Bioacoustic AI",
-            "confidence_tier": confidence_tier,
-            "prediction": {
-                "species_id": species_id,
-                "common_name": common_name,
-                "scientific_name": scientific_name,
-                "confidence": round(confidence, 4),
-                "family": gemini_result.get("family") or local_details.get("family", "Aves"),
-                "order": gemini_result.get("order") or local_details.get("order", "Passeriformes"),
-                "conservation_status": gemini_result.get("conservation_status") or local_details.get("conservation_status", "Least Concern (LC)"),
-                "habitat": gemini_result.get("habitat") or local_details.get("habitat", "Woodlands and rural trees"),
-                "diet": gemini_result.get("diet") or local_details.get("diet", "Seeds, berries, insects"),
-                "geographical_distribution": gemini_result.get("geographical_distribution") or local_details.get("geographical_distribution", "Widespread across India"),
-                "physical_characteristics": local_details.get("physical_characteristics", ""),
-                "description": gemini_result.get("description") or local_details.get("description", ""),
-                "image_url": local_details.get("image_url", "")
-            },
-            "vocalization": {
-                "type": gemini_result.get("vocalization_type", "Avian song/call"),
-                "description": gemini_result.get("vocalization_description", "Acoustic song pattern identified by Gemini Bioacoustics.")
-            },
-            "top_predictions": top_preds,
-            "audio_url": media_url,
-            "spectrogram_url": spectrogram_url,
-            "audio_metadata": meta
-        }
-
-    # ─────────────────────────────────────────────────────────────
-    # PATH B: LOCAL OFFLINE BIOACOUSTICS PIPELINE
-    # ─────────────────────────────────────────────────────────────
+    # 2. Bird Sound Vocalization Verification (Bioacoustics check)
     detection = audio_validator.detect_bird_sound(saved_path)
     if not detection.get("is_bird_sound"):
-        rejection_msg = detection.get("rejection_message", "Invalid Audio: No bird sound detected. Please upload an audio recording containing bird sounds.")
+        rejection_msg = "No recognizable bird sound detected. Please upload a valid bird recording."
         record_identification(
             input_type="audio",
             uploaded_filename=file.filename or file_id,
@@ -611,6 +449,41 @@ async def identify_bird_audio(
         )
         raise HTTPException(status_code=400, detail=rejection_msg)
 
+    # Optional Gemini sound verification if online
+    if effective_api_key and effective_api_key.strip():
+        try:
+            ok, g_res = gemini_service.identify_audio(saved_path, effective_api_key.strip())
+            if ok and g_res.get("is_bird_sound") is False:
+                rejection_msg = "No recognizable bird sound detected. Please upload a valid bird recording."
+                record_identification(
+                    input_type="audio",
+                    uploaded_filename=file.filename or file_id,
+                    media_url=media_url,
+                    detection_status="rejected_no_bird_sound",
+                    predicted_species="None",
+                    scientific_name="None",
+                    confidence_score=0.0,
+                    top_predictions=[],
+                    rejection_reason=rejection_msg,
+                    telemetry={"detected_sound": g_res.get("detected_sound", "non-bird audio")}
+                )
+                raise HTTPException(status_code=400, detail=rejection_msg)
+        except HTTPException:
+            raise
+        except Exception:
+            pass
+
+    # 3. Always generate Mel Spectrogram for visual bioacoustic representation
+    spectrogram_filename = f"{os.path.splitext(file_id)[0]}_spectrogram.png"
+    spectrogram_path = os.path.join(UPLOADS_DIR, spectrogram_filename)
+    spectrogram_url = None
+    try:
+        audio_classifier.generate_mel_spectrogram(saved_path, spectrogram_path)
+        spectrogram_url = f"/uploads/{spectrogram_filename}"
+    except Exception as e:
+        print("Spectrogram generation error:", e)
+
+    # 4. Classify audio using trained bioacoustic classification model
     try:
         top_predictions = audio_classifier.classify_audio_spectrogram(saved_path, top_k=5)
         if not top_predictions:
@@ -618,14 +491,22 @@ async def identify_bird_audio(
 
         top_match = top_predictions[0]
         confidence = float(top_match["confidence"])
-        common_name = top_match["common_name"]
-        scientific_name = top_match["scientific_name"]
         species_id = top_match["species_id"]
 
-        top_details = find_bird_details(species_id) or {}
+        # Format top predictions with percentage
+        for p in top_predictions:
+            p["confidence_percentage"] = f"{round(float(p['confidence']) * 100, 1)}%"
+
+        # 5. Generate Complete 6-Section Structured Biological Data (A to F)
+        structured_info = species_detail_service.get_structured_info(species_id, confidence, "audio")
+        common_name = structured_info["basic_identification"]["common_name"]
+        scientific_name = structured_info["basic_identification"]["scientific_name"]
+        family = structured_info["basic_identification"]["family"]
+
         confidence_tier = determine_confidence_level(confidence, thresholds)
         detection_status = "success" if confidence_tier != "low" else "uncertain"
 
+        # Record in database
         ident_id = record_identification(
             input_type="audio",
             uploaded_filename=file.filename or file_id,
@@ -651,24 +532,27 @@ async def identify_bird_audio(
             "is_bird_sound": True,
             "validated_by": "Local Librosa Bioacoustics",
             "confidence_tier": confidence_tier,
+            "predicted_species": common_name,
+            "scientific_name": scientific_name,
+            "confidence": round(confidence, 4),
+            "audio_url": media_url,
+            "spectrogram_url": spectrogram_url,
+            "structured_info": structured_info,
             "prediction": {
                 "species_id": species_id,
                 "common_name": common_name,
                 "scientific_name": scientific_name,
                 "confidence": round(confidence, 4),
-                "family": top_details.get("family", top_match.get("family", "Aves")),
-                "order": top_details.get("order", "Passeriformes"),
-                "conservation_status": top_details.get("conservation_status", "Least Concern (LC)"),
-                "habitat": top_details.get("habitat", "Forests, scrublands, open woodlands"),
-                "diet": top_details.get("diet", "Insects, seeds, berries"),
-                "geographical_distribution": top_details.get("geographical_distribution", "Native to India"),
-                "physical_characteristics": top_details.get("physical_characteristics", ""),
-                "description": top_details.get("description", "Documented avian species in Drishti Encyclopedia."),
-                "image_url": top_details.get("image_url", "")
+                "family": family,
+                "conservation_status": structured_info["basic_identification"].get("conservation_status", "Least Concern (LC)"),
+                "habitat": structured_info["habitat_distribution"].get("natural_habitat", ""),
+                "diet": structured_info["feeding_habits"].get("what_it_eats", ""),
+                "physical_characteristics": structured_info["physical_characteristics"].get("appearance", ""),
+                "geographical_distribution": structured_info["habitat_distribution"].get("geographic_distribution", ""),
+                "description": structured_info.get("description", ""),
+                "image_url": structured_info.get("image_url", "")
             },
             "top_predictions": top_predictions,
-            "audio_url": media_url,
-            "spectrogram_url": spectrogram_url,
             "acoustic_telemetry": detection.get("telemetry", {}),
             "audio_metadata": meta
         }

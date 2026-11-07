@@ -156,7 +156,7 @@ class AudioValidationService:
         if not is_bird_sound:
             return {
                 "is_bird_sound": False,
-                "rejection_message": f"Invalid Audio: No bird sound detected. Please upload an audio recording containing bird sounds. (Detected: {detected_category})",
+                "rejection_message": "No recognizable bird sound detected. Please upload a valid bird recording.",
                 "telemetry": acoustic_telemetry
             }
 

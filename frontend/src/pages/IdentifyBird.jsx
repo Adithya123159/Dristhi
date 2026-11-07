@@ -1,617 +1,496 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
+  ScanLine, 
+  Volume2, 
   UploadCloud, 
   Trash2, 
-  RefreshCw, 
-  ScanLine, 
-  MapPin, 
-  Utensils, 
   AlertTriangle,
-  Key,
   CheckCircle2,
-  ShieldCheck,
-  Feather,
-  Camera,
-  Layers,
+  RefreshCw,
+  FileAudio,
+  Image as ImageIcon,
   Sparkles,
-  ArrowRight,
-  ExternalLink,
-  Eye,
-  Sliders
+  Play,
+  RotateCcw
 } from 'lucide-react';
 import { api } from '../services/api';
-import ConfidenceMeter from '../components/ConfidenceMeter';
-import PredictionChart from '../components/PredictionChart';
-import { getStatusBadge } from '../utils/statusBadges';
+import StructuredBirdResult from '../components/StructuredBirdResult';
 
-const STAGES = [
-  { id: 1, label: 'Uploading Image' },
-  { id: 2, label: 'Validating Quality' },
-  { id: 3, label: 'Neural Feature Extraction' },
-  { id: 4, label: 'Grad-CAM Heatmap' },
-  { id: 5, label: 'Classifying Species' }
+const IMAGE_STAGES = [
+  'Validating file integrity...',
+  'Scanning image for avian morphology...',
+  'Extracting deep neural features...',
+  'Generating Grad-CAM attention heatmap...',
+  'Classifying bird species...'
 ];
 
-export default function IdentifyBird({ setSelectedSpeciesModal }) {
-  const [selectedFile, setSelectedFile] = useState(null);
+const AUDIO_STAGES = [
+  'Validating audio recording...',
+  'Analyzing bioacoustic frequency bands (1.5 - 8.5 kHz)...',
+  'Generating Mel Spectrogram...',
+  'Matching harmonic vocalization signatures...',
+  'Classifying avian sound...'
+];
+
+export default function IdentifyBird({ 
+  initialInputType = 'image', 
+  setSelectedSpeciesModal 
+}) {
+  const [activeTab, setActiveTab] = useState(initialInputType); // 'image' | 'audio'
+  
+  // Image State
+  const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  
+  // Audio State
+  const [selectedAudio, setSelectedAudio] = useState(null);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState(null);
+
+  // Common Processing State
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [currentStage, setCurrentStage] = useState(1);
+  const [stageIndex, setStageIndex] = useState(0);
   const [predictionResult, setPredictionResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [isNotBird, setIsNotBird] = useState(false);
-  const [viewMode, setViewMode] = useState('original'); // 'original', 'gradcam'
-  const [apiKey, setApiKey] = useState('');
-  const [showKeyBar, setShowKeyBar] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const audioInputRef = useRef(null);
 
+  // Sync if initialInputType changes
   useEffect(() => {
-    async function initKey() {
-      const saved = localStorage.getItem('avian_gemini_api_key') || '';
-      if (saved) {
-        setApiKey(saved);
-      } else {
-        try {
-          const status = await api.getApiKeyStatus();
-          if (status && status.has_key) {
-            setApiKey(status.masked_key || 'configured-on-server');
-          }
-        } catch (e) {
-          console.warn('API key init notice:', e);
-        }
-      }
+    if (initialInputType) {
+      setActiveTab(initialInputType);
     }
-    initKey();
-  }, []);
+  }, [initialInputType]);
 
-  const handleSaveApiKey = async (val) => {
-    const trimmed = (val || '').trim();
-    setApiKey(trimmed);
-    if (trimmed) {
-      localStorage.setItem('avian_gemini_api_key', trimmed);
-      await api.saveApiKey(trimmed);
-      setShowKeyBar(false);
-    } else {
-      localStorage.removeItem('avian_gemini_api_key');
-      await api.saveApiKey('');
+  // Stage progress timer during inference
+  useEffect(() => {
+    let interval;
+    if (isAnalyzing) {
+      setStageIndex(0);
+      interval = setInterval(() => {
+        setStageIndex((prev) => (prev < 4 ? prev + 1 : prev));
+      }, 700);
     }
-  };
+    return () => clearInterval(interval);
+  }, [isAnalyzing]);
 
-  const handleFileSelect = (file) => {
+  // ─── FILE SELECTION HANDLERS ───
+
+  const handleImageSelect = (file) => {
     if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
-      setError('Please upload a valid JPG, JPEG, or PNG image.');
-      setIsNotBird(false);
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG, or WebP).');
       return;
     }
-    setError(null);
-    setIsNotBird(false);
+    setErrorMessage(null);
     setPredictionResult(null);
-    setSelectedFile(file);
-    setViewMode('annotated');
+    setSelectedImage(file);
 
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
   };
 
+  const handleAudioSelect = (file) => {
+    if (!file) return;
+    const validExtensions = ['.wav', '.mp3', '.flac', '.ogg', '.m4a'];
+    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    if (!validExtensions.includes(ext) && !file.type.startsWith('audio/')) {
+      setErrorMessage('Please upload a valid audio recording (WAV, MP3, FLAC, or M4A).');
+      return;
+    }
+    setErrorMessage(null);
+    setPredictionResult(null);
+    setSelectedAudio(file);
+
+    const objectUrl = URL.createObjectURL(file);
+    setAudioPreviewUrl(objectUrl);
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelect(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      if (activeTab === 'image') {
+        handleImageSelect(file);
+      } else {
+        handleAudioSelect(file);
+      }
     }
   };
 
   const handleClear = () => {
-    setSelectedFile(null);
+    setSelectedImage(null);
     setImagePreview(null);
+    setSelectedAudio(null);
+    if (audioPreviewUrl) {
+      URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(null);
+    }
     setPredictionResult(null);
-    setError(null);
-    setIsNotBird(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    setErrorMessage(null);
+    setIsAnalyzing(false);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+    if (audioInputRef.current) audioInputRef.current.value = '';
   };
 
-  const handleClassify = async () => {
-    if (!selectedFile) return;
-    setIsAnalyzing(true);
-    setError(null);
-    setIsNotBird(false);
-    setCurrentStage(1);
+  const handleTabSwitch = (newTab) => {
+    if (newTab === activeTab) return;
+    handleClear();
+    setActiveTab(newTab);
+  };
 
-    const t1 = setTimeout(() => setCurrentStage(2), 400);
-    const t2 = setTimeout(() => setCurrentStage(3), 900);
-    const t3 = setTimeout(() => setCurrentStage(4), 1600);
-    const t4 = setTimeout(() => setCurrentStage(5), 2200);
+  // ─── CLASSIFICATION EXECUTION ───
+
+  const handleIdentify = async () => {
+    setErrorMessage(null);
+    setPredictionResult(null);
+    setIsAnalyzing(true);
 
     try {
-      const response = await api.identifyBird(selectedFile, apiKey);
-      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
-      setCurrentStage(5);
-      if (response.success) {
-        setPredictionResult(response);
+      if (activeTab === 'image') {
+        if (!selectedImage) return;
+        const res = await api.identifyBird(selectedImage);
+        if (res && res.success) {
+          setPredictionResult(res);
+        } else {
+          setErrorMessage(res.detail || 'Bird identification failed. Please try again.');
+        }
       } else {
-        setError(response.detail || 'Classification failed.');
+        if (!selectedAudio) return;
+        const res = await api.identifyAudio(selectedAudio);
+        if (res && res.success) {
+          setPredictionResult(res);
+        } else {
+          setErrorMessage(res.detail || 'Audio identification failed. Please try again.');
+        }
       }
     } catch (err) {
-      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
-      const msg = err.message || 'Error communicating with backend.';
-      setError(msg);
-      if (err.isNotBird || msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('invalid image')) {
-        setIsNotBird(true);
+      console.error('Classification request error:', err);
+      const msg = err.message || 'An error occurred during identification.';
+      // Provide clean user-facing error message matching specifications
+      if (activeTab === 'image' && (msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('not a bird'))) {
+        setErrorMessage('No bird detected. Please upload a valid bird image.');
+      } else if (activeTab === 'audio' && (msg.toLowerCase().includes('no bird') || msg.toLowerCase().includes('sound') || msg.toLowerCase().includes('vocalization'))) {
+        setErrorMessage('No recognizable bird sound detected. Please upload a valid bird recording.');
+      } else {
+        setErrorMessage(msg);
       }
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  // Determine active visual to display
-  const getActiveImageSrc = () => {
-    if (!predictionResult) return imagePreview;
-    if (viewMode === 'gradcam' && predictionResult.gradcam_url) {
-      return `${api.getBaseUrl()}${predictionResult.gradcam_url}`;
-    }
-    return imagePreview;
-  };
-
   return (
-    <div className="space-y-8 max-w-6xl mx-auto animate-fadeIn">
-      {/* ─── HEADER ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
-              <ScanLine className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Neural Avian Vision Classifier
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium">
-                Deep learning species classification &bull; Gemini Multimodal Vision &bull; Grad-CAM explainability
-              </p>
-            </div>
+    <div className="space-y-8 max-w-5xl mx-auto pb-12 animate-fadeIn">
+      {/* ─── HEADER: DUAL INPUT METHOD SELECTOR ─── */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <span>Multimodal Bird Identification</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              Deep learning computer vision & bioacoustic voice analysis for 100 Indian bird species
+            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {apiKey.trim() ? (
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Gemini Vision Connected</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowKeyBar(!showKeyBar)}
-                className="px-2.5 py-1 text-xs text-slate-500 hover:text-slate-800 underline font-medium"
-              >
-                {showKeyBar ? 'Hide' : 'Change Key'}
-              </button>
-            </div>
-          ) : (
+          {/* Mode Switcher Tabs */}
+          <div className="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200/80 self-start sm:self-auto">
             <button
               type="button"
-              onClick={() => setShowKeyBar(true)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-xs transition-all flex items-center gap-1.5 animate-pulse"
+              onClick={() => handleTabSwitch('image')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                activeTab === 'image'
+                  ? 'bg-white text-emerald-800 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <Key className="w-3.5 h-3.5" />
-              <span>Enter Gemini API Key</span>
+              <ScanLine className={`w-4 h-4 ${activeTab === 'image' ? 'text-emerald-600' : 'text-slate-400'}`} />
+              <span>Bird Image Upload</span>
             </button>
-          )}
-        </div>
-      </div>
 
-      {/* ─── GEMINI API KEY SETUP BANNER ─── */}
-      <div className={`p-4 rounded-3xl border transition-all space-y-3 ${
-        apiKey.trim() 
-          ? 'bg-emerald-50/50 border-emerald-200/90' 
-          : 'bg-amber-50/80 border-amber-300/80 shadow-xs'
-      }`}>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start sm:items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs text-white ${
-              apiKey.trim() ? 'bg-emerald-600' : 'bg-amber-500'
-            }`}>
-              <Key className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-xs font-bold text-slate-900">
-                  Google Gemini Multimodal AI Integration
-                </h4>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  apiKey.trim() ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-200/80 text-amber-900'
-                }`}>
-                  {apiKey.trim() ? 'Ready for Single Identification' : 'Recommended'}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600 mt-0.5">
-                {apiKey.trim()
-                  ? 'Your Gemini API key is active. Drishti will identify the exact single bird species with calibrated confidence.'
-                  : 'Enter your Google Gemini API key to identify this bird accurately (e.g. owls, raptors, songbirds) with high precision.'}
-              </p>
-            </div>
-          </div>
-
-          {!apiKey.trim() && (
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1 self-start sm:self-center"
+            <button
+              type="button"
+              onClick={() => handleTabSwitch('audio')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                activeTab === 'audio'
+                  ? 'bg-white text-teal-800 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <span>Get Free Key at Google AI Studio</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          )}
+              <Volume2 className={`w-4 h-4 ${activeTab === 'audio' ? 'text-teal-600' : 'text-slate-400'}`} />
+              <span>Bird Audio Upload</span>
+            </button>
+          </div>
         </div>
 
-        {/* Input bar: always open if no key, or toggled open */}
-        {(!apiKey.trim() || showKeyBar) && (
-          <div className="pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row gap-2">
-            <input
-              type="password"
-              placeholder="Paste Google Gemini API Key here (AIzaSy...)"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono shadow-2xs"
-            />
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleSaveApiKey(apiKey)}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors whitespace-nowrap"
-              >
-                Save &amp; Activate Key
-              </button>
-              {apiKey && (
-                <button
-                  type="button"
-                  onClick={() => handleSaveApiKey('')}
-                  className="px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-xl font-semibold border border-rose-200"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
+        {/* ─── UPLOAD VIEW (Visible when no result yet) ─── */}
+        {!predictionResult && (
+          <div className="pt-6 space-y-6">
+            {/* ERROR ALERT BOX */}
+            {errorMessage && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3.5 animate-fadeIn">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-amber-900">
+                    {activeTab === 'image' ? 'No Bird Detected' : 'No Bird Sound Detected'}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-amber-800 leading-relaxed font-medium">
+                    {errorMessage}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 1: BIRD IMAGE UPLOAD */}
+            {activeTab === 'image' && (
+              <div className="space-y-5">
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  className="hidden"
+                  onChange={(e) => handleImageSelect(e.target.files?.[0])}
+                />
+
+                {!imagePreview ? (
+                  /* DROP ZONE */
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    onClick={() => imageInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3.5 ${
+                      isDragging 
+                        ? 'border-emerald-500 bg-emerald-50/50 scale-[0.99]' 
+                        : 'border-slate-200 hover:border-emerald-400 hover:bg-slate-50/80 bg-slate-50/40'
+                    }`}
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-xs">
+                      <UploadCloud className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-slate-800">
+                        Click to upload or drag & drop a bird image
+                      </p>
+                      <p className="text-xs text-slate-500 font-medium">
+                        Supported formats: JPG, JPEG, PNG, WebP (Max 15MB)
+                      </p>
+                    </div>
+                    <span className="inline-block mt-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white text-emerald-800 border border-emerald-200 shadow-2xs">
+                      Select Image File
+                    </span>
+                  </div>
+                ) : (
+                  /* IMAGE PREVIEW & ACTIONS */
+                  <div className="space-y-5">
+                    <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 max-h-[380px] flex items-center justify-center">
+                      <img 
+                        src={imagePreview} 
+                        alt="Selected bird preview" 
+                        className="w-full h-full object-contain max-h-[380px]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleClear}
+                        className="absolute top-3 right-3 p-2 rounded-xl bg-slate-900/80 hover:bg-red-600 text-white backdrop-blur-md transition-colors"
+                        title="Remove image"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                          <ImageIcon className="w-5 h-5" />
+                        </div>
+                        <div className="truncate">
+                          <p className="text-sm font-bold text-slate-900 truncate">
+                            {selectedImage?.name}
+                          </p>
+                          <p className="text-xs text-slate-500 font-medium">
+                            {(selectedImage?.size / (1024 * 1024)).toFixed(2)} MB &bull; Ready for classification
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5">
+                        <button
+                          type="button"
+                          onClick={handleClear}
+                          disabled={isAnalyzing}
+                          className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                        >
+                          Change Image
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleIdentify}
+                          disabled={isAnalyzing}
+                          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50"
+                        >
+                          {isAnalyzing ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <span>Identifying...</span>
+                            </>
+                          ) : (
+                            <>
+                              <ScanLine className="w-4 h-4" />
+                              <span>Identify Bird Species</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 2: BIRD AUDIO UPLOAD */}
+            {activeTab === 'audio' && (
+              <div className="space-y-5">
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/wav,audio/mp3,audio/mpeg,audio/flac,audio/ogg,audio/m4a"
+                  className="hidden"
+                  onChange={(e) => handleAudioSelect(e.target.files?.[0])}
+                />
+
+                {!selectedAudio ? (
+                  /* DROP ZONE */
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    onClick={() => audioInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3.5 ${
+                      isDragging 
+                        ? 'border-teal-500 bg-teal-50/50 scale-[0.99]' 
+                        : 'border-slate-200 hover:border-teal-400 hover:bg-slate-50/80 bg-slate-50/40'
+                    }`}
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center shadow-xs">
+                      <FileAudio className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-slate-800">
+                        Click to upload or drag & drop a bird audio recording
+                      </p>
+                      <p className="text-xs text-slate-500 font-medium">
+                        Supported formats: WAV, MP3, FLAC, M4A, OGG (Max 25MB, up to 3 mins)
+                      </p>
+                    </div>
+                    <span className="inline-block mt-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white text-teal-800 border border-teal-200 shadow-2xs">
+                      Select Audio Recording
+                    </span>
+                  </div>
+                ) : (
+                  /* AUDIO PREVIEW & CONTROLS */
+                  <div className="space-y-5">
+                    <div className="p-6 rounded-2xl bg-slate-900 text-white border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center flex-shrink-0">
+                          <Volume2 className="w-6 h-6" />
+                        </div>
+                        <div className="truncate">
+                          <p className="text-sm font-bold text-slate-100 truncate">
+                            {selectedAudio.name}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {(selectedAudio.size / (1024 * 1024)).toFixed(2)} MB &bull; Audio Vocalization Clip
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Native Audio Player Preview */}
+                      {audioPreviewUrl && (
+                        <div className="flex items-center gap-2">
+                          <audio 
+                            src={audioPreviewUrl} 
+                            controls 
+                            className="h-10 rounded-xl"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                      <button
+                        type="button"
+                        onClick={handleClear}
+                        disabled={isAnalyzing}
+                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                      >
+                        Change Recording
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleIdentify}
+                        disabled={isAnalyzing}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50"
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Analyzing Acoustics...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-4 h-4" />
+                            <span>Identify Bird Recording</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PROCESSING PROGRESS BAR */}
+            {isAnalyzing && (
+              <div className="p-6 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3 animate-fadeIn">
+                <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                    <span>Processing Avian Telemetry</span>
+                  </span>
+                  <span>Step {stageIndex + 1} of 5</span>
+                </div>
+
+                <div className="bg-emerald-200/70 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${((stageIndex + 1) / 5) * 100}%` }}
+                  />
+                </div>
+
+                <p className="text-xs text-emerald-800 font-medium">
+                  {activeTab === 'image' ? IMAGE_STAGES[stageIndex] : AUDIO_STAGES[stageIndex]}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* ─── UPLOAD AND PREVIEW COLUMN ─── */}
-        <div className="lg:col-span-5 space-y-5">
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span>Upload Avian Photograph</span>
-              </h3>
-              {selectedFile && (
-                <button
-                  onClick={handleClear}
-                  className="text-xs text-slate-400 hover:text-rose-600 flex items-center gap-1 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Clear</span>
-                </button>
-              )}
-            </div>
-
-            {/* Dropzone */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              onClick={() => !imagePreview && fileInputRef.current?.click()}
-              className={`relative rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden min-h-[260px] ${
-                isDragging
-                  ? 'border-emerald-500 bg-emerald-50/50'
-                  : imagePreview
-                  ? 'border-emerald-200 bg-slate-100/80'
-                  : 'border-slate-300 hover:border-emerald-400 bg-slate-50/60 cursor-pointer'
-              }`}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/jpg,image/webp"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-              />
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-              />
-
-              {imagePreview ? (
-                <div className="relative w-full h-[280px] bg-slate-100 flex items-center justify-center">
-                  <img
-                    src={getActiveImageSrc()}
-                    alt="Preview"
-                    className="max-h-full max-w-full object-contain"
-                  />
-
-                  {/* View Mode Overlay Tabs if prediction results are present */}
-                  {predictionResult && predictionResult.gradcam_url && (
-                    <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-md rounded-xl p-1.5 flex items-center justify-center gap-1 text-[11px] font-bold text-slate-700 border border-slate-200 shadow-sm">
-                      <button
-                        onClick={() => setViewMode('original')}
-                        className={`px-3 py-1 rounded-lg transition-colors ${
-                          viewMode === 'original' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        Original
-                      </button>
-
-                      <button
-                        onClick={() => setViewMode('gradcam')}
-                        className={`px-3 py-1 rounded-lg transition-colors ${
-                          viewMode === 'gradcam' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        Grad-CAM Heatmap
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="p-8 text-center space-y-3">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-sm">
-                    <UploadCloud className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">
-                      Drag and drop bird photo here, or click to browse
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      JPG, PNG, WebP up to 15MB
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Camera className="w-4 h-4 text-emerald-600" />
-                <span>Take Photo</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <UploadCloud className="w-4 h-4 text-emerald-600" />
-                <span>Browse Files</span>
-              </button>
-            </div>
-
-            {/* Run Classification Button */}
-            <button
-              onClick={handleClassify}
-              disabled={!selectedFile || isAnalyzing}
-              className={`w-full py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all ${
-                !selectedFile || isAnalyzing
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 hover:scale-[1.01]'
-              }`}
-            >
-              {isAnalyzing ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Processing Pipeline...</span>
-                </>
-              ) : (
-                <>
-                  <ScanLine className="w-4 h-4" />
-                  <span>Run Multimodal Bird Classification</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* 5-Stage Progress Tracker */}
-          {isAnalyzing && (
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                <span>Vision Pipeline Stage {currentStage} of 5</span>
-                <span className="text-emerald-600">{STAGES[currentStage - 1]?.label}</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-emerald-600 h-full transition-all duration-300 rounded-full"
-                  style={{ width: `${(currentStage / 5) * 100}%` }}
-                />
-              </div>
-              <div className="grid grid-cols-5 gap-1 pt-1">
-                {STAGES.map((s) => (
-                  <div
-                    key={s.id}
-                    className={`text-[9px] text-center font-medium p-1 rounded-md ${
-                      s.id <= currentStage ? 'text-emerald-700 bg-emerald-50' : 'text-slate-400'
-                    }`}
-                  >
-                    {s.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Rejection / Error Card */}
-          {error && (
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 space-y-2">
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-bold text-xs sm:text-sm">
-                    {isNotBird ? 'Image Rejected: No Bird Detected' : 'Classification Error'}
-                  </h4>
-                  <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">{error}</p>
-                </div>
-              </div>
-              {isNotBird && (
-                <div className="mt-2 p-2 rounded-xl bg-rose-100/60 text-[11px] text-rose-800 font-medium">
-                  <strong>Enforced Rule:</strong> Non-bird objects (humans, vehicles, dogs, architecture) are rejected to ensure model integrity. Please upload a clear photo containing a bird.
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ─── RESULTS COLUMN ─── */}
-        <div className="lg:col-span-7 space-y-6">
-          {predictionResult ? (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-              {/* Header Badge */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                    Neural Identification Verified
-                  </span>
-                </div>
-
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                    predictionResult.confidence_tier === 'high'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : predictionResult.confidence_tier === 'medium'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : 'bg-rose-50 text-rose-700 border-rose-200'
-                  }`}
-                >
-                  {(predictionResult.confidence_tier || 'HIGH').toUpperCase()} CONFIDENCE
-                </span>
-              </div>
-
-              {/* Single Predicted Species Display */}
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                    Family: {predictionResult.prediction.family || 'Aves'}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-semibold">
-                    Order: {predictionResult.prediction.order || 'Passeriformes'}
-                  </span>
-                  {predictionResult.prediction.conservation_status && (
-                    <span className="px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-800 text-[11px] font-bold">
-                      {predictionResult.prediction.conservation_status}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                    {predictionResult.prediction.common_name}
-                  </h2>
-                  <p className="text-sm font-semibold text-slate-500 italic mt-0.5">
-                    {predictionResult.prediction.scientific_name}
-                  </p>
-                </div>
-
-                {/* Prominent Confidence Score Display */}
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/40 to-slate-50 border border-emerald-200/90 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 block">
-                        Identification Confidence Score
-                      </span>
-                      <div className="text-4xl font-black text-emerald-600 mt-0.5">
-                        {(predictionResult.prediction.confidence * 100).toFixed(1)}%
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                        AI Provider
-                      </span>
-                      <span className="text-xs font-bold text-slate-700 block mt-0.5">
-                        {predictionResult.validated_by || (apiKey ? 'Google Gemini Vision AI' : 'Local Avian Vision')}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="w-full bg-slate-200/70 h-2.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-emerald-600 h-full rounded-full transition-all duration-700 shadow-xs"
-                      style={{ width: `${Math.min(100, Math.max(5, predictionResult.prediction.confidence * 100))}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Description / Plumage Overview if available */}
-                {predictionResult.prediction.description && (
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 leading-relaxed">
-                    <span className="font-bold text-slate-900 block mb-1">Species Overview:</span>
-                    <p>{predictionResult.prediction.description}</p>
-                    {predictionResult.prediction.physical_characteristics && (
-                      <p className="mt-2 text-slate-600">
-                        <strong className="text-slate-800">Plumage:</strong> {predictionResult.prediction.physical_characteristics}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Ecological Details Summary */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Native Habitat</span>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-snug">
-                    {predictionResult.prediction.habitat || 'Tropical forests, open woodlands, scrublands'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                    <Utensils className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Dietary Niche</span>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-snug">
-                    {predictionResult.prediction.diet || 'Insects, seeds, small rodents, fruits'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Open Full Profile Modal Button */}
-              <button
-                onClick={() => setSelectedSpeciesModal && setSelectedSpeciesModal(predictionResult.prediction)}
-                className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-bold text-xs transition-colors flex items-center justify-center gap-2"
-              >
-                <span>Open Full Species Encyclopedia Profile</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center min-h-[420px]">
-              <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-4">
-                <ScanLine className="w-8 h-8" />
-              </div>
-              <h3 className="text-base font-bold text-slate-800">Awaiting Bird Photograph</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm leading-relaxed">
-                Upload any bird photograph to detect bounding boxes, extract Grad-CAM attention maps, and classify species across 100 Indian avian species.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* ─── IDENTIFICATION RESULT VIEW ─── */}
+      {predictionResult && (
+        <StructuredBirdResult
+          result={predictionResult}
+          onReset={handleClear}
+          setSelectedSpeciesModal={setSelectedSpeciesModal}
+        />
+      )}
     </div>
   );
 }
