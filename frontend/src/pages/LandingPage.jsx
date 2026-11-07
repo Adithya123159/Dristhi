@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import birdBackground from '../assets/bird-background.jpg';
 import { 
   Bird, 
   ScanLine, 
   ArrowRight, 
   LogIn, 
-  UserPlus, 
   ShieldCheck, 
-  BookOpen, 
-  ChevronRight,
   Menu,
-  X,
-  Compass
+  X
 } from 'lucide-react';
+import { api } from '../services/api';
 
 export default function LandingPage({ 
   onNavigateTab, 
@@ -20,6 +17,19 @@ export default function LandingPage({
   onLogout 
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dbStats, setDbStats] = useState({ total_classifications: 0 });
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const stats = await api.getStats();
+        setDbStats(stats);
+      } catch (err) {
+        console.warn('Could not load db stats:', err);
+      }
+    }
+    loadStats();
+  }, []);
 
   return (
     <div className="min-h-screen lg:h-screen lg:max-h-screen overflow-y-auto lg:overflow-hidden bg-slate-50 text-slate-800 flex flex-col justify-between font-sans selection:bg-emerald-600 selection:text-white relative">
@@ -60,7 +70,7 @@ export default function LandingPage({
         </svg>
       </div>
 
-      {/* ─── 1. TOP NAVBAR (STRUCTURE MATCHING REFERENCE: LOGO LEFT, LINKS RIGHT) ─── */}
+      {/* ─── 1. TOP NAVBAR (LOGO LEFT, AUTH RIGHT) ─── */}
       <header className="relative z-30 w-full max-w-7xl mx-auto px-6 sm:px-10 py-5 flex items-center justify-between flex-shrink-0">
         
         {/* Brand Logo (Left) */}
@@ -71,62 +81,31 @@ export default function LandingPage({
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-600/30 group-hover:scale-105 transition-all">
             <Bird className="w-5 h-5 drop-shadow-xs" />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-black text-2xl tracking-tight text-slate-900 group-hover:text-emerald-700 transition-colors">
-              Drishti
-            </span>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-              <span>100 Species</span>
-            </span>
-          </div>
+          <span className="font-black text-2xl tracking-tight text-slate-900 group-hover:text-emerald-700 transition-colors">
+            Drishti
+          </span>
         </div>
 
-        {/* Navigation Links & Action Buttons (Aligned Right) */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 flex-shrink-0">
-          <button 
-            onClick={() => onNavigateTab('landing')}
-            className="text-xs font-extrabold tracking-wider text-slate-800 hover:text-emerald-700 uppercase transition-colors"
-          >
-            HOME
-          </button>
-          <button 
-            onClick={() => onNavigateTab('identify')}
-            className="text-xs font-extrabold tracking-wider text-slate-800 hover:text-emerald-700 uppercase transition-colors"
-          >
-            AI CLASSIFIER
-          </button>
-          <button 
-            onClick={() => onNavigateTab('species')}
-            className="text-xs font-extrabold tracking-wider text-slate-800 hover:text-emerald-700 uppercase transition-colors"
-          >
-            SPECIES CATALOG
-          </button>
-          <button 
-            onClick={() => onNavigateTab('encyclopedia')}
-            className="text-xs font-extrabold tracking-wider text-slate-800 hover:text-emerald-700 uppercase transition-colors"
-          >
-            ENCYCLOPEDIA
-          </button>
-          <button 
-            onClick={() => onNavigateTab('dashboard')}
-            className="text-xs font-extrabold tracking-wider text-slate-800 hover:text-emerald-700 uppercase transition-colors"
-          >
-            DASHBOARD
-          </button>
-
-          {/* User Auth or Register Action */}
+        {/* User Auth: Sign In or Register (Right) */}
+        <nav className="hidden sm:flex items-center gap-3 flex-shrink-0">
           {currentUser ? (
-            <div className="flex items-center gap-2.5 pl-3 border-l border-slate-300">
+            <div className="flex items-center gap-2.5">
               <div 
                 onClick={() => onNavigateTab('dashboard')}
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 cursor-pointer transition-colors shadow-2xs"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 cursor-pointer transition-colors shadow-2xs border border-slate-200/80"
+                title="Open Dashboard"
               >
                 <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-[10px] font-bold">
                   {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                 </div>
-                <span className="text-xs font-bold text-slate-800 max-w-[100px] truncate">{currentUser.name}</span>
+                <span className="text-xs font-bold text-slate-800 max-w-[120px] truncate">{currentUser.name}</span>
               </div>
+              <button
+                onClick={() => onNavigateTab('dashboard')}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-extrabold text-slate-700 hover:text-emerald-700 transition-colors"
+              >
+                DASHBOARD
+              </button>
               <button
                 onClick={onLogout}
                 className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
@@ -136,12 +115,12 @@ export default function LandingPage({
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-300">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => onNavigateTab('login')}
-                className="text-xs font-extrabold tracking-wider text-slate-700 hover:text-slate-900 uppercase transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-extrabold tracking-wider text-slate-700 hover:text-slate-950 uppercase transition-colors"
               >
-                LOG IN
+                SIGN IN
               </button>
               <button
                 onClick={() => onNavigateTab('register')}
@@ -156,58 +135,60 @@ export default function LandingPage({
         {/* Mobile Hamburger Menu Toggle */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+          className="sm:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           aria-label="Toggle Navigation Menu"
         >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </header>
 
-      {/* Mobile Drawer Dropdown */}
+      {/* Mobile Drawer Dropdown - Auth actions only */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden relative z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 space-y-2 shadow-xl animate-in fade-in slide-in-from-top-2">
-          <button 
-            onClick={() => { onNavigateTab('identify'); setIsMobileMenuOpen(false); }}
-            className="w-full text-left py-2 text-sm font-bold text-slate-800 hover:text-emerald-700"
-          >
-            AI Classifier
-          </button>
-          <button 
-            onClick={() => { onNavigateTab('species'); setIsMobileMenuOpen(false); }}
-            className="w-full text-left py-2 text-sm font-bold text-slate-800 hover:text-emerald-700"
-          >
-            Species Catalog (100)
-          </button>
-          <button 
-            onClick={() => { onNavigateTab('encyclopedia'); setIsMobileMenuOpen(false); }}
-            className="w-full text-left py-2 text-sm font-bold text-slate-800 hover:text-emerald-700"
-          >
-            Bird Encyclopedia
-          </button>
-          <button 
-            onClick={() => { onNavigateTab('dashboard'); setIsMobileMenuOpen(false); }}
-            className="w-full text-left py-2 text-sm font-bold text-slate-800 hover:text-emerald-700"
-          >
-            Dashboard
-          </button>
-          <div className="pt-2 border-t border-slate-200 flex items-center gap-3">
-            <button
-              onClick={() => { onNavigateTab('login'); setIsMobileMenuOpen(false); }}
-              className="flex-1 py-2 text-center text-sm font-bold text-slate-700 bg-slate-100 rounded-xl"
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => { onNavigateTab('register'); setIsMobileMenuOpen(false); }}
-              className="flex-1 py-2 text-center text-sm font-bold text-white bg-emerald-600 rounded-xl"
-            >
-              Register
-            </button>
-          </div>
+        <div className="sm:hidden relative z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 space-y-3 shadow-xl animate-in fade-in slide-in-from-top-2">
+          {currentUser ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-100">
+                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-slate-900 truncate">{currentUser.name}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{currentUser.email}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => { onNavigateTab('dashboard'); setIsMobileMenuOpen(false); }}
+                className="w-full py-2.5 text-center text-xs font-bold text-white bg-emerald-600 rounded-xl"
+              >
+                Open Dashboard
+              </button>
+              <button
+                onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
+                className="w-full py-2 text-center text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => { onNavigateTab('login'); setIsMobileMenuOpen(false); }}
+                className="flex-1 py-2.5 text-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { onNavigateTab('register'); setIsMobileMenuOpen(false); }}
+                className="flex-1 py-2.5 text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors"
+              >
+                Register
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* ─── 2. MAIN HERO SECTION (SPLIT 2-COLUMN STRUCTURE MATCHING REFERENCE) ─── */}
+      {/* ─── 2. MAIN HERO SECTION ─── */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 sm:px-10 py-4 sm:py-8 flex flex-col justify-between">
         
         {/* Main Content Row: Left-Aligned Hero Section */}
@@ -220,7 +201,7 @@ export default function LandingPage({
 
           {/* Massive Bold Headline */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.08] max-w-2xl">
-            Identify Any Indian Bird with{' '}
+            Identify Any Bird Worldwide with{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700">
               Neural Vision.
             </span>
@@ -228,10 +209,10 @@ export default function LandingPage({
 
           {/* Sub-paragraph */}
           <p className="mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
-            Upload any bird photograph to instantly discover its common name, scientific taxonomy, dietary niche, native habitat, and IUCN conservation rating in under 50ms with multimodal deep learning.
+            Upload any bird photograph or vocalization to instantly discover its common name, scientific taxonomy, dietary niche, native habitat, and IUCN conservation rating with multimodal deep learning.
           </p>
 
-          {/* Primary Action Button (Placed on Left below paragraph) */}
+          {/* Primary Action Button */}
           <div className="mt-6 sm:mt-8">
             <button
               onClick={() => onNavigateTab('identify')}
@@ -244,33 +225,34 @@ export default function LandingPage({
           </div>
         </div>
 
-        {/* ─── 3. LOWER SECTION (MATCHING REFERENCE: BADGE BOTTOM-LEFT, STACKED CTAS BOTTOM-RIGHT) ─── */}
+        {/* ─── 3. LOWER SECTION (DYNAMIC TELEMETRY BOTTOM-LEFT, CTAS BOTTOM-RIGHT) ─── */}
         <div className="w-full flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 pt-6 sm:pt-4 border-t border-slate-200/60 flex-shrink-0">
           
-          {/* Bottom-Left: Telemetry Badge (Matching reference bottom-left placement) */}
+          {/* Bottom-Left: Dynamic Telemetry Badge connected to real DB stats */}
           <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/90 shadow-2xs text-xs font-semibold text-slate-700">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>100 Native Species &bull; Sub-50ms Neural Latency</span>
+            <span>
+              {dbStats.total_classifications > 0
+                ? `${dbStats.total_classifications} Database Records • Multimodal AI`
+                : 'Multimodal Avian AI • Neural Recognition'}
+            </span>
           </div>
 
-          {/* Bottom-Right: Stacked Action Buttons (Matching reference bottom-right structure) */}
-          <div className="flex flex-col items-center sm:items-end gap-2.5 w-full sm:w-auto">
-            
-            {/* Top Button: Pill with circular icon badge (like SCHEDULE A DEMO in reference) */}
+          {/* Bottom-Right: Clean Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2.5 w-full sm:w-auto">
             <button
-              onClick={() => onNavigateTab('species')}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/95 backdrop-blur-md hover:bg-white text-slate-800 border border-slate-300/90 hover:border-emerald-300 font-bold text-xs tracking-wider uppercase shadow-sm hover:shadow-md hover:scale-102 transition-all flex items-center justify-center gap-2.5 group"
+              onClick={() => onNavigateTab('identify')}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/95 backdrop-blur-md hover:bg-white text-slate-800 border border-slate-300/90 hover:border-emerald-300 font-bold text-xs tracking-wider uppercase shadow-sm hover:shadow-md hover:scale-102 transition-all flex items-center justify-center gap-2 group"
             >
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">
                 <Bird className="w-3.5 h-3.5" />
               </div>
-              <span>BROWSE 100 SPECIES</span>
+              <span>START IDENTIFICATION</span>
             </button>
 
-            {/* Bottom Button: Solid button (like CONTACT US in reference) */}
             <button
               onClick={() => onNavigateTab('dashboard')}
-              className="w-full sm:w-auto min-w-[210px] px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-emerald-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-md hover:shadow-lg hover:scale-102 transition-all text-center flex items-center justify-center gap-2"
+              className="w-full sm:w-auto min-w-[200px] px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-emerald-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-md hover:shadow-lg hover:scale-102 transition-all text-center flex items-center justify-center gap-2"
             >
               <span>EXPLORE DASHBOARD</span>
               <ArrowRight className="w-4 h-4" />

@@ -73,12 +73,6 @@ export default function AuthPage({
     }
   };
 
-  const fillDemoAccount = () => {
-    setEmail('explorer@avian.ai');
-    setPassword('password123');
-    setError('');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-100/50 via-green-50/40 to-emerald-50 text-slate-800 flex flex-col justify-center items-center px-4 py-12 relative selection:bg-emerald-600 selection:text-white overflow-hidden">
       
@@ -226,15 +220,6 @@ export default function AuthPage({
                 <label className="block text-xs font-bold text-emerald-950">
                   Password
                 </label>
-                {mode === 'login' && (
-                  <button
-                    type="button"
-                    onClick={fillDemoAccount}
-                    className="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold"
-                  >
-                    Use Demo Account
-                  </button>
-                )}
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-emerald-600/70 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -285,7 +270,7 @@ export default function AuthPage({
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Sign In' : 'Create Free Account'}</span>
+                  <span>{mode === 'login' ? 'Sign In' : 'Register'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
@@ -296,13 +281,13 @@ export default function AuthPage({
           <div className="mt-5 pt-4 border-t border-emerald-100 text-center">
             {mode === 'login' ? (
               <p className="text-xs text-emerald-800">
-                Don't have an account?{' '}
+                New user?{' '}
                 <button
                   type="button"
                   onClick={() => { setMode('register'); setError(''); }}
                   className="font-bold text-emerald-700 hover:text-emerald-900 underline"
                 >
-                  Register here
+                  Register first
                 </button>
               </p>
             ) : (
